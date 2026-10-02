@@ -16,7 +16,7 @@ Ngày chốt: 02/10/2026 (ký trước khi bắt đầu làm việc)
 |---|---|
 | Lam | |
 | Khoi | |
-| Tung | |
+| Tung | 02/10/2026 | OK TÙNG
 | T.Duy | |
 | K.Duy | |
 
