@@ -15,7 +15,7 @@ Ngày chốt: 02/10/2026 (ký trước khi bắt đầu làm việc)
 | Tên | Ngày xác nhận |
 |---|---|
 | Lam | |
-| Khoi | |
+| Khoi | 3/20/2026 | OK Lâm Anh Khôi
 | Tung | |
 | T.Duy | |
 | K.Duy | |

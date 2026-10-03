@@ -5,7 +5,7 @@
 |---|---|
 | Tung |  |
 | Lam |  |
-| Khoi |  |
+| Khoi | OpenAlex |
 | T.Duy |  |
 | K.Duy |  |
 
