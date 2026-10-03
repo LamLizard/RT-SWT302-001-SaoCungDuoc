@@ -7,7 +7,7 @@
 | Lam |  |
 | Khoi |  |
 | T.Duy |  |
-| K.Duy |  |
+| K.Duy |IEEE Explore , Google Scholar ,OpenAlex |
 
 Cả nhóm phủ ≥ 3 cơ sở dữ liệu (IEEE · ACM · OpenAlex = 3 nguồn đếm chính).
 
