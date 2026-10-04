@@ -7,7 +7,7 @@
 | Lâm | ACM Digital Library |
 | Khôi | OpenAlex |
 | T.Duy | Semantic Scholar + Google Scholar (seed & bổ sung) |
-| K.Duy |IEEE Explore , Google Scholar ,OpenAlex |
+| K.Duy | Snowballing lùi và tiến, seed là các paper dẫn chứng trên thẻ RQ |
 
 Cả nhóm phủ ≥ 3 cơ sở dữ liệu (IEEE · ACM · OpenAlex = 3 nguồn đếm chính).
 
@@ -23,7 +23,7 @@ Cả nhóm phủ ≥ 3 cơ sở dữ liệu (IEEE · ACM · OpenAlex = 3 nguồn
 | EC-S | Dưới 4 trang (abstract, poster)                             |
 | EC-N | Không có thực nghiệm (vision paper, tutorial)               |
 
-## ĐIỀN THEO RQ (⬜ nhóm rà chốt trước khi search)
+## ĐIỀN THEO RQ
 
 | Mã | Nội dung |
 | --- | --- |
