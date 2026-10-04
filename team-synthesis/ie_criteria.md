@@ -3,11 +3,11 @@
 ## A0. Phân công nguồn tìm kiếm
 | Thành viên | Nguồn phụ trách |
 |---|---|
-| Tung |  |
-| Lam |  |
-| Khoi |  |
+| Tùng | IEEE Xplore |
+| Lâm | ACM Digital Library |
+| Khôi | OpenAlex |
 | T.Duy |  |
-| K.Duy |  |
+| K.Duy | IEEE Xplore |
 
 Cả nhóm phủ ≥ 3 cơ sở dữ liệu (IEEE · ACM · OpenAlex = 3 nguồn đếm chính).
 
