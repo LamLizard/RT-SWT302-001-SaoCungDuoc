@@ -19,14 +19,6 @@ Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày 
 | T.Duy | Semantic Scholar + Google Scholar (seed & bổ sung) |
 | K.Duy | IEEE Xplore |
 
-| Thành viên | Nguồn                                              |
-| ---------- | -------------------------------------------------- |
-| Tung       | IEEE Xplore                                        |
-| Lam        | ACM Digital Library                                |
-| Khoi       | OpenAlex                                           |
-| T.Duy      | Semantic Scholar + Google Scholar (seed & bổ sung) |
-| K.Duy      | Snowballing lùi + tiến                             |
-
 ## 3. Phạm vi tìm
 
 - Trường tìm: Title / Abstract / Keywords

@@ -10,10 +10,10 @@ Ngày chốt: 02/10/2026 (ký trước khi bắt đầu làm việc)
 
 | Tên | Ngày xác nhận |
 |---|---|
-| Lâm | 02/10/2026 | OK + Lâm
-| Khoi | 3/10/2026 | OK Lâm Anh Khôi
-| Tùng | 02/10/2026 | OK TÙNG
-| T.Duy | 03/10/2026 — OK + T.Duy |
-| K.Duy |03/10/2026 | OK + Duy
+| Lâm | 02/10/2026 | OK + Lâm |
+| Khoi | 3/10/2026 | OK + Lâm Anh Khôi |
+| Tùng | 02/10/2026 | OK + TÙNG |
+| T.Duy | 03/10/2026 | OK + T.Duy |
+| K.Duy |03/10/2026 | OK + Duy |
 
 (Lịch sử commit là bằng chứng đối chiếu khi có tranh chấp.)

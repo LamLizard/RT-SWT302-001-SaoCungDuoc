@@ -6,16 +6,8 @@
 | Tùng | IEEE Xplore |
 | Lâm | ACM Digital Library |
 | Khôi | OpenAlex |
-| T.Duy |  |
+| T.Duy | Semantic Scholar + Google Scholar (seed & bổ sung) |
 | K.Duy |IEEE Explore , Google Scholar ,OpenAlex |
-
-| Thành viên | Nguồn phụ trách                                    |
-| ---------- | -------------------------------------------------- |
-| Tung       |                                                    |
-| Lam        |                                                    |
-| Khoi       |                                                    |
-| T.Duy      | Semantic Scholar + Google Scholar (seed & bổ sung) |
-| K.Duy      |                                                    |
 
 Cả nhóm phủ ≥ 3 cơ sở dữ liệu (IEEE · ACM · OpenAlex = 3 nguồn đếm chính).
 
