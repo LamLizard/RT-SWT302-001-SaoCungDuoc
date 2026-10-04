@@ -1,7 +1,7 @@
 # Giá trị biên vs ngẫu nhiên trên mutant REST API
-**Topic:** RT-SWT302-001 · RQ: FA26-EXT-12
-**Môn:** SWT302 — Research-Based Learning
-**Nhóm:** SaoCungDuoc — FA26, 2026
+**Topic:** RT-SWT302-001, RQ: FA26-EXT-12
+**Môn:** SWT302 - Research-Based Learning
+**Nhóm:** SaoCungDuoc - FA26, 2026
 **Thành viên:** Lam (PL), Khoi (DG), Tung (MS), T.Duy (LR), K.Duy (RW)
 **Giảng viên hướng dẫn:** L.T.Q.Chi
 ## Tiến độ
