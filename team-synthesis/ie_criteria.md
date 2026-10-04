@@ -7,7 +7,7 @@
 | Lâm | ACM Digital Library |
 | Khôi | OpenAlex |
 | T.Duy |  |
-| K.Duy | IEEE Xplore |
+| K.Duy |IEEE Explore , Google Scholar ,OpenAlex |
 
 Cả nhóm phủ ≥ 3 cơ sở dữ liệu (IEEE · ACM · OpenAlex = 3 nguồn đếm chính).
 

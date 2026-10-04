@@ -18,6 +18,6 @@ Ngày chốt: 02/10/2026 (ký trước khi bắt đầu làm việc)
 | Khoi | |
 | Tung | |
 | T.Duy | |
-| K.Duy | |
+| K.Duy |03/10/2026 | OK + Duy
 
 (Lịch sử commit là bằng chứng đối chiếu khi có tranh chấp.)
