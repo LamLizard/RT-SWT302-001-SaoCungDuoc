@@ -1,0 +1,238 @@
+{
+    "seed_title":  "Prompt-Based REST API Test Amplification in Industry: An Experience Report",
+    "seed_doi":  "10.48550/arXiv.2601.17903",
+    "direction":  "references",
+    "source":  "Semantic Scholar Graph API",
+    "retrieved_at":  "2026-10-05T15:44:21.8164909+07:00",
+    "limit":  100,
+    "pages":  [
+                  {
+                      "offset":  0,
+                      "citingPaperInfo":  {
+                                              "openAccessPdf":  {
+                                                                    "url":  "",
+                                                                    "status":  null,
+                                                                    "license":  null,
+                                                                    "disclaimer":  "Notice: Paper or abstract available at https://arxiv.org/abs/2601.17903, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+                                                                },
+                                              "title":  "Prompt-Based REST API Test Amplification in Industry: An Experience Report",
+                                              "authors":  [
+                                                              {
+                                                                  "authorId":  "2300648346",
+                                                                  "name":  "Tolgahan Bardakci"
+                                                              },
+                                                              {
+                                                                  "authorId":  "2406836311",
+                                                                  "name":  "Andreas Faes"
+                                                              },
+                                                              {
+                                                                  "authorId":  "3203537",
+                                                                  "name":  "Mutlu Beyazıt"
+                                                              },
+                                                              {
+                                                                  "authorId":  "2406835946",
+                                                                  "name":  "Serge Demeyr"
+                                                              }
+                                                          ]
+                                          },
+                      "data":  [
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "5a8a8b66152e7e14a3cc5e9498373d3776753629",
+                                                          "externalIds":  {
+                                                                              "DBLP":  "journals/corr/abs-2510-27417",
+                                                                              "ArXiv":  "2510.27417",
+                                                                              "DOI":  "10.48550/arXiv.2510.27417",
+                                                                              "CorpusId":  282719350
+                                                                          },
+                                                          "title":  "Agentic LLMs for REST API Test Amplification: A Comparative Study Across Cloud Applications",
+                                                          "venue":  "arXiv.org",
+                                                          "year":  2025
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "9b0906c37279944b71f68b2e77c81fa0f1ef6c82",
+                                                          "externalIds":  {
+                                                                              "ArXiv":  "2509.25043",
+                                                                              "DBLP":  "journals/corr/abs-2509-25043",
+                                                                              "DOI":  "10.48550/arXiv.2509.25043",
+                                                                              "CorpusId":  281676475
+                                                                          },
+                                                          "title":  "Large Language Models for Software Testing: A Research Roadmap",
+                                                          "venue":  "arXiv.org",
+                                                          "year":  2025
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "7c2222819c7bbe9f13ecce02718ee73649308abe",
+                                                          "externalIds":  {
+                                                                              "ArXiv":  "2504.08113",
+                                                                              "DBLP":  "conf/pts/NooyensBBD25",
+                                                                              "DOI":  "10.48550/arXiv.2504.08113",
+                                                                              "CorpusId":  277741368
+                                                                          },
+                                                          "title":  "Test Amplification for REST APIs via Single and Multi-Agent LLM Systems",
+                                                          "venue":  "International Conference on Testing Software and Systems",
+                                                          "year":  2025
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "037b4345769b0608819cddc9bb2cff3a6daf8699",
+                                                          "externalIds":  {
+                                                                              "DBLP":  "conf/kbse/YangYGW0ZCZLW024",
+                                                                              "ArXiv":  "2406.18181",
+                                                                              "DOI":  "10.1145/3691620.3695529",
+                                                                              "CorpusId":  270737889
+                                                                          },
+                                                          "title":  "On the Evaluation of Large Language Models in Unit Test Generation",
+                                                          "venue":  "International Conference on Automated Software Engineering",
+                                                          "year":  2024
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "ce4e101950554c41d3b35f5b297722abd1ce6403",
+                                                          "externalIds":  {
+                                                                              "ArXiv":  "2402.09171",
+                                                                              "DBLP":  "conf/sigsoft/AlshahwanCFGHHM24",
+                                                                              "DOI":  "10.1145/3663529.3663839",
+                                                                              "CorpusId":  267657828
+                                                                          },
+                                                          "title":  "Automated Unit Test Improvement using Large Language Models at Meta",
+                                                          "venue":  "SIGSOFT FSE Companion",
+                                                          "year":  2024
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "4e3c65511292a800b17be6653bd057e7a545a0b0",
+                                                          "externalIds":  {
+                                                                              "DBLP":  "journals/tse/SchaferNET24",
+                                                                              "ArXiv":  "2302.06527",
+                                                                              "DOI":  "10.1109/TSE.2023.3334955",
+                                                                              "CorpusId":  256827098
+                                                                          },
+                                                          "title":  "An Empirical Evaluation of Using Large Language Models for Automated Unit Test Generation",
+                                                          "venue":  "IEEE Transactions on Software Engineering",
+                                                          "year":  2023
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "80e61c5eeaabea1eedc16be19db18c5f0e91ad88",
+                                                          "externalIds":  {
+                                                                              "DBLP":  "conf/icsm/CorradiniZPC21",
+                                                                              "ArXiv":  "2108.08209",
+                                                                              "DOI":  "10.26226/morressier.613b5417842293c031b5b5c6",
+                                                                              "CorpusId":  237194705
+                                                                          },
+                                                          "title":  "Restats: A Test Coverage Tool for RESTful APIs",
+                                                          "venue":  "IEEE International Conference on Software Maintenance and Evolution",
+                                                          "year":  2021
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "822332ba0878d3a12fa82cfd09635bf88a719833",
+                                                          "externalIds":  {
+                                                                              "MAG":  "2968373634",
+                                                                              "DBLP":  "conf/sigsoft/Martin-LopezSR19",
+                                                                              "DOI":  "10.1145/3340433.3342822",
+                                                                              "CorpusId":  199550821
+                                                                          },
+                                                          "title":  "Test coverage criteria for RESTful web APIs",
+                                                          "venue":  "A-TEST@ESEC/SIGSOFT FSE",
+                                                          "year":  2019
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "19674c67bebb6c0e27f7882dc4100b1597e47645",
+                                                          "externalIds":  {
+                                                                              "MAG":  "2955835447",
+                                                                              "DBLP":  "conf/icse/AtlidakisGP19",
+                                                                              "DOI":  "10.1109/ICSE.2019.00083",
+                                                                              "CorpusId":  85465006
+                                                                          },
+                                                          "title":  "RESTler: Stateful REST API Fuzzing",
+                                                          "venue":  "International Conference on Software Engineering",
+                                                          "year":  2019
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  "d3b4a24c753718b8cd24b7e7b59e576340f1907d",
+                                                          "externalIds":  {
+                                                                              "MAG":  "2884381798",
+                                                                              "DBLP":  "journals/jss/DanglotVYZMB19",
+                                                                              "ArXiv":  "1705.10692",
+                                                                              "DOI":  "10.1016/j.jss.2019.110398",
+                                                                              "CorpusId":  58488786
+                                                                          },
+                                                          "title":  "A snowballing literature study on test amplification",
+                                                          "venue":  "Journal of Systems and Software",
+                                                          "year":  2017
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  null,
+                                                          "externalIds":  null,
+                                                          "title":  "Visual Studio IDE",
+                                                          "venue":  "visualstudio",
+                                                          "year":  2025
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  null,
+                                                          "externalIds":  null,
+                                                          "title":  "2022. Testing RESTful APIs: A Survey",
+                                                          "venue":  "",
+                                                          "year":  null
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  null,
+                                                          "externalIds":  null,
+                                                          "title":  "2024.ASurveyonLargeLanguageModelsfor SoftwareEngineering",
+                                                          "venue":  "arXiv",
+                                                          "year":  null
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  null,
+                                                          "externalIds":  null,
+                                                          "title":  "2022. AmPyfier: Test Am-plification in Python",
+                                                          "venue":  "Journal of Software: Evolution and Process",
+                                                          "year":  null
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  null,
+                                                          "externalIds":  null,
+                                                          "title":  "Swagger API",
+                                                          "venue":  "petstore.swagger.io",
+                                                          "year":  null
+                                                      }
+                                   },
+                                   {
+                                       "citedPaper":  {
+                                                          "paperId":  null,
+                                                          "externalIds":  null,
+                                                          "title":  "2025. RESTCov: A Tool for Measuring Structural REST API Coverage",
+                                                          "venue":  "github",
+                                                          "year":  null
+                                                      }
+                                   }
+                               ]
+                  }
+              ],
+    "error":  null
+}

@@ -1,0 +1,156 @@
+{
+    "seed_title":  "Test Oracle Generation for REST APIs",
+    "seed_doi":  "10.1145/3726524",
+    "direction":  "citations",
+    "source":  "Semantic Scholar Graph API",
+    "retrieved_at":  "2026-10-05T15:44:40.5383580+07:00",
+    "limit":  100,
+    "pages":  [
+                  {
+                      "offset":  0,
+                      "data":  [
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "16c8187e85cfb432e83c8780a5d9ff3fef070eb1",
+                                                           "externalIds":  {
+                                                                               "DOI":  "10.1145/3832214",
+                                                                               "CorpusId":  292524021
+                                                                           },
+                                                           "title":  "Towards More Realistic Assertion Generation under Mixed-Assertion Scenario",
+                                                           "venue":  "",
+                                                           "year":  2026
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "497c417e16edd5d15963be7f02f704259c6ea4b1",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2609.37315",
+                                                                               "CorpusId":  292473801
+                                                                           },
+                                                           "title":  "Do Agent Benchmarks Do What They Say? An Executable-Contract Audit of Tool-Using Agent Environments",
+                                                           "venue":  "",
+                                                           "year":  2026
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "cd2cc4779b1e786dfffb33db3457ea89fed8d74a",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2609.27806",
+                                                                               "CorpusId":  292267487
+                                                                           },
+                                                           "title":  "DualMine: Static-Dynamic REST API Constraint Discovery with Dual Validation",
+                                                           "venue":  "",
+                                                           "year":  2026
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "47543b68a53e3501e9b07621e339b72d1f0707ea",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2608.16239",
+                                                                               "CorpusId":  291183644
+                                                                           },
+                                                           "title":  "Validating HTTP Semantics in REST APIs With Constructed Call Sequence Scenarios",
+                                                           "venue":  "",
+                                                           "year":  2026
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "0f877bcaa92ee6a7e540bfa72de9c626c004538d",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2606.10465",
+                                                                               "DBLP":  "journals/corr/abs-2606-10465",
+                                                                               "DOI":  "10.48550/arXiv.2606.10465",
+                                                                               "CorpusId":  289132803
+                                                                           },
+                                                           "title":  "MASTOR: A Multi-Agent Approach to Semantic Test Oracle Generation for RESTful APIs",
+                                                           "venue":  "arXiv.org",
+                                                           "year":  2026
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "dbea9571fb97300a5e855e4575d7aca6938a4927",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2510.19777",
+                                                                               "CorpusId":  282272169
+                                                                           },
+                                                           "title":  "Independent Test Generation for RESTful APIs",
+                                                           "venue":  "",
+                                                           "year":  2025
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "2e819b73e2cb0fe7d2162aaa801969e60a24653c",
+                                                           "externalIds":  {
+                                                                               "DOI":  "10.1145/3771281",
+                                                                               "CorpusId":  282114168
+                                                                           },
+                                                           "title":  "Test Oracle Generation for REST APIs—RCR Report",
+                                                           "venue":  "ACM Transactions on Software Engineering and Methodology",
+                                                           "year":  2025
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "9fe9ba94df54d21999b9d3b1d7908b7910d8312b",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2508.16318",
+                                                                               "DBLP":  "journals/corr/abs-2508-16318",
+                                                                               "DOI":  "10.1109/ASE63991.2025.00116",
+                                                                               "CorpusId":  280708427
+                                                                           },
+                                                           "title":  "SATORI: Static Test Oracle Generation for REST APIs",
+                                                           "venue":  "International Conference on Automated Software Engineering",
+                                                           "year":  2025
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "35f0ce9a54714bbf5e064bb9998027936fc06efa",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2504.17287",
+                                                                               "DOI":  "10.1145/3744916.3787775",
+                                                                               "CorpusId":  278033731
+                                                                           },
+                                                           "title":  "RBCTest: Leveraging LLMs to Mine and Verify Oracles of API Response Bodies for RESTful API Testing",
+                                                           "venue":  "Proceedings of the 2026 IEEE/ACM 48th International Conference on Software Engineering",
+                                                           "year":  2025
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "fa4f110357fd9998396ca971229d4177778aa0a0",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2504.16833",
+                                                                               "DBLP":  "journals/corr/abs-2504-16833",
+                                                                               "DOI":  "10.1145/3810241",
+                                                                               "CorpusId":  277999447
+                                                                           },
+                                                           "title":  "LRASGen: LLM-based RESTful API Specification Generation",
+                                                           "venue":  "ACM Transactions on Software Engineering and Methodology",
+                                                           "year":  2025
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "18cdfc94792d01a967e34f8086d26b05ff908981",
+                                                           "externalIds":  {
+                                                                               "DBLP":  "journals/csr/JTKP27",
+                                                                               "DOI":  "10.1016/j.cosrev.2026.101043",
+                                                                               "CorpusId":  290943209
+                                                                           },
+                                                           "title":  "Security testing of RESTful APIs: Approaches and research challenges",
+                                                           "venue":  "Computer Science Review",
+                                                           "year":  null
+                                                       }
+                                   }
+                               ]
+                  }
+              ],
+    "error":  null
+}

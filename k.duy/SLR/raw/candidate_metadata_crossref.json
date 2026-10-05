@@ -1,0 +1,873 @@
+{
+  "queried": 44,
+  "results": [
+    {
+      "doi": "10.1007/978-3-030-65310-1_33",
+      "status": 200,
+      "title": [
+        "RESTest: Black-Box Constraint-Based Testing of RESTful Web APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2020
+          ]
+        ]
+      },
+      "container-title": [
+        "Lecture Notes in Computer Science",
+        "Service-Oriented Computing"
+      ],
+      "page": "459-475",
+      "type": "book-chapter",
+      "url": "https://doi.org/10.1007/978-3-030-65310-1_33"
+    },
+    {
+      "doi": "10.1016/j.cosrev.2026.101043",
+      "status": 200,
+      "title": [
+        "Security testing of RESTful APIs: Approaches and research challenges"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2027,
+            2
+          ]
+        ]
+      },
+      "container-title": [
+        "Computer Science Review"
+      ],
+      "page": "101043",
+      "type": "journal-article",
+      "url": "https://doi.org/10.1016/j.cosrev.2026.101043"
+    },
+    {
+      "doi": "10.1109/ase51524.2021.9678586",
+      "status": 200,
+      "title": [
+        "Improving Test Case Generation for REST APIs Through Hierarchical Clustering"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2021,
+            11
+          ]
+        ]
+      },
+      "container-title": [
+        "2021 36th IEEE/ACM International Conference on Automated Software Engineering (ASE)"
+      ],
+      "page": "117-128",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/ase51524.2021.9678586"
+    },
+    {
+      "doi": "10.1109/ase56229.2023.00218",
+      "status": 200,
+      "title": [
+        "Adaptive REST API Testing with Reinforcement Learning"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023,
+            9,
+            11
+          ]
+        ]
+      },
+      "container-title": [
+        "2023 38th IEEE/ACM International Conference on Automated Software Engineering (ASE)"
+      ],
+      "page": "446-458",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/ase56229.2023.00218"
+    },
+    {
+      "doi": "10.1109/ase63991.2025.00116",
+      "status": 200,
+      "title": [
+        "SATORI: Static Test Oracle Generation for REST APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            11,
+            16
+          ]
+        ]
+      },
+      "container-title": [
+        "2025 40th IEEE/ACM International Conference on Automated Software Engineering (ASE)"
+      ],
+      "page": "1364-1376",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/ase63991.2025.00116"
+    },
+    {
+      "doi": "10.1109/eitce70137.2026.11634323",
+      "status": 200,
+      "title": [
+        "Requirement-Aware LLM Testing for Backend REST APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2026,
+            6
+          ]
+        ]
+      },
+      "container-title": [
+        "2026 10th International Conference on Electronic Information Technology and Computer Engineering (EITCE)"
+      ],
+      "page": "745-750",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/eitce70137.2026.11634323"
+    },
+    {
+      "doi": "10.1109/icse-seip52600.2021.00016",
+      "status": 200,
+      "title": [
+        "Automatically Identifying Parameter Constraints in Complex Web APIs: A Case Study at Adyen"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2021,
+            5
+          ]
+        ]
+      },
+      "container-title": [
+        "2021 IEEE/ACM 43rd International Conference on Software Engineering: Software Engineering in Practice (ICSE-SEIP)"
+      ],
+      "page": "71-80",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/icse-seip52600.2021.00016"
+    },
+    {
+      "doi": "10.1109/icse55347.2025.00179",
+      "status": 200,
+      "title": [
+        "A Multi-Agent Approach for REST API Testing with Semantic Graphs and LLM-Driven Inputs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            4,
+            26
+          ]
+        ]
+      },
+      "container-title": [
+        "2025 IEEE/ACM 47th International Conference on Software Engineering (ICSE)"
+      ],
+      "page": "1409-1421",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/icse55347.2025.00179"
+    },
+    {
+      "doi": "10.1109/icst46399.2020.00024",
+      "status": 200,
+      "title": [
+        "RESTTESTGEN: Automated Black-Box Testing of RESTful APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2020,
+            10
+          ]
+        ]
+      },
+      "container-title": [
+        "2020 IEEE 13th International Conference on Software Testing, Validation and Verification (ICST)"
+      ],
+      "page": "142-152",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/icst46399.2020.00024"
+    },
+    {
+      "doi": "10.1109/icst46399.2020.00046",
+      "status": 200,
+      "title": [
+        "Checking Security Properties of Cloud Service REST APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2020,
+            10
+          ]
+        ]
+      },
+      "container-title": [
+        "2020 IEEE 13th International Conference on Software Testing, Validation and Verification (ICST)"
+      ],
+      "page": "387-397",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/icst46399.2020.00046"
+    },
+    {
+      "doi": "10.1109/icst60714.2024.00017",
+      "status": 200,
+      "title": [
+        "KAT: Dependency-Aware Automated API Testing with Large Language Models"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2024,
+            5,
+            27
+          ]
+        ]
+      },
+      "container-title": [
+        "2024 IEEE Conference on Software Testing, Verification and Validation (ICST)"
+      ],
+      "page": "82-92",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/icst60714.2024.00017"
+    },
+    {
+      "doi": "10.1109/ms.2020.3013820",
+      "status": 200,
+      "title": [
+        "Automated Black- and White-Box Testing of RESTful APIs With EvoMaster"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2021,
+            5
+          ]
+        ]
+      },
+      "container-title": [
+        "IEEE Software"
+      ],
+      "page": "72-78",
+      "type": "journal-article",
+      "url": "https://doi.org/10.1109/ms.2020.3013820"
+    },
+    {
+      "doi": "10.1109/msr66628.2025.00072",
+      "status": 200,
+      "title": [
+        "A Public Benchmark of REST APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            4,
+            28
+          ]
+        ]
+      },
+      "container-title": [
+        "2025 IEEE/ACM 22nd International Conference on Mining Software Repositories (MSR)"
+      ],
+      "page": "421-433",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1109/msr66628.2025.00072"
+    },
+    {
+      "doi": "10.1109/tsc.2021.3050610",
+      "status": 200,
+      "title": [
+        "Specification and Automated Analysis of Inter-Parameter Dependencies in Web APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2022,
+            7,
+            1
+          ]
+        ]
+      },
+      "container-title": [
+        "IEEE Transactions on Services Computing"
+      ],
+      "page": "2342-2355",
+      "type": "journal-article",
+      "url": "https://doi.org/10.1109/tsc.2021.3050610"
+    },
+    {
+      "doi": "10.1109/tse.2022.3150618",
+      "status": 200,
+      "title": [
+        "ARTE: Automated Generation of Realistic Test Inputs for Web APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023,
+            1,
+            1
+          ]
+        ]
+      },
+      "container-title": [
+        "IEEE Transactions on Software Engineering"
+      ],
+      "page": "348-363",
+      "type": "journal-article",
+      "url": "https://doi.org/10.1109/tse.2022.3150618"
+    },
+    {
+      "doi": "10.1145/3368089.3409719",
+      "status": 200,
+      "title": [
+        "Intelligent REST API data fuzzing"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2020,
+            11,
+            8
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering"
+      ],
+      "page": "725-736",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3368089.3409719"
+    },
+    {
+      "doi": "10.1145/3395363.3397374",
+      "status": 200,
+      "title": [
+        "Differential regression testing for REST APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2020,
+            7,
+            18
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 29th ACM SIGSOFT International Symposium on Software Testing and Analysis"
+      ],
+      "page": "312-323",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3395363.3397374"
+    },
+    {
+      "doi": "10.1145/3460319.3469082",
+      "status": 200,
+      "title": [
+        "RESTest: automated black-box testing of RESTful web APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2021,
+            7,
+            11
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 30th ACM SIGSOFT International Symposium on Software Testing and Analysis"
+      ],
+      "page": "682-685",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3460319.3469082"
+    },
+    {
+      "doi": "10.1145/3510003.3510133",
+      "status": 200,
+      "title": [
+        "Morest"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2022,
+            5,
+            21
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 44th International Conference on Software Engineering"
+      ],
+      "page": "1406-1417",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3510003.3510133"
+    },
+    {
+      "doi": "10.1145/3510003.3510151",
+      "status": 200,
+      "title": [
+        "Combinatorial testing of RESTful APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2022,
+            5,
+            21
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 44th International Conference on Software Engineering"
+      ],
+      "page": "426-437",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3510003.3510151"
+    },
+    {
+      "doi": "10.1145/3510454.3528637",
+      "status": 200,
+      "title": [
+        "Deriving semantics-aware fuzzers from web API schemas"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2022,
+            5,
+            21
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the ACM/IEEE 44th International Conference on Software Engineering: Companion Proceedings"
+      ],
+      "page": "345-346",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3510454.3528637"
+    },
+    {
+      "doi": "10.1145/3533767.3534401",
+      "status": 200,
+      "title": [
+        "Automated test generation for REST APIs: no time to rest yet"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2022,
+            7,
+            18
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 31st ACM SIGSOFT International Symposium on Software Testing and Analysis"
+      ],
+      "page": "289-301",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3533767.3534401"
+    },
+    {
+      "doi": "10.1145/3540250.3549144",
+      "status": 200,
+      "title": [
+        "Online testing of RESTful APIs: promises and challenges"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2022,
+            11,
+            7
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 30th ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering"
+      ],
+      "page": "408-420",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3540250.3549144"
+    },
+    {
+      "doi": "10.1145/3597503.3608133",
+      "status": 200,
+      "title": [
+        "EDEFuzz: A Web API Fuzzer for Excessive Data Exposures"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2024,
+            2,
+            6
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the IEEE/ACM 46th International Conference on Software Engineering"
+      ],
+      "page": "1-12",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3597503.3608133"
+    },
+    {
+      "doi": "10.1145/3597503.3639137",
+      "status": 200,
+      "title": [
+        "Generating REST API Specifications through Static Analysis"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2024,
+            4,
+            12
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the IEEE/ACM 46th International Conference on Software Engineering"
+      ],
+      "page": "1-13",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3597503.3639137"
+    },
+    {
+      "doi": "10.1145/3597926.3598114",
+      "status": 200,
+      "title": [
+        "AGORA: Automated Generation of Test Oracles for REST APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023,
+            7,
+            12
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 32nd ACM SIGSOFT International Symposium on Software Testing and Analysis"
+      ],
+      "page": "1018-1030",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3597926.3598114"
+    },
+    {
+      "doi": "10.1145/3597926.3598131",
+      "status": 200,
+      "title": [
+        "Enhancing REST API Testing with NLP Techniques"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023,
+            7,
+            12
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 32nd ACM SIGSOFT International Symposium on Software Testing and Analysis"
+      ],
+      "page": "1232-1243",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3597926.3598131"
+    },
+    {
+      "doi": "10.1145/3617175",
+      "status": 200,
+      "title": [
+        "Testing RESTful APIs: A Survey"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023,
+            11,
+            24
+          ]
+        ]
+      },
+      "container-title": [
+        "ACM Transactions on Software Engineering and Methodology"
+      ],
+      "page": "1-41",
+      "type": "journal-article",
+      "url": "https://doi.org/10.1145/3617175"
+    },
+    {
+      "doi": "10.1145/3639476.3639769",
+      "status": 200,
+      "title": [
+        "Leveraging Large Language Models to Improve REST API Testing"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2024,
+            4,
+            14
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 2024 ACM/IEEE 44th International Conference on Software Engineering: New Ideas and Emerging Results"
+      ],
+      "page": "37-41",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3639476.3639769"
+    },
+    {
+      "doi": "10.1145/3677182.3677264",
+      "status": 200,
+      "title": [
+        "Application of API automation testing based on microservice mode in industry software"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2024,
+            4,
+            26
+          ]
+        ]
+      },
+      "container-title": [
+        "International Conference on Algorithms Software Engineering and Network Security"
+      ],
+      "page": "460-464",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3677182.3677264"
+    },
+    {
+      "doi": "10.1145/3691620.3695511",
+      "status": 200,
+      "title": [
+        "DeepREST: Automated Test Case Generation for REST APIs Exploiting Deep Reinforcement Learning"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2024,
+            10,
+            27
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 39th IEEE/ACM International Conference on Automated Software Engineering"
+      ],
+      "page": "1383-1394",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3691620.3695511"
+    },
+    {
+      "doi": "10.1145/3715737",
+      "status": 200,
+      "title": [
+        "LlamaRestTest: Effective REST API Testing with Small Language Models"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            6,
+            19
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the ACM on Software Engineering"
+      ],
+      "page": "465-488",
+      "type": "journal-article",
+      "url": "https://doi.org/10.1145/3715737"
+    },
+    {
+      "doi": "10.1145/3726524",
+      "status": 200,
+      "title": [
+        "Test Oracle Generation for REST APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            12,
+            11
+          ]
+        ]
+      },
+      "container-title": [
+        "ACM Transactions on Software Engineering and Methodology"
+      ],
+      "page": "1-37",
+      "type": "journal-article",
+      "url": "https://doi.org/10.1145/3726524"
+    },
+    {
+      "doi": "10.1145/3744916.3787775",
+      "status": 200,
+      "title": [
+        "RBCTest: Leveraging LLMs to Mine and Verify Oracles of API Response Bodies for RESTful API Testing"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2026,
+            4,
+            12
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 2026 IEEE/ACM 48th International Conference on Software Engineering"
+      ],
+      "page": "1301-1313",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3744916.3787775"
+    },
+    {
+      "doi": "10.1145/3771281",
+      "status": 200,
+      "title": [
+        "Test Oracle Generation for REST APIs—RCR Report"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2026,
+            7,
+            1
+          ]
+        ]
+      },
+      "container-title": [
+        "ACM Transactions on Software Engineering and Methodology"
+      ],
+      "page": "1-4",
+      "type": "journal-article",
+      "url": "https://doi.org/10.1145/3771281"
+    },
+    {
+      "doi": "10.1145/3774748.3787598",
+      "status": 200,
+      "title": [
+        "RESTifAI: LLM-Based Workflow for Reusable REST API Testing"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2026,
+            4,
+            12
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the 2026 IEEE/ACM 48th International Conference on Software Engineering"
+      ],
+      "page": "24-28",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.1145/3774748.3787598"
+    },
+    {
+      "doi": "10.1145/3832185",
+      "status": 200,
+      "title": [
+        "RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2026,
+            10,
+            1
+          ]
+        ]
+      },
+      "container-title": [
+        "Proceedings of the ACM on Software Engineering"
+      ],
+      "page": "2159-2180",
+      "type": "journal-article",
+      "url": "https://doi.org/10.1145/3832185"
+    },
+    {
+      "doi": "10.26226/morressier.613b5417842293c031b5b5c6",
+      "status": 200,
+      "title": [
+        "Restats: A Test Coverage Tool for RESTful APIs"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2021,
+            9,
+            17
+          ]
+        ]
+      },
+      "container-title": [],
+      "page": null,
+      "type": "posted-content",
+      "url": "https://doi.org/10.26226/morressier.613b5417842293c031b5b5c6"
+    },
+    {
+      "doi": "10.48550/arxiv.2409.03838",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "doi": "10.48550/arxiv.2504.08113",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "doi": "10.48550/arxiv.2507.09481",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "doi": "10.48550/arxiv.2510.27417",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "doi": "10.48550/arxiv.2606.10465",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "doi": "10.5753/sbes.2025.9670",
+      "status": 200,
+      "title": [
+        "Combining TSL and LLM to Automate REST API Testing: A Comparative Study"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            9,
+            22
+          ]
+        ]
+      },
+      "container-title": [
+        "Anais do XXXIX Simpósio Brasileiro de Engenharia de Software (SBES 2025)"
+      ],
+      "page": "71-81",
+      "type": "proceedings-article",
+      "url": "https://doi.org/10.5753/sbes.2025.9670"
+    }
+  ]
+}
