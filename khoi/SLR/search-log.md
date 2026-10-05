@@ -1,0 +1,28 @@
+# Search log — Khôi · nguồn phụ trách: OpenAlex
+*Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · Cập nhật: 05/10/2026*
+
+## 1. Nhật ký chạy query (ghi MỌI phiên bản chuỗi + số kết quả)
+
+| Lần | Chuỗi tìm (nguyên văn) | CSDL | Trường tìm | Bộ lọc | Ngày chạy | Số kết quả | Ghi chú |
+|---|---|---|---|---|---|---|---|
+| **V1** | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | OpenAlex (tab Advanced, works (core)) | title-abstract | year ≥ 2020 | 05/10/2026 | **10** | ⚠️ KHÔNG HỢP LỆ — kiểm tra ở tab OQL cho thấy giao diện Advanced đã bỏ dấu nháy kép, các cụm từ bị tìm như từ đơn (không khớp String A nguyên văn). Không dùng; chạy lại đúng ở V3 |
+| **V2** | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing")` | OpenAlex (tab Advanced, works (core)) | title-abstract | year ≥ 2020 | 05/10/2026 | **283** | Trong khoảng 20–500 nhưng KHÔNG dùng làm chuỗi chạy chính: trang 1 (25 kết quả) gần như toàn bài ngoài chủ đề (vd "General Principles for Psychotherapeutic Interventions in Children and Adolescents", "Satire and The Cambridge Introduction to Satire", "The Word-Foot Theory of Old English Meter") → ⚠️ KHÔNG HỢP LỆ: đã xác nhận ở tab OQL, truy vấn không có dấu nháy kép (vd `REST API testing` thay vì `"REST API testing"`). Không dùng |
+| **V3** | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | OpenAlex (tab OQL: `get works where year ≥ (2020) and title-abstract has (…)`) | title-abstract | year ≥ 2020 | 05/10/2026 | **0** | String A nguyên văn, có dấu nháy (OQL báo valid). 0 kết quả → < 20 → theo quy tắc: bỏ khối O (bản V4) |
+| **V4** | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing")` | OpenAlex (tab OQL) | title-abstract | year ≥ 2020 | 05/10/2026 | **0** | Bỏ khối O vẫn 0 kết quả (< 20). Kiểm tra cú pháp cụm từ trong OQL trước khi nới sang String B (review-protocol §3) |
+| **V5** | `("REST API" OR "RESTful API" OR "web API" OR "web service") AND ("boundary value analysis" OR "boundary value" OR "boundary testing" OR "equivalence partitioning") AND ("mutation testing" OR "mutants" OR "mutation score")` | OpenAlex (tab OQL) | title-abstract | year ≥ 2020 | 05/10/2026 | **0** | String B (review-protocol §3, dùng khi cần nới). **0** kết quả (đã kiểm chứng cú pháp, xem mục 2) → < 20 → bỏ khối O (bản V6) |
+| **V6** | `("REST API" OR "RESTful API" OR "web API" OR "web service") AND ("boundary value analysis" OR "boundary value" OR "boundary testing" OR "equivalence partitioning")` | OpenAlex (tab OQL) | title-abstract | year ≥ 2020 | 05/10/2026 | **7** | String B bỏ khối O (quy tắc < 20, review-protocol §3). Vẫn < 20 → dừng nới chuỗi, báo PL. ✅ Bộ record của nguồn OpenAlex = 7 record của V6 (V3–V5 = 0 nên hợp các lần chạy hợp lệ = V6). Phần lớn là bài tiếng Indonesia; xét ở vòng lọc V1 (IC-L, IC-P) |
+
+## 2. Xử lý đặc biệt trong quá trình tìm
+
+1. **Giao diện Advanced của OpenAlex bỏ dấu nháy kép** → V1, V2 tìm theo từ đơn, không đúng String A (bằng chứng: V2 ra 283 bài, trang 1 gần như toàn bài ngoài chủ đề). Từ V3 trở đi nhập truy vấn trực tiếp ở tab **OQL**, kiểm tra từng cụm nằm trong dấu nháy và OQL báo `valid` trước khi Search. Kết quả V1, V2 không đưa vào `01_all_records.csv`.
+2. **Bản ghi trùng trong kết quả OpenAlex** (quan sát ở V1: cùng tiêu đề, tác giả, năm xuất hiện 2 lần) → khi export lần chạy chính, giữ đủ trong `01_all_records.csv` rồi loại trùng (EC-D) theo DOI / tiêu đề chuẩn hoá.
+3. **Kiểm tra cú pháp OQL** (05/10/2026, sau V4 = 0; không tính là một phiên bản search): `get works where year ≥ (2020) and title-abstract has ("RESTestBench")` → **1** kết quả, đúng bài "RESTestBench: A Benchmark for Evaluating the Effectiveness of LLM-Generated REST API Test Cases from NL Requirements" (Kogler và cộng sự, 2026). → Cú pháp dấu nháy trong OQL hoạt động; V3 = 0 và V4 = 0 là số thật.
+   - Sau V5 = 0, kiểm tra thêm cụm nhiều từ (cùng bộ lọc year ≥ 2020): (A) `title-abstract has ("mutation testing")` → **2.404** kết quả (cụm nhiều từ được tìm đúng); (B) `title-abstract has ("REST API" AND "mutation testing")` → **2** kết quả: "RESTestBench: A Benchmark for Evaluating the Effectiveness of LLM-Generated REST API Test Cases from NL Requirements" (2026) và "Method for Prioritizing Auto-Generated Test Cases for REST APIs Based on OpenAPI Specifications" (2026). → Cú pháp OQL đúng; V3–V5 = 0 phản ánh tài liệu thật sự rất hiếm trên OpenAlex với trường title-abstract.
+4. **Tổng hợp số**: V1, V2 không hợp lệ (không tính) · V3 0 + V4 0 + V5 0 + V6 7 = **7 record thô** (chuỗi chạy chính: V6) → sau loại trùng (EC-D): record (khớp `01_all_records.csv`).
+5. Snowballing: không áp dụng cho nguồn này — K.Duy phụ trách (review-protocol §2). Lấy dữ liệu bằng export trên giao diện web, không tự viết tool.
+
+## 3. Thay đổi so với protocol
+
+| Ngày | Thay đổi | Lý do |
+|---|---|---|
+| 05/10/2026 | Trường tìm: protocol ghi Title / Abstract / Keywords → OpenAlex dùng `title-abstract` | OpenAlex không có trường Keywords riêng; nội dung chuỗi giữ nguyên |
