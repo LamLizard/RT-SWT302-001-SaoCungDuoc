@@ -1,0 +1,5 @@
+# Local research skills and installer staging; do not commit these files.
+/.agents/
+
+# Public reproduction archives are kept locally; provenance is in SLR/sources.
+/SLR/sources/*.zip
