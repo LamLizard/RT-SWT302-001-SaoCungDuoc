@@ -1,0 +1,426 @@
+{
+    "indexed":  {
+                    "date-parts":  [
+                                       [
+                                           2026,
+                                           10,
+                                           2
+                                       ]
+                                   ],
+                    "date-time":  "2026-10-02T10:24:08Z",
+                    "timestamp":  1790936648222,
+                    "version":  "4.1.0"
+                },
+    "publisher-location":  "New York, NY, USA",
+    "reference-count":  25,
+    "publisher":  "ACM",
+    "license":  [
+                    {
+                        "start":  {
+                                      "date-parts":  [
+                                                         [
+                                                             2021,
+                                                             7,
+                                                             11
+                                                         ]
+                                                     ],
+                                      "date-time":  "2021-07-11T00:00:00Z",
+                                      "timestamp":  1625961600000
+                                  },
+                        "content-version":  "vor",
+                        "delay-in-days":  0,
+                        "URL":  "https://www.acm.org/publications/policies/copyright_policy#Background"
+                    }
+                ],
+    "funder":  [
+                   {
+                       "name":  "Junta de Andalucía (Consejería de Economía y Conocimiento)",
+                       "award":  [
+                                     "US-1264651,P18-FR-2895"
+                                 ],
+                       "award-info":  [
+                                          {
+                                              "award-number":  [
+                                                                   "US-1264651,P18-FR-2895"
+                                                               ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "name":  "Ministerio de Educación y Formación Profesional",
+                       "award":  [
+                                     "FPU17/04077"
+                                 ],
+                       "award-info":  [
+                                          {
+                                              "award-number":  [
+                                                                   "FPU17/04077"
+                                                               ]
+                                          }
+                                      ]
+                   },
+                   {
+                       "name":  "Ministerio de Ciencia, Innovación y Universidades",
+                       "award":  [
+                                     "RTI2018-101204-B-C21"
+                                 ],
+                       "award-info":  [
+                                          {
+                                              "award-number":  [
+                                                                   "RTI2018-101204-B-C21"
+                                                               ]
+                                          }
+                                      ]
+                   }
+               ],
+    "content-domain":  {
+                           "domain":  [
+                                          "dl.acm.org"
+                                      ],
+                           "crossmark-restriction":  true
+                       },
+    "short-container-title":  [
+
+                              ],
+    "published-print":  {
+                            "date-parts":  [
+                                               [
+                                                   2021,
+                                                   7,
+                                                   11
+                                               ]
+                                           ]
+                        },
+    "DOI":  "10.1145/3460319.3469082",
+    "type":  "proceedings-article",
+    "created":  {
+                    "date-parts":  [
+                                       [
+                                           2021,
+                                           7,
+                                           8
+                                       ]
+                                   ],
+                    "date-time":  "2021-07-08T22:18:43Z",
+                    "timestamp":  1625782723000
+                },
+    "page":  "682-685",
+    "update-policy":  "https://doi.org/10.1145/crossmark-policy",
+    "source":  "Crossref",
+    "is-referenced-by-count":  74,
+    "title":  [
+                  "RESTest: automated black-box testing of RESTful web APIs"
+              ],
+    "prefix":  "10.1145",
+    "author":  [
+                   {
+                       "ORCID":  "https://orcid.org/0000-0001-5501-9225",
+                       "authenticated-orcid":  false,
+                       "given":  "Alberto",
+                       "family":  "Martin-Lopez",
+                       "sequence":  "first",
+                       "affiliation":  [
+                                           {
+                                               "name":  "University of Seville, Spain"
+                                           }
+                                       ],
+                       "role":  [
+                                    {
+                                        "vocabulary":  "crossref",
+                                        "role":  "author"
+                                    }
+                                ]
+                   },
+                   {
+                       "ORCID":  "https://orcid.org/0000-0001-8816-6213",
+                       "authenticated-orcid":  false,
+                       "given":  "Sergio",
+                       "family":  "Segura",
+                       "sequence":  "additional",
+                       "affiliation":  [
+                                           {
+                                               "name":  "University of Seville, Spain"
+                                           }
+                                       ],
+                       "role":  [
+                                    {
+                                        "vocabulary":  "crossref",
+                                        "role":  "author"
+                                    }
+                                ]
+                   },
+                   {
+                       "ORCID":  "https://orcid.org/0000-0001-9827-1834",
+                       "authenticated-orcid":  false,
+                       "given":  "Antonio",
+                       "family":  "Ruiz-Cortés",
+                       "sequence":  "additional",
+                       "affiliation":  [
+                                           {
+                                               "name":  "University of Seville, Spain"
+                                           }
+                                       ],
+                       "role":  [
+                                    {
+                                        "vocabulary":  "crossref",
+                                        "role":  "author"
+                                    }
+                                ]
+                   }
+               ],
+    "member":  "320",
+    "published-online":  {
+                             "date-parts":  [
+                                                [
+                                                    2021,
+                                                    7,
+                                                    11
+                                                ]
+                                            ]
+                         },
+    "reference":  [
+                      {
+                          "key":  "e_1_3_2_1_1_1",
+                          "unstructured":  "[n.d.]. Allure - Test report framework. http://allure.qatools.ru/ accessed April 2021.  [n.d.]. Allure - Test report framework. http://allure.qatools.ru/ accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_2_1",
+                          "volume-title":  "https://apifortress.com/ accessed",
+                          "author":  "Fortress API",
+                          "year":  "2021",
+                          "unstructured":  "[n.d.]. API Fortress . https://apifortress.com/ accessed April 2021 . [n.d.]. API Fortress. https://apifortress.com/ accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_3_1",
+                          "volume-title":  "https://www.dbpedia.org/ accessed",
+                          "year":  "2021",
+                          "unstructured":  "[n.d.]. DBpedia. https://www.dbpedia.org/ accessed April 2021 . [n.d.]. DBpedia. https://www.dbpedia.org/ accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_4_1",
+                          "volume-title":  "https://www.openapis.org accessed",
+                          "author":  "Specification API",
+                          "year":  "2021",
+                          "unstructured":  "[n.d.]. Open API Specification . https://www.openapis.org accessed April 2021 . [n.d.]. OpenAPI Specification. https://www.openapis.org accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_5_1",
+                          "volume-title":  "https://developer.paypal.com/docs/api/ accessed",
+                          "author":  "PayPal",
+                          "year":  "2021",
+                          "unstructured":  "[n.d.]. PayPal API. https://developer.paypal.com/docs/api/ accessed April 2021 . [n.d.]. PayPal API. https://developer.paypal.com/docs/api/ accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_6_1",
+                          "volume-title":  "https://www.getpostman.com accessed",
+                          "year":  "2021",
+                          "unstructured":  "[n.d.]. Postman. https://www.getpostman.com accessed April 2021 . [n.d.]. Postman. https://www.getpostman.com accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_7_1",
+                          "unstructured":  "[n.d.]. ProgrammableWeb API Directory. http://www.programmableweb.com/ accessed April 2021.  [n.d.]. ProgrammableWeb API Directory. http://www.programmableweb.com/ accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_8_1",
+                          "volume-title":  "https://smartbear.com/product/ready-api/overview/ accessed",
+                          "author":  "API.",
+                          "year":  "2021",
+                          "unstructured":  "[n.d.]. Ready API. https://smartbear.com/product/ready-api/overview/ accessed April 2021 . [n.d.]. ReadyAPI. https://smartbear.com/product/ready-api/overview/ accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_9_1",
+                          "volume-title":  "http://rest-assured.io accessed",
+                          "author":  "Assured REST",
+                          "year":  "2021",
+                          "unstructured":  "[n.d.]. REST Assured . http://rest-assured.io accessed April 2021 . [n.d.]. REST Assured. http://rest-assured.io accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_10_1",
+                          "volume-title":  "YouTube Data API. https://developers.google.com/youtube/v3/ accessed",
+                          "year":  "2021",
+                          "unstructured":  "[n.d.]. YouTube Data API. https://developers.google.com/youtube/v3/ accessed April 2021 . [n.d.]. YouTube Data API. https://developers.google.com/youtube/v3/ accessed April 2021."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_11_1",
+                          "doi-asserted-by":  "publisher",
+                          "DOI":  "10.1145/3293455"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_12_1",
+                          "volume-title":  "Automated Blackbox and Whitebox Testing of RESTful APIs With EvoMaster",
+                          "author":  "Arcuri Andrea",
+                          "unstructured":  "Andrea Arcuri . 2021. Automated Blackbox and Whitebox Testing of RESTful APIs With EvoMaster . IEEE Software . Andrea Arcuri. 2021. Automated Blackbox and Whitebox Testing of RESTful APIs With EvoMaster. IEEE Software."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_13_1",
+                          "doi-asserted-by":  "crossref",
+                          "unstructured":  "Vaggelis Atlidakis Patrice Godefroid and Marina Polishchuk. 2019. RESTler: Stateful REST API Fuzzing. In ICSE. 748–758.  Vaggelis Atlidakis Patrice Godefroid and Marina Polishchuk. 2019. RESTler: Stateful REST API Fuzzing. In ICSE. 748–758.",
+                          "DOI":  "10.1109/ICSE.2019.00083"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_14_1",
+                          "doi-asserted-by":  "crossref",
+                          "unstructured":  "T. Y. Chen H. Leung and I. K. Mak. 2005. Adaptive Random Testing. In ASIAN. 320–329.  T. Y. Chen H. Leung and I. K. Mak. 2005. Adaptive Random Testing. In ASIAN. 320–329.",
+                          "DOI":  "10.1007/978-3-540-30502-6_23"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_15_1",
+                          "volume-title":  "Javier Luis Cánovas Izquierdo, and Jordi Cabot",
+                          "author":  "Hamza",
+                          "year":  "2018",
+                          "unstructured":  "Hamza Ed-douibi , Javier Luis Cánovas Izquierdo, and Jordi Cabot . 2018 . Automatic Generation of Test Cases for REST APIs: A Specification-Based Approach. In EDOC. 181–190. Hamza Ed-douibi, Javier Luis Cánovas Izquierdo, and Jordi Cabot. 2018. Automatic Generation of Test Cases for REST APIs: A Specification-Based Approach. In EDOC. 181–190."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_17_1",
+                          "doi-asserted-by":  "crossref",
+                          "unstructured":  "Antonio Gamez-Diaz Pablo Fernandez and Antonio Ruiz-Cortes. 2019. Automating SLA-Driven API Development with SLA4OAI. In ICSOC. 20–35.  Antonio Gamez-Diaz Pablo Fernandez and Antonio Ruiz-Cortes. 2019. Automating SLA-Driven API Development with SLA4OAI. In ICSOC. 20–35.",
+                          "DOI":  "10.1007/978-3-030-33702-5_2"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_18_1",
+                          "doi-asserted-by":  "crossref",
+                          "unstructured":  "Stefan Karlsson Adnan Causevic and Daniel Sundmark. 2020. QuickREST: Property-based Test Generation of OpenAPI Described RESTful APIs. In ICST.  Stefan Karlsson Adnan Causevic and Daniel Sundmark. 2020. QuickREST: Property-based Test Generation of OpenAPI Described RESTful APIs. In ICST.",
+                          "DOI":  "10.1109/ICST46399.2020.00023"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_19_1",
+                          "volume-title":  "Specification and Automated Analysis of Inter-Parameter Dependencies in Web APIs",
+                          "author":  "Martin-Lopez Alberto",
+                          "unstructured":  "Alberto Martin-Lopez , Sergio Segura , Carlos Müller , and Antonio Ruiz-Cortés . 2020. Specification and Automated Analysis of Inter-Parameter Dependencies in Web APIs . IEEE TSC. Alberto Martin-Lopez, Sergio Segura, Carlos Müller, and Antonio Ruiz-Cortés. 2020. Specification and Automated Analysis of Inter-Parameter Dependencies in Web APIs. IEEE TSC."
+                      },
+                      {
+                          "key":  "e_1_3_2_1_20_1",
+                          "doi-asserted-by":  "crossref",
+                          "unstructured":  "Alberto Martin-Lopez Sergio Segura and Antonio Ruiz-Cortés. 2019. A Catalogue of Inter-Parameter Dependencies in RESTful Web APIs. In ICSOC. 399–414.  Alberto Martin-Lopez Sergio Segura and Antonio Ruiz-Cortés. 2019. A Catalogue of Inter-Parameter Dependencies in RESTful Web APIs. In ICSOC. 399–414.",
+                          "DOI":  "10.1007/978-3-030-33702-5_31"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_21_1",
+                          "doi-asserted-by":  "crossref",
+                          "unstructured":  "Alberto Martin-Lopez Sergio Segura and Antonio Ruiz-Cortés. 2019. Test Coverage Criteria for RESTful Web APIs. In A-TEST. 15–21.  Alberto Martin-Lopez Sergio Segura and Antonio Ruiz-Cortés. 2019. Test Coverage Criteria for RESTful Web APIs. In A-TEST. 15–21.",
+                          "DOI":  "10.1145/3340433.3342822"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_22_1",
+                          "doi-asserted-by":  "crossref",
+                          "unstructured":  "Alberto Martin-Lopez Sergio Segura and Antonio Ruiz-Cortés. 2020. RESTest: Black-Box Constraint-Based Testing of RESTful Web APIs. In ICSOC.  Alberto Martin-Lopez Sergio Segura and Antonio Ruiz-Cortés. 2020. RESTest: Black-Box Constraint-Based Testing of RESTful Web APIs. In ICSOC.",
+                          "DOI":  "10.1007/978-3-030-65310-1_33"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_23_1",
+                          "volume-title":  "RESTful Web APIs. O’Reilly Media",
+                          "author":  "Richardson Leonard",
+                          "unstructured":  "Leonard Richardson , Mike Amundsen , and Sam Ruby . 2013. RESTful Web APIs. O’Reilly Media , Inc .. isbn:1449358063, 9781449358068 Leonard Richardson, Mike Amundsen, and Sam Ruby. 2013. RESTful Web APIs. O’Reilly Media, Inc.. isbn:1449358063, 9781449358068"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_24_1",
+                          "doi-asserted-by":  "crossref",
+                          "unstructured":  "Sergio Segura Amador Durán Javier Troya and Antonio Ruiz-Cortés. 2019. Metamorphic Relation Patterns for Query-Based Systems. In MET. 24–31.  Sergio Segura Amador Durán Javier Troya and Antonio Ruiz-Cortés. 2019. Metamorphic Relation Patterns for Query-Based Systems. In MET. 24–31.",
+                          "DOI":  "10.1109/MET.2019.00012"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_25_1",
+                          "doi-asserted-by":  "publisher",
+                          "DOI":  "10.1109/TSE.2017.2764464"
+                      },
+                      {
+                          "key":  "e_1_3_2_1_26_1",
+                          "doi-asserted-by":  "crossref",
+                          "unstructured":  "Emanuele Viglianisi Michael Dallago and Mariano Ceccato. 2020. RestTestGen: Automated Black-Box Testing of RESTful APIs. In ICST.  Emanuele Viglianisi Michael Dallago and Mariano Ceccato. 2020. RestTestGen: Automated Black-Box Testing of RESTful APIs. In ICST.",
+                          "DOI":  "10.1109/ICST46399.2020.00024"
+                      }
+                  ],
+    "event":  {
+                  "name":  "ISSTA \u002721: 30th ACM SIGSOFT International Symposium on Software Testing and Analysis",
+                  "location":  "Virtual Denmark",
+                  "acronym":  "ISSTA \u002721",
+                  "sponsor":  [
+                                  "SIGSOFT ACM Special Interest Group on Software Engineering"
+                              ]
+              },
+    "container-title":  [
+                            "Proceedings of the 30th ACM SIGSOFT International Symposium on Software Testing and Analysis"
+                        ],
+    "original-title":  [
+
+                       ],
+    "link":  [
+                 {
+                     "URL":  "https://dl.acm.org/doi/10.1145/3460319.3469082",
+                     "content-type":  "unspecified",
+                     "content-version":  "vor",
+                     "intended-application":  "text-mining"
+                 },
+                 {
+                     "URL":  "https://dl.acm.org/doi/pdf/10.1145/3460319.3469082",
+                     "content-type":  "unspecified",
+                     "content-version":  "vor",
+                     "intended-application":  "similarity-checking"
+                 }
+             ],
+    "deposited":  {
+                      "date-parts":  [
+                                         [
+                                             2025,
+                                             6,
+                                             17
+                                         ]
+                                     ],
+                      "date-time":  "2025-06-17T21:24:37Z",
+                      "timestamp":  1750195477000
+                  },
+    "score":  1,
+    "resource":  {
+                     "primary":  {
+                                     "URL":  "https://dl.acm.org/doi/10.1145/3460319.3469082"
+                                 }
+                 },
+    "subtitle":  [
+
+                 ],
+    "short-title":  [
+
+                    ],
+    "issued":  {
+                   "date-parts":  [
+                                      [
+                                          2021,
+                                          7,
+                                          11
+                                      ]
+                                  ]
+               },
+    "references-count":  25,
+    "alternative-id":  [
+                           "10.1145/3460319.3469082",
+                           "10.1145/3460319"
+                       ],
+    "URL":  "https://doi.org/10.1145/3460319.3469082",
+    "relation":  {
+
+                 },
+    "subject":  [
+
+                ],
+    "published":  {
+                      "date-parts":  [
+                                         [
+                                             2021,
+                                             7,
+                                             11
+                                         ]
+                                     ]
+                  },
+    "assertion":  [
+                      {
+                          "value":  "2021-07-11",
+                          "order":  2,
+                          "name":  "published",
+                          "label":  "Published",
+                          "group":  {
+                                        "name":  "publication_history",
+                                        "label":  "Publication History"
+                                    }
+                      }
+                  ]
+}

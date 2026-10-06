@@ -1,0 +1,110 @@
+{
+    "seed_title":  "SATORI: Static Test Oracle Generation for REST APIs",
+    "seed_doi":  "10.1109/ase63991.2025.00116",
+    "direction":  "citations",
+    "source":  "Semantic Scholar Graph API",
+    "retrieved_at":  "2026-10-05T15:44:46.0580451+07:00",
+    "limit":  100,
+    "pages":  [
+                  {
+                      "offset":  0,
+                      "data":  [
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "cd2cc4779b1e786dfffb33db3457ea89fed8d74a",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2609.27806",
+                                                                               "CorpusId":  292267487
+                                                                           },
+                                                           "title":  "DualMine: Static-Dynamic REST API Constraint Discovery with Dual Validation",
+                                                           "venue":  "",
+                                                           "year":  2026
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "24ae5ce2bbca7adfd049482b4cd7199d2e4d8faf",
+                                                           "externalIds":  {
+                                                                               "DBLP":  "journals/corr/abs-2607-23963",
+                                                                               "ArXiv":  "2607.23963",
+                                                                               "DOI":  "10.1145/3832185",
+                                                                               "CorpusId":  290625742
+                                                                           },
+                                                           "title":  "RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning",
+                                                           "venue":  "arXiv.org",
+                                                           "year":  2026
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "c1d3c5f2d1b91758d7a7aafaa4f8f69eeb46f792",
+                                                           "externalIds":  {
+                                                                               "DBLP":  "journals/corr/abs-2607-05031",
+                                                                               "ArXiv":  "2607.05031",
+                                                                               "DOI":  "10.1109/ACCESS.2026.3729738",
+                                                                               "CorpusId":  289934919
+                                                                           },
+                                                           "title":  "LLM-Based Test Oracles: Source-of-Authority Taxonomy—A Systematic Literature Review",
+                                                           "venue":  "IEEE Access",
+                                                           "year":  2026
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "0f877bcaa92ee6a7e540bfa72de9c626c004538d",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2606.10465",
+                                                                               "DBLP":  "journals/corr/abs-2606-10465",
+                                                                               "DOI":  "10.48550/arXiv.2606.10465",
+                                                                               "CorpusId":  289132803
+                                                                           },
+                                                           "title":  "MASTOR: A Multi-Agent Approach to Semantic Test Oracle Generation for RESTful APIs",
+                                                           "venue":  "arXiv.org",
+                                                           "year":  2026
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "7bbe28306ba044aa889de027b17edc38704d9e58",
+                                                           "externalIds":  {
+                                                                               "DBLP":  "journals/corr/abs-2507-09481",
+                                                                               "ArXiv":  "2507.09481",
+                                                                               "DOI":  "10.48550/arXiv.2507.09481",
+                                                                               "CorpusId":  280294743
+                                                                           },
+                                                           "title":  "Evaluating LLMs on Sequential API Call Through Automated Test Generation",
+                                                           "venue":  "arXiv.org",
+                                                           "year":  2025
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "35f0ce9a54714bbf5e064bb9998027936fc06efa",
+                                                           "externalIds":  {
+                                                                               "ArXiv":  "2504.17287",
+                                                                               "DOI":  "10.1145/3744916.3787775",
+                                                                               "CorpusId":  278033731
+                                                                           },
+                                                           "title":  "RBCTest: Leveraging LLMs to Mine and Verify Oracles of API Response Bodies for RESTful API Testing",
+                                                           "venue":  "Proceedings of the 2026 IEEE/ACM 48th International Conference on Software Engineering",
+                                                           "year":  2025
+                                                       }
+                                   },
+                                   {
+                                       "citingPaper":  {
+                                                           "paperId":  "18cdfc94792d01a967e34f8086d26b05ff908981",
+                                                           "externalIds":  {
+                                                                               "DBLP":  "journals/csr/JTKP27",
+                                                                               "DOI":  "10.1016/j.cosrev.2026.101043",
+                                                                               "CorpusId":  290943209
+                                                                           },
+                                                           "title":  "Security testing of RESTful APIs: Approaches and research challenges",
+                                                           "venue":  "Computer Science Review",
+                                                           "year":  null
+                                                       }
+                                   }
+                               ]
+                  }
+              ],
+    "error":  null
+}
