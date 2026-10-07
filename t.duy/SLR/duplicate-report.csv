@@ -1,0 +1,4 @@
+﻿"pair_id","record_a_id","record_b_id","match_type","score","status","resolution","resolved_by","resolved_at","notes"
+"D001","RAW0143","RAW0144","verified published/preprint version","1","MERGED","R131","Codex (AI-assisted; chờ T.Duy xác nhận)","2026-10-07T13:06:16.863022+00:00","Verified same paper/version; not a separate included paper."
+"D002","RAW-GS001","RAW-CSV2-011","exact DOI","1","MERGED","G001","Codex (AI-assisted; chờ T.Duy xác nhận)","2026-10-07T13:06:16.863022+00:00","Verified same paper/version; not a separate included paper."
+"D003","RAW-GS002","RAW-CSV2-012","verified published/preprint version","1","MERGED","R001","Codex (AI-assisted; chờ T.Duy xác nhận)","2026-10-07T13:06:16.863022+00:00","Verified same paper/version; not a separate included paper."

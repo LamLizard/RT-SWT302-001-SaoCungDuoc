@@ -1,0 +1,2 @@
+﻿"ma","doi","title","year","venue","url","v1_decision","v2_status","v2_note"
+"R001","10.5753/sbes.2025.9670","Combining TSL and LLM to Automate REST API Testing: A Comparative Study","2025","Anais do XXXIX Simpósio Brasileiro de Engenharia de Software (SBES 2025)","https://arxiv.org/abs/2509.05540","UNSURE","INCLUDE","LLM/TSL không tự đủ IC-I; ở đây có mô tả EP/BVA trong phương pháp. Chưa có đối chứng uniform random cùng ngân sách."
