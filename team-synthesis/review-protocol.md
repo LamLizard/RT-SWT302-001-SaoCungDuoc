@@ -16,7 +16,7 @@ Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày 
 | Lam | ACM Digital Library |
 | Khoi | OpenAlex |
 | T.Duy | Semantic Scholar + Google Scholar (seed & bổ sung) |
-| K.Duy | Snowballing lùi và tiến, seed là các paper dẫn chứng trên thẻ RQ |
+| K.Duy |Springer |
 
 ## 3. Phạm vi tìm
 
