@@ -1,6 +1,4 @@
 # Evidence Table — Lâm (ACM) · 8 cột
-*Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · 04/10/2026 (bản 3 — đã điền từ full-text bản mở/tác giả)*
-*Chú thích: "Kết quả" = số THẬT đọc từ bài (abstract/bảng của bản chính thức); ⚠️ = chỗ chưa có nguồn, thiếu thật thì ghi N/A — không bịa.*
 
 | # | Paper (tên + năm + venue + DOI) | Tool/LLM | Dataset | Metric | Kết quả | Code | Hạn chế | Gần RQ |
 |---|---|---|---|---|---|---|---|---|
@@ -17,23 +15,3 @@
 | 11 | Understanding on the Edge: LLM-generated Boundary Test Explanations (AST 2026) · 10.1145/3793654.3793754 | GPT-4.1 (giải thích boundary) | 20 boundary pairs (nhóm VV/VE/EE) | Likert: clarity / correctness / completeness / usefulness | 27 chuyên gia (13 NC + 14 thực hành): **63,5% đánh giá tích cực (4–5)**, 17% tiêu cực; 6 phỏng vấn follow-up | N/A | Construct: đánh giá chủ quan (4 tiêu chí); độ quen thuộc BVA ảnh hưởng; mẫu tự nguyện | 1/4 — I (BVA) |
 | 12 | EDEFuzz: A Web API Fuzzer for Excessive Data Exposures (ICSE 2024) · 10.1145/3597503.3608133 | EDEFuzz (fuzzing + oracle metamorphic cho EDE) | 8 website phổ biến + quét thực tế | True positive rate (TPR); EDE phát hiện | **TPR 98,65%** (8 website) với cấu hình tối thiểu | github.com/Broken-Assumptions | Simulated Server hạn chế (8,7% site); xác định field nhạy cảm cần con người | 2/4 — P,O (bảo mật) |
 | 13 | Detecting Server-Side Request Forgery (SSRF) Vulnerabilities In REST API Fuzz Testing (SBFT 2026) · 10.1145/3786155.3788581 | EvoMaster mở rộng (sinh test SSRF) | 2 case study thực: Lychee, Microcks | Tỉ lệ sinh & khai thác SSRF (10 lần chạy) | Lychee: **2/10 lần chạy**; Microcks: **6/10 lần chạy** | github.com/WebFuzzing/EvoMaster | Internal: lỗi công cụ (giảm thiểu: test nhiều mức; nền EvoMaster) | 2/4 — P,O (bảo mật) |
-
-## Quyết định V2 (đọc toàn văn/bản lưu trữ) — quan trọng!
-Đã kiểm **số trang + mục Threats + số liệu** của các bài có bản đọc; phát hiện **3 bài dưới 4 trang → đề xuất LOẠI theo EC-S** (nhóm xác nhận ở buổi họp):
-- #3 FSE-oracles: bản lưu trữ **3 trang** (tr. ACM cần nhóm kiểm lại nếu muốn giữ)
-- #12 RESTest League: **3 trang** (tr. 31–33, Crossref)
-- #14 EvoMaster League: **2 trang** (tr. 52–53, Crossref)
-- #4 WSSE: không có bản mở — nếu nhóm không truy cập được full-text → loại theo **EC-A**
-→ **Included chốt: 13 bài** (#1, #2, #5–#11, #13 + 3 bài thêm ở cuối bảng). ≥ 6 ✓
-
-## Nguồn bản đọc miễn phí đã dùng (mở kiểm chứng được từng số)
-- #1 TOSEM: github.com/WebFuzzing/EvoMaster/blob/master/docs/publications/2022_tosem_faults.pdf
-- #2 Online testing: hdl.handle.net/11441/165697 (kho Sevilla) · #3 Oracles: hdl.handle.net/11441/165886
-- #5 MongoDB-fuzzing: arxiv.org/pdf/2507.20848 · #6 APITestGenie: arxiv.org/pdf/2604.02039 · #7 MioHint: arxiv.org/pdf/2504.05738 · #8 RBCTest: arxiv.org/pdf/2504.17287 · #10 CRUDinfer: michelepasqua.github.io/publications/pdfs/ICSE26.pdf · #11 SAINT: arxiv.org/pdf/2511.13305
-- #9 Defects4REST: github.com/ANSWER-OSU/Defects4REST-ReplicationPackage (PDF: defects4rest_icse26.pdf)
-- #14 EvoMaster League: github.com/WebFuzzing/EvoMaster/blob/master/docs/publications/2026_sbft_competition.pdf
-- Tham khảo UNSURE: BVT-explanation arxiv.org/pdf/2601.22791 · EDEFuzz arxiv.org/pdf/2301.09258
-
-## Ghi chú cho nhóm
-- Chưa có bài ≥3/4 P/I/C/O → chưa có ứng viên phản chứng; khoảng trống RQ còn nguyên ✓
-- ≥50% hàng "Kết quả" có số thực: **13/13 hàng đã có số thật** ✓
