@@ -1,28 +1,71 @@
 # Search log — Khôi · nguồn phụ trách: OpenAlex
-*Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · Cập nhật: 05/10/2026*
+*Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · Cập nhật: 13/10/2026*
+*Công cụ lấy dữ liệu: RBL Paper Harvester (extension Chrome tự viết, gọi API OpenAlex) — xem mục 6 "Kiểm chứng".*
 
-## 1. Nhật ký chạy query (ghi MỌI phiên bản chuỗi + số kết quả)
+## 1. Bảng log chính (lần chạy chính thức, dùng cho PRISMA)
 
-| Lần | Chuỗi tìm (nguyên văn) | CSDL | Trường tìm | Bộ lọc | Ngày chạy | Số kết quả | Ghi chú |
+| # | Query nguyên văn | CSDL | Trường tìm | Bộ lọc | Ngày | Số kết quả | Số sau bỏ trùng | Ghi chú |
+|---|---|---|---|---|---|---|---|---|
+| V1 | `("REST API" OR "RESTful API" OR "RESTful web service" OR "web API" OR "OpenAPI") AND ("equivalence partitioning" OR "boundary value" OR "boundary testing" OR "black-box testing" OR "black box testing" OR "test generation" OR "test case generation" OR "test amplification" OR "random testing" OR "fuzzing" OR "test oracle") AND ("mutation" OR "mutant" OR "mutation score" OR "fault detection")` | OpenAlex (API, `title_and_abstract.search`) | title-abstract | year ≥ 2020 | 13/10/2026 01:58 | **30** (web OQL: 19) | 30 | Độ phủ bài nền của RQ chỉ 1/6 → khối O quá hẹp, mở rộng O (V2) |
+| V2 | `("REST API" OR "RESTful API" OR "RESTful web service" OR "web API" OR "OpenAPI") AND ("equivalence partitioning" OR "boundary value" OR "boundary testing" OR "black-box testing" OR "black box testing" OR "test generation" OR "test case generation" OR "test amplification" OR "random testing" OR "fuzzing" OR "test oracle") AND ("mutation" OR "mutant" OR "fault" OR "bug" OR "defect" OR "failure" OR "coverage")` | OpenAlex (API, `title_and_abstract.search`) | title-abstract | year ≥ 2020 | 13/10/2026 01:59 | **166** | 159 (gộp V1 + V2) | Trong ngưỡng 20–500, độ phủ bài nền 5/6 → **chuỗi chạy chính** |
+
+**Kiểm tra độ phủ (6 bài nền trên thẻ RQ):** V2 tìm thấy RESTestBench (K23), SATORI (K52), *Test Oracle Generation for REST APIs* (K44), *Prompt-Based REST API Test Amplification* (K77), DualMine (K113) = 5/6; thiếu RESTOR (chỉ xuất hiện khi bỏ khối O).
+
+## 2. Tổng hợp
+
+- Tổng trước dedup: 30 + 166 = **196** · Sau dedup: **159** (bỏ 37: 30 bài V1 nằm trọn trong V2 + 7 bản trùng trong kết quả OpenAlex) = số dòng nhánh CSDL trong `01_all_records.csv` (K01–K159) — khớp hộp PRISMA.
+- Cộng nhánh snowballing (mục 4): 01 có **194** dòng (K01–K194).
+- Chênh lệch tool–web ở V1 (30 so với 19): API OpenAlex có stemming (khớp số nhiều/biến thể như "REST APIs", "mutants", "fuzz"), tab OQL khớp đúng cụm. Tập kết quả web nằm trọn trong tập của tool.
+
+## 3. Lịch sử thử nghiệm trước khi chốt chuỗi (không dùng cho PRISMA, giữ để minh bạch)
+
+| Ngày | Chuỗi | Cách chạy | Kết quả | Kết luận |
+|---|---|---|---|---|
+| 05/10 | String A (protocol), có/không khối O | web tab Advanced | 10 / 283 | **Không hợp lệ**: giao diện Advanced bỏ dấu nháy kép, cụm từ bị tìm như từ đơn (trang 1 toàn bài ngoài chủ đề) |
+| 05/10 | String A đầy đủ / bỏ O | web tab OQL | 0 / 0 | Cú pháp OQL đã kiểm (`title-abstract has ("RESTestBench")` → 1 bài đúng) → 0 là số thật |
+| 05/10 | String B đầy đủ / bỏ O | web tab OQL | 0 / 7 | < 20 → báo PL |
+| 13/10 00:18–00:26 | String A đầy đủ / bỏ O, String B đầy đủ / bỏ O | tool (API) | 0 / 1 / 0 / 12 | Khớp web (khác ở String B bỏ O: 12 vs 7, do stemming; 7 bài web nằm trọn trong 12). Vẫn < 20 |
+| 13/10 00:32 | `(REST API…) AND (test generation… OR random testing)` (gợi ý của thành viên) | tool | 294 | Cho thấy bài nền dùng thuật ngữ "test generation/fuzzing", không phải EP/BVA → thiết kế lại chuỗi theo PICO |
+| 13/10 ~01:05 | Chuỗi mới bỏ hẳn khối O | tool | 398 (độ phủ 6/6) | Không dùng: V2 đã trong ngưỡng 20–500 (quy tắc dừng); bài thiếu (RESTOR) xử lý qua snowballing |
+
+## 4. Snowballing
+
+| Seed (DOI) | Vòng | Hướng (lùi/tiến) | Qua API | Số đã lướt | Số thêm vào 01 | Số include cuối | Ghi chú |
 |---|---|---|---|---|---|---|---|
-| **V1** | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | OpenAlex (tab Advanced, works (core)) | title-abstract | year ≥ 2020 | 05/10/2026 | **10** | ⚠️ KHÔNG HỢP LỆ — kiểm tra ở tab OQL cho thấy giao diện Advanced đã bỏ dấu nháy kép, các cụm từ bị tìm như từ đơn (không khớp String A nguyên văn). Không dùng; chạy lại đúng ở V3 |
-| **V2** | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing")` | OpenAlex (tab Advanced, works (core)) | title-abstract | year ≥ 2020 | 05/10/2026 | **283** | Trong khoảng 20–500 nhưng KHÔNG dùng làm chuỗi chạy chính: trang 1 (25 kết quả) gần như toàn bài ngoài chủ đề (vd "General Principles for Psychotherapeutic Interventions in Children and Adolescents", "Satire and The Cambridge Introduction to Satire", "The Word-Foot Theory of Old English Meter") → ⚠️ KHÔNG HỢP LỆ: đã xác nhận ở tab OQL, truy vấn không có dấu nháy kép (vd `REST API testing` thay vì `"REST API testing"`). Không dùng |
-| **V3** | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | OpenAlex (tab OQL: `get works where year ≥ (2020) and title-abstract has (…)`) | title-abstract | year ≥ 2020 | 05/10/2026 | **0** | String A nguyên văn, có dấu nháy (OQL báo valid). 0 kết quả → < 20 → theo quy tắc: bỏ khối O (bản V4) |
-| **V4** | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing")` | OpenAlex (tab OQL) | title-abstract | year ≥ 2020 | 05/10/2026 | **0** | Bỏ khối O vẫn 0 kết quả (< 20). Kiểm tra cú pháp cụm từ trong OQL trước khi nới sang String B (review-protocol §3) |
-| **V5** | `("REST API" OR "RESTful API" OR "web API" OR "web service") AND ("boundary value analysis" OR "boundary value" OR "boundary testing" OR "equivalence partitioning") AND ("mutation testing" OR "mutants" OR "mutation score")` | OpenAlex (tab OQL) | title-abstract | year ≥ 2020 | 05/10/2026 | **0** | String B (review-protocol §3, dùng khi cần nới). **0** kết quả (đã kiểm chứng cú pháp, xem mục 2) → < 20 → bỏ khối O (bản V6) |
-| **V6** | `("REST API" OR "RESTful API" OR "web API" OR "web service") AND ("boundary value analysis" OR "boundary value" OR "boundary testing" OR "equivalence partitioning")` | OpenAlex (tab OQL) | title-abstract | year ≥ 2020 | 05/10/2026 | **7** | String B bỏ khối O (quy tắc < 20, review-protocol §3). Vẫn < 20 → dừng nới chuỗi, báo PL. ✅ Bộ record của nguồn OpenAlex = 7 record của V6 (V3–V5 = 0 nên hợp các lần chạy hợp lệ = V6). Phần lớn là bài tiếng Indonesia; xét ở vòng lọc V1 (IC-L, IC-P) |
+| 10.1007/978-3-030-65310-1_33 (K90 — RESTest: Black-Box Constraint-Based Testing of RESTful Web APIs, ICSOC 2020) | 1 | lùi | OpenAlex | 4 | 1 | 0 | OpenAlex ghi nhận 19 reference của seed; bỏ 15 reference trước năm 2020 (IC-Y) |
+| 10.1007/978-3-030-65310-1_33 (K90) | 1 | tiến | OpenAlex | 53 | 34 | 4 | K162 bBOXRT, K167 DeepREST, K168 mass-assignment black-box, K192 RESTing-LLAMA |
 
-## 2. Xử lý đặc biệt trong quá trình tìm
+- Tổng snowballing: 57 bài lướt → 35 bài mới vào 01 (22 bài đã có ở nhánh CSDL hoặc trùng nhau) → V1 loại 21 → V2: 4 INCLUDE, 7 EXCLUDE, 3 chưa quyết.
+- Lý do chọn 1 gốc K90: bài sát RQ nhất trong 42 INCLUDE — so sánh trực tiếp constraint-based (gần phân hoạch) với random testing trên 9 API (100% vs 40,1% test hợp lệ; 4.278 vs 2.920 failure).
+- Snowballing làm 1 vòng, 1 gốc theo quyết định của nhóm cho tuần 6.
 
-1. **Giao diện Advanced của OpenAlex bỏ dấu nháy kép** → V1, V2 tìm theo từ đơn, không đúng String A (bằng chứng: V2 ra 283 bài, trang 1 gần như toàn bài ngoài chủ đề). Từ V3 trở đi nhập truy vấn trực tiếp ở tab **OQL**, kiểm tra từng cụm nằm trong dấu nháy và OQL báo `valid` trước khi Search. Kết quả V1, V2 không đưa vào `01_all_records.csv`.
-2. **Bản ghi trùng trong kết quả OpenAlex** (quan sát ở V1: cùng tiêu đề, tác giả, năm xuất hiện 2 lần) → khi export lần chạy chính, giữ đủ trong `01_all_records.csv` rồi loại trùng (EC-D) theo DOI / tiêu đề chuẩn hoá.
-3. **Kiểm tra cú pháp OQL** (05/10/2026, sau V4 = 0; không tính là một phiên bản search): `get works where year ≥ (2020) and title-abstract has ("RESTestBench")` → **1** kết quả, đúng bài "RESTestBench: A Benchmark for Evaluating the Effectiveness of LLM-Generated REST API Test Cases from NL Requirements" (Kogler và cộng sự, 2026). → Cú pháp dấu nháy trong OQL hoạt động; V3 = 0 và V4 = 0 là số thật.
-   - Sau V5 = 0, kiểm tra thêm cụm nhiều từ (cùng bộ lọc year ≥ 2020): (A) `title-abstract has ("mutation testing")` → **2.404** kết quả (cụm nhiều từ được tìm đúng); (B) `title-abstract has ("REST API" AND "mutation testing")` → **2** kết quả: "RESTestBench: A Benchmark for Evaluating the Effectiveness of LLM-Generated REST API Test Cases from NL Requirements" (2026) và "Method for Prioritizing Auto-Generated Test Cases for REST APIs Based on OpenAPI Specifications" (2026). → Cú pháp OQL đúng; V3–V5 = 0 phản ánh tài liệu thật sự rất hiếm trên OpenAlex với trường title-abstract.
-4. **Tổng hợp số**: V1, V2 không hợp lệ (không tính) · V3 0 + V4 0 + V5 0 + V6 7 = **7 record thô** (chuỗi chạy chính: V6) → sau loại trùng (EC-D): **7 record** (khớp `01_all_records.csv`, mã K01–K07). Không có bản trùng: 6/7 record có DOI riêng; record không có DOI (W3212188834) so theo tiêu đề chuẩn hoá cũng không trùng. File export gốc giữ nguyên: `works-csv-gDrfmiHUYc8TZ5mMKB6FdH.csv` (OpenAlex, CSV, có abstract, 05/10/2026).
-5. Snowballing: không áp dụng cho nguồn này — K.Duy phụ trách (review-protocol §2). Lấy dữ liệu bằng export trên giao diện web, không tự viết tool.
-
-## 3. Thay đổi so với protocol
+## 5. Thay đổi so với protocol
 
 | Ngày | Thay đổi | Lý do |
 |---|---|---|
-| 05/10/2026 | Trường tìm: protocol ghi Title / Abstract / Keywords → OpenAlex dùng `title-abstract` | OpenAlex không có trường Keywords riêng; nội dung chuỗi giữ nguyên |
+| 05/10/2026 | Trường tìm: protocol ghi Title / Abstract / Keywords → OpenAlex dùng `title-abstract` | OpenAlex không có trường Keywords riêng |
+| 13/10/2026 | **Thay String A/B bằng chuỗi mới (V1/V2 mục 1)**, thiết kế theo PICO: P = REST API; khối kỹ thuật = I (EP, BVA, black-box) + C (random testing, fuzzing) + thuật ngữ các bài nền (test generation, amplification, oracle); O = mutation/fault | String A/B cho < 20 kết quả ở mọi biến thể (mục 3); 6 bài nền trên thẻ RQ đều không dùng thuật ngữ EP/BVA trong abstract → String A/B không tìm ra chúng. Đã báo PL |
+| 13/10/2026 | Áp **IC-I** theo nghĩa: bài sinh dữ liệu đầu vào hộp đen cho REST API theo hướng phân hoạch/biên/ràng buộc/combinatorial (khối I) **hoặc** ngẫu nhiên/fuzzing (khối C) | RQ so sánh EP+BVA với random; hiểu IC-I đúng nghĩa đen (chỉ EP/BVA) cho 0 INCLUDE ở mọi chuỗi. Cần PL/nhóm xác nhận để các nguồn lọc thống nhất |
+| 13/10/2026 | Lấy dữ liệu và snowballing bằng tool tự viết (thay mục cũ "export web, không tự viết tool; snowballing không áp dụng") | Gom nhiều lượt chạy, loại trùng, snowballing 2 hướng có lọc năm; đã kiểm chứng (mục 6) |
+| 13/10/2026 | Screening V1 dùng bộ luật tự động của tool + người rà lại; V2 có **AI hỗ trợ (Claude)** | Khối lượng 159 + 35 bài; mọi quyết định tự động/AI được ghi nhãn trong `v1_note` / `v2_reason` (mục 7) |
+
+## 6. Kiểm chứng (tool tự viết lấy metadata)
+
+1. **Số bản ghi khớp số trang web báo?** V1: tool 30, web OQL 19 (cùng chuỗi, 13/10). Chênh do API OpenAlex có stemming; 19 bài web nằm trọn trong 30 bài của tool. Các chuỗi cũ: String A 0 = 0, String B bỏ O tool 12 / web 7 (7 bài web nằm trọn trong 12).
+2. **5 bản ghi đối chiếu tiêu đề/năm/DOI** (chọn ngẫu nhiên, đối chiếu bản ghi OpenAlex `api.openalex.org/works/doi:…`, 13/10/2026):
+
+| Mã | DOI | Tiêu đề | Năm | Khớp |
+|---|---|---|---|---|
+| K14 | 10.1016/j.asoc.2021.107246 | A Discrete Dynamic Artificial Bee Colony with Hyper-Scout for RESTful web service API test suite generation | 2021 | ✓ |
+| K40 | 10.1145/3491038 | On the Faults Found in REST APIs by Automated Test Generation | 2022 | ✓ |
+| K86 | 10.1117/12.3056906 | Response relation model-driven approach for automated fuzz testing of RESTful Web APIs | 2025 | ✓ |
+| K105 | 10.48550/arxiv.2604.08007 | Log-based, Business-aware REST API Testing | 2026 | ✓ |
+| K176 | 10.1145/3468264.3473491 | Automated generation of realistic test inputs for web APIs | 2021 | ✓ |
+
+3. **Chạy lại cùng query ra cùng số?** Cùng cặp chuỗi V1 + V2 chạy 2 lần: 13/10 00:48 và 13/10 01:58–01:59. Cả hai lần V1 = 30 và tập hợp V1 ∪ V2 sau dedup = **159 bài giống hệt nhau** (so theo DOI/tiêu đề: 159/159 trùng khớp).
+
+## 7. Khai báo sử dụng AI
+
+- **V1:** bộ luật sàng tự động của RBL Paper Harvester (IC-Y, IC-L, IC-T theo loại tài liệu/nơi đăng, EC-N, IC-P, IC-I theo từ khoá; không có abstract → Unsure). Mỗi bài ghi `[tự động] <luật đã áp>` trong `v1_note`; người thực hiện rà lại INCLUDE/Unsure.
+- **V2:** **AI hỗ trợ (Claude)** tìm và đọc bản toàn văn mở (arXiv, kho trường), trang nhà xuất bản/metadata OpenAlex, trích bằng chứng (số trang, mục thực nghiệm, số liệu) vào `v2_reason` của `03_final_included.csv`. Mỗi dòng ghi mức bằng chứng: `[AI hỗ trợ · đọc toàn văn bản mở]`, `[AI hỗ trợ · trang nhà xuất bản/metadata OpenAlex: abstract + số trang]`, `[AI hỗ trợ · abstract + metadata, CHƯA đọc toàn văn — cần xác nhận]`.
+- Người thực hiện (Khôi) chịu trách nhiệm kiểm lại; các bài mức "CHƯA đọc toàn văn" và 11 bài chưa quyết ở V2 sẽ được đọc lại và cập nhật.
