@@ -10,17 +10,17 @@ Paper từ nguồn (N = 80)
 → Final phễu chính (N = 1)
 ```
 
-## NHÁNH SNOWBALLING (vòng 1 — 1 seed: #1 · 10.1145/3491038, đủ 1 lượt lùi + 1 lượt tiến; lý do chọn: search-log §4)
+## NHÁNH SNOWBALLING (vòng 1 — 1 seed: R021 · 10.1145/3698062.3698065, đủ 1 lượt lùi + 1 lượt tiến; lý do chọn: search-log §4)
 ```text
-[Snowballing (N = 24)]  ← SS = tổng "Số thêm vào 01" của bảng seed (search-log §4): lùi rà 30 → thêm 3; tiến rà 31 → thêm 21
+[Snowballing (N = 6)]  ← SS = tổng "Số thêm vào 01" của bảng seed (search-log §4): lùi rà 13 → thêm 6; tiến 0 (không có mục nào)
         ↓
-[Loại V1 (N = 9): IC-P = 5, EC-N = 2, EC-O = 1, IC-T = 1]
+[Loại V1 (N = 5): IC-P = 1, IC-Y = 4]
         ↓
-[Full-text đọc (N = 15)]
+[Full-text đọc (N = 1)]
         ↓
-[Loại V2 (N = 0)]
+[Loại V2 (N = 1): EC-A = 1]
         ↓
-[Included từ snowballing (N = 15)]  ← KK = tổng "Số include cuối" của bảng seed (3 lùi + 12 tiến)
+[Included từ snowballing (N = 0)]
 ```
 
-**TỔNG: Final included = 13 (search) + 15 (snowball) = 28** → = số dòng Include trong `03_final_included.csv` đếm theo cột `source`; sau khi nhóm gộp (bỏ trùng theo DOI) sẽ cập nhật lại.
+**TỔNG: Final included = 1 (search) + 0 (snowball) = 1** → = số dòng Include trong `03_final_included.csv` (hiện tại: R021)
