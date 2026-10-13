@@ -68,10 +68,16 @@ Log OpenAlex nguồn từng ghi session bBOXRT mở **03:07:05 ngày 13/10/2026 
 
 **Giới hạn truy vết:** gói chưa có raw provider log đầy đủ cho công cụ snowball thứ hai. Vì vậy chưa xác minh tổng citations/references available, số pages provider, hoàn tất từng hướng hoặc coverage forward 12 tháng. Không diễn giải thiếu log hoặc số 0 của snapshot thành không có citation. Matching records và đồng bộ quyết định không tự hoàn tất coverage snowball.
 
-## Hồ sơ bàn giao hiện hành
+## Hồ sơ bàn giao sau bổ sung toàn văn 13/10/2026
 
-- [01_all_records.csv](01_all_records.csv): **150 paper duy nhất**, trong đó 68 IEEE ban đầu và 82 snowball mới.
-- [02_after_screening_v1.csv](02_after_screening_v1.csv): 150 records cho bàn giao; **68 đã V1** (1 INCLUDE, 49 UNSURE, 18 EXCLUDE), **45 FULL_TEXT_DIRECT** đã lọc từ PDF, **37 NOT_REVIEWED**. Không giả lập quyết định V1 cho đợt lọc trực tiếp toàn văn.
-- [04_fulltext_screening.csv](04_fulltext_screening.csv): **95 records**; **4 INCLUDE + 5 REVIEW + 86 EXCLUDE**. EXCLUDE gồm **46 EC-A import** và **40 full-text EXCLUDE**. Có **49 full-text đã đánh giá = 4 IEEE + 45 snowball**; 46 chưa lấy được toàn văn không tính assessed.
-- [03_final_included.csv](03_final_included.csv) và [03_included_only.csv](extras/03_included_only.csv): đúng **4 INCLUDE**, không chứa EXCLUDE/REVIEW.
-- [evidence-table.md](evidence-table.md) có bốn hàng INCLUDE; [prisma-flow.md](prisma-flow.md) dùng cùng catalog và quyết định. [Archive nguồn](extras/original-export/) giữ log, manifest, quyết định và review trước matching. Tập dữ liệu đã đồng bộ nhưng **chưa finalized**: còn 37 NOT_REVIEWED, 5 REVIEW, coverage/provider logs và kiểm chéo độc lập.
+12 PDF do người thực hiện bổ sung tại `snowballing/paper-bo-sung`; tất cả khớp DOI/title với K09,K18,K23,K30,K35,K38,K51,K52,K53,K55,K56,K64 đã có. Bổ sung file/evidence và re-open V1 exclusions; không tăng unique catalog hoặc snowball discovery counts, không tự tạo seed/direction mới.
+
+- 01/02: 150 records. V1 lịch sử giữ 68 quyết định; 12 exclusions được mở lại bằng full-text. 02 thêm V2/current và IC/EC evidence.
+- 04: 107 outcomes = 97 EXCLUDE + 5 INCLUDE + 5 REVIEW. 46 EC-A import giữ riêng; 61 full-text thực đọc = 49 cũ + 12 mới.
+- Lô bổ sung: 1 INCLUDE K52/P53 (operational EP có suy luận, đối chứng random cùng số request, failure results); 11 EXCLUDE. Final 03 và included copy có 5 bài.
+- Screening results: 57 = 45 snowball cũ + 12 recovered IEEE; evidence 537 = 405 cũ + 132 mới. screening_batch phân biệt hai nguồn.
+- V1 historical counts không đổi; luồng hiện hành disjoint: 150 = 6 V1-only exclusions + 107 outcomes + 37 NOT_REVIEWED.
+
+Thay đổi ngày 13/10/2026: sửa nhận định IC-P của K52 từ abstract bằng toàn văn Sections5–6, nhưng không sửa event V1 cũ. IC-I quyết định bằng phân lớp request thực dùng, không bằng câu EP/BVA của JUnit tests. Không đổi tiêu chí Git, không khẳng định K52 BVA, uniform distribution hoặc unique mutants. K52 HIGH_PARTIAL là nhận định độ gần tương đối, không đặt ngưỡng numeric mới.
+
+[Review bổ sung](snowballing/supplemental-review-2026-10-13.md) và [bảng lô bổ sung](snowballing/supplemental-screening-2026-10-13.csv) ghi lý do từng bài. Vẫn 37 NOT_REVIEWED, 5 REVIEW và thiếu coverage/provider logs; dossier chưa finalized.

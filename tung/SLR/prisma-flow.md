@@ -21,15 +21,21 @@ Nhóm SaoCungDuoc · RQ FA26-EXT-12 · ngày dừng **13/10/2026 (UTC+7)** · **
 
 Số **99** đếm paper snowball duy nhất trong ledger, không phải raw retrieval hits. Không cộng 99 với 72 rồi gọi kết quả là raw identified. Các record không có DOI được đối chiếu bằng metadata/crosswalk; DOI trống không tạo thành một nhóm duplicate.
 
+12 PDF bổ sung đều khớp DOI/title với records IEEE đã có; chỉ bổ sung toàn văn và mở lại screening của 12 V1 exclusions. Tổng catalog và số nhận diện không đổi.
+
 ## Luồng screening hiện hành
 
 ```text
 Catalog hợp nhất (150 papers)
 ├─ Tập từ tool chính: V1 screened (68)
 │  ├─ EXCLUDE ở V1 (18)
+│  │  ├─ Chỉ V1, chưa mở lại (6)
+│  │  └─ Bổ sung PDF, mở lại full-text (12)
+│  │     ├─ EXCLUDE sau full-text (11)
+│  │     └─ INCLUDE (1: K52 / P53)
 │  └─ INCLUDE V1 (1) + UNSURE V1 (49) → 50 reports cần full-text
 │     ├─ Chưa lấy được full-text: nhãn EC-A import (46)
-│     └─ Đã đánh giá full-text (4)
+│     └─ Đã đánh giá full-text từ đợt trước (4)
 │        ├─ EXCLUDE sau full-text (3)
 │        └─ INCLUDE (1: bBOXRT)
 └─ Snowball mới (82)
@@ -39,23 +45,24 @@ Catalog hợp nhất (150 papers)
    │  └─ REVIEW chưa chốt (5)
    └─ Chưa screening / chưa có quyết định full-text (37)
 
-Ledger outcomes sau V1 hoặc full-text trực tiếp (95)
+Ledger outcomes sau V1 hoặc full-text trực tiếp (107)
 ├─ Chưa lấy được full-text (46)
-└─ Thực sự đã đánh giá full-text (49 = 4 + 45)
-   ├─ EXCLUDE sau full-text (40 = 3 + 37)
-   ├─ INCLUDE hiện hành (4 = 1 + 3)
+└─ Thực sự đã đánh giá full-text (61 = 4 + 12 + 45)
+   ├─ EXCLUDE sau full-text (51 = 3 + 11 + 37)
+   ├─ INCLUDE hiện hành (5 = 1 + 1 + 3)
    └─ REVIEW cần chốt (5)
 ```
 
-Kiểm số học: **150 = 18 + 95 + 37**; **68 = 18 + 1 + 49**; **95 = 46 + 49**; **49 = 40 + 4 + 5**; **95 = 86 EXCLUDE + 4 INCLUDE + 5 REVIEW**. Trong 86 EXCLUDE, chỉ 40 là quyết định loại sau khi đã đọc toàn văn; 46 còn lại là nhãn chưa lấy được full-text.
+Kiểm số học: **150 = 6 + 107 + 37**; **68 = 18 + 1 + 49** (V1 lịch sử); **18 = 6 + 12**; **107 = 46 + 61**; **61 = 51 + 5 + 5**; **107 = 97 EXCLUDE + 5 INCLUDE + 5 REVIEW**. Trong 97 EXCLUDE, chỉ 51 là quyết định loại sau khi đã đọc toàn văn; 46 còn lại là nhãn chưa lấy được full-text.
 
-45 bài snowball có quyết định ở mức full-text trực tiếp. Không tính 45 bài này là đã qua một vòng title/abstract V1 độc lập. 37 bài snowball mới còn lại được giữ là chưa review, không tự chuyển sang EXCLUDE hoặc EC-A.
+45 bài snowball có quyết định ở mức full-text trực tiếp. Không tính 45 bài này là đã qua một vòng title/abstract V1 độc lập. 37 bài snowball mới còn lại được giữ là chưa review, không tự chuyển sang EXCLUDE hoặc EC-A. 12 records V1 EXCLUDE được mở lại bằng PDF bổ sung, giữ V1 lịch sử và ghi quyết định V2; không tính là 12 paper snowball mới hoặc một vòng V1 mới.
 
 ## Tập giữ lại và REVIEW
 
 | DOI / bài | Quyết định hiện hành | Ghi chú |
 |---|---|---|
-| `10.1109/access.2021.3056505` — bBOXRT | INCLUDE | BVA thực tế; 1 bài INCLUDE từ tool chính. |
+| `10.1109/access.2021.3056505` — bBOXRT | INCLUDE | BVA thực tế; INCLUDE từ tool chính. |
+| `10.1109/tsc.2021.3050610` — K52 / P53 | INCLUDE | Bổ sung toàn văn; operational EP có suy luận từ lớp request hợp lệ/không hợp lệ và CSP chọn đại diện. Gần RQ HIGH_PARTIAL; chưa chứng minh BVA hoặc unique mutants. |
 | `10.1145/3533767.3534401` — K81 / P12 | INCLUDE | Operational EP; quyết định từ full-text snowball. |
 | `10.1145/3597926.3598131` — K84 / P17 | INCLUDE | EP qua công cụ và evidence đối chiếu; không khẳng định có BVA riêng. |
 | `10.1145/3696630.3728545` — K108 / P38 | INCLUDE | EP được suy luận từ lớp đầu vào thực dùng; không khẳng định BVA hoặc kết quả riêng cho REST. |
@@ -65,19 +72,19 @@ Kiểm số học: **150 = 18 + 95 + 37**; **68 = 18 + 1 + 49**; **95 = 46 + 49*
 | `10.1007/978-3-030-65310-1_33` — K77 / P33 | REVIEW | Cần xác nhận EP/BVA thực dùng. |
 | `10.1145/3611643.3613888` — K95 / P39 | REVIEW | Cần xác nhận IC-I; EPs trong Table 1 là endpoints. |
 
-Hai seed `10.1109/ms.2025.3559664` và `10.1109/access.2025.3554960` hiện **EXCLUDE**, theo quyết định trong CSV nguồn hiện hành. Nhãn UNSURE ở các events lịch sử cũ được giữ để truy vết, không dùng thay quyết định mới. Một bài root khác `10.1145/3644032.3644449` EXCLUDE vì EC-S; tổng root full-text là 3 EXCLUDE + 1 INCLUDE.
+Hai seed `10.1109/ms.2025.3559664` và `10.1109/access.2025.3554960` hiện **EXCLUDE**, theo quyết định trong CSV nguồn hiện hành. Nhãn UNSURE ở các events lịch sử cũ được giữ để truy vết, không dùng thay quyết định mới. Một bài root khác `10.1145/3644032.3644449` EXCLUDE vì EC-S; tổng root full-text thực đọc hiện là 16 = 14 EXCLUDE + 2 INCLUDE (bBOXRT và K52), gồm 4 bài cũ và 12 bài được mở lại.
 
 ## File đối chiếu
 
 | File | Dòng dữ liệu | Vai trò |
 |---|---:|---|
 | [01_all_records.csv](01_all_records.csv) | 150 | Catalog sau matching. |
-| [02_after_screening_v1.csv](02_after_screening_v1.csv) | 150 | Quyết định V1, route full-text trực tiếp và các record chưa review. |
-| [04_fulltext_screening.csv](04_fulltext_screening.csv) | 95 | Outcomes: EXCLUDE 86, INCLUDE 4, REVIEW 5. |
-| [03_final_included.csv](03_final_included.csv) | 4 | Chỉ INCLUDE. |
-| [03_included_only.csv](extras/03_included_only.csv) | 4 | Tập INCLUDE đồng nhất với CSV 03. |
+| [02_after_screening_v1.csv](02_after_screening_v1.csv) | 150 | Giữ V1 lịch sử, thêm V2/current, route mở lại full-text và các record chưa review. |
+| [04_fulltext_screening.csv](04_fulltext_screening.csv) | 107 | Outcomes: EXCLUDE 97, INCLUDE 5, REVIEW 5. |
+| [03_final_included.csv](03_final_included.csv) | 5 | Chỉ INCLUDE; thêm K52 / P53. |
+| [03_included_only.csv](extras/03_included_only.csv) | 5 | Tập INCLUDE đồng nhất với CSV 03. |
 | [matching-crosswalk.csv](extras/matching-crosswalk.csv) | 150 | Nối canonical ID, K và P. |
-| [evidence-table.md](evidence-table.md) | 4 bài INCLUDE | Evidence và độ gần PICO. |
+| [evidence-table.md](evidence-table.md) | 5 bài INCLUDE | Evidence và độ gần PICO. |
 
 ## Những phần chưa chốt
 
