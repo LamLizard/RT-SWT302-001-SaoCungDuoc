@@ -33,10 +33,10 @@
 | Seed (DOI) | Vòng | Hướng (lùi/tiến) | Qua API | Số đã lướt | Số thêm vào 01 | Số include cuối | Ghi chú |
 |---|---|---|---|---|---|---|---|
 | 10.1007/978-3-030-65310-1_33 (K90 — RESTest: Black-Box Constraint-Based Testing of RESTful Web APIs, ICSOC 2020) | 1 | lùi | OpenAlex | 4 | 1 | 0 | OpenAlex ghi nhận 19 reference của seed; bỏ 15 reference trước năm 2020 (IC-Y) |
-| 10.1007/978-3-030-65310-1_33 (K90) | 1 | tiến | OpenAlex | 53 | 34 | 4 | K162 bBOXRT, K167 DeepREST, K168 mass-assignment black-box, K192 RESTing-LLAMA |
+| 10.1007/978-3-030-65310-1_33 (K90) | 1 | tiến | OpenAlex | 53 | 34 | 6 | K162 bBOXRT, K166 dự đoán tính hợp lệ input, K167 DeepREST, K168 mass-assignment black-box, K191 RestTestGen/DeepREST trong công nghiệp, K192 RESTing-LLAMA |
 
-- Tổng snowballing: 57 bài lướt → 35 bài mới vào 01 (22 bài đã có ở nhánh CSDL hoặc trùng nhau) → V1 loại 21 → V2: 4 INCLUDE, 7 EXCLUDE, 3 chưa quyết.
-- Lý do chọn 1 gốc K90: bài sát RQ nhất trong 42 INCLUDE — so sánh trực tiếp constraint-based (gần phân hoạch) với random testing trên 9 API (100% vs 40,1% test hợp lệ; 4.278 vs 2.920 failure).
+- Tổng snowballing: 57 bài lướt → 35 bài mới vào 01 (22 bài đã có ở nhánh CSDL hoặc trùng nhau) → V1 loại 21 → V2 (14 bài): **6 INCLUDE**, 8 EXCLUDE (IC-I 3, EC-S 2, EC-N 2, EC-A 1).
+- Lý do chọn 1 gốc K90: bài sát RQ nhất trong các bài INCLUDE của nhánh CSDL — so sánh trực tiếp constraint-based (gần phân hoạch) với random testing trên 9 API (100% vs 40,1% test hợp lệ; 4.278 vs 2.920 failure).
 - Snowballing làm 1 vòng, 1 gốc theo quyết định của nhóm cho tuần 6.
 
 ## 5. Thay đổi so với protocol
@@ -48,6 +48,7 @@
 | 13/10/2026 | Áp **IC-I** theo nghĩa: bài sinh dữ liệu đầu vào hộp đen cho REST API theo hướng phân hoạch/biên/ràng buộc/combinatorial (khối I) **hoặc** ngẫu nhiên/fuzzing (khối C) | RQ so sánh EP+BVA với random; hiểu IC-I đúng nghĩa đen (chỉ EP/BVA) cho 0 INCLUDE ở mọi chuỗi. Cần PL/nhóm xác nhận để các nguồn lọc thống nhất |
 | 13/10/2026 | Lấy dữ liệu và snowballing bằng tool tự viết (thay mục cũ "export web, không tự viết tool; snowballing không áp dụng") | Gom nhiều lượt chạy, loại trùng, snowballing 2 hướng có lọc năm; đã kiểm chứng (mục 6) |
 | 13/10/2026 | Screening V1 dùng bộ luật tự động của tool + người rà lại; V2 có **AI hỗ trợ (Claude)** | Khối lượng 159 + 35 bài; mọi quyết định tự động/AI được ghi nhãn trong `v1_note` / `v2_reason` (mục 7) |
+| 13/10/2026 | V2: bài **không tải được toàn văn → EXCLUDE · EC-A** (áp thống nhất cho mọi bài) | Đúng định nghĩa EC-A; tránh INCLUDE bài chỉ dựa trên abstract. 27/73 bài không tải được (24 EC-A + 3 giữ mã IC-L/EC-S đã xác định từ metadata) |
 
 ## 6. Kiểm chứng (tool tự viết lấy metadata)
 
@@ -67,5 +68,6 @@
 ## 7. Khai báo sử dụng AI
 
 - **V1:** bộ luật sàng tự động của RBL Paper Harvester (IC-Y, IC-L, IC-T theo loại tài liệu/nơi đăng, EC-N, IC-P, IC-I theo từ khoá; không có abstract → Unsure). Mỗi bài ghi `[tự động] <luật đã áp>` trong `v1_note`; người thực hiện rà lại INCLUDE/Unsure.
-- **V2:** **AI hỗ trợ (Claude)** tìm và đọc bản toàn văn mở (arXiv, kho trường), trang nhà xuất bản/metadata OpenAlex, trích bằng chứng (số trang, mục thực nghiệm, số liệu) vào `v2_reason` của `03_final_included.csv`. Mỗi dòng ghi mức bằng chứng: `[AI hỗ trợ · đọc toàn văn bản mở]`, `[AI hỗ trợ · trang nhà xuất bản/metadata OpenAlex: abstract + số trang]`, `[AI hỗ trợ · abstract + metadata, CHƯA đọc toàn văn — cần xác nhận]`.
-- Người thực hiện (Khôi) chịu trách nhiệm kiểm lại; các bài mức "CHƯA đọc toàn văn" và 11 bài chưa quyết ở V2 sẽ được đọc lại và cập nhật.
+- **V2:** Khôi tự tải toàn văn: lấy được **46/73** PDF (bản nhà xuất bản hoặc bản arXiv/tác giả của bài đã đăng); 27 bài không tải được → EXCLUDE (24 EC-A, K08 IC-L, K99/K180 EC-S). **AI (Claude) hỗ trợ đọc 46 PDF** theo IC/EC (số trang, Table/Figure có số, kỹ thuật sinh input, có thực nghiệm) và đề xuất quyết định kèm bằng chứng; Khôi rà và nhập quyết định cuối vào tool.
+- **Kết quả V2:** 34 INCLUDE (nhánh CSDL 28 + snowballing 6), 39 EXCLUDE — khớp `03_final_included.csv` và `prisma-flow.md`. Các ca ranh giới cần PL xác nhận ghi ở cuối `prisma-flow.md`.
+- Người thực hiện (Khôi) chịu trách nhiệm quyết định cuối; evidence table lập từ chính các PDF đã tải, có AI hỗ trợ trích số.
