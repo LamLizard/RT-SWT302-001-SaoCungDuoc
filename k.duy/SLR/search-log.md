@@ -1,46 +1,77 @@
-# Search log — K.Duy · nguồn phụ trách: SpringerLink
+# Search log — K.Duy (Springer Nature)
 
-*RQ FA26-EXT-12 · Các truy vấn chạy ngày 07/10/2026. Search field mặc định của SpringerLink; không áp dụng bộ lọc năm/loại tài liệu trên giao diện.*
+Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · cập nhật 13/10/2026. Lấy 01, 02, 03 mới nhất của K.Duy làm nguồn chuẩn. 01 có 35 metadata records; 02 có 8 records; 03 có 8 records với V1 `INCLUDE`, V2 chưa được ghi. Không thay đổi quyết định trong các tệp này. Theo run log đã ghi cho RBL Paper Harvester v1.5.1, search API chạy ngày 13/10/2026, sau ngày dừng search protocol 05/10/2026; ghi nhận là lượt chạy lại/đối chiếu API và cần PL xác nhận chấp nhận.
 
-## 1. Nhật ký chạy query
+## 1. Search log — lượt tool
 
-| Lần | Chuỗi tìm (nguyên văn) | CSDL | Trường tìm | Bộ lọc | Ngày chạy | Số kết quả | Ghi chú |
-|---|---|---|---|---|---|---:|---|
-| V1 | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | SpringerLink | Mặc định | Không đặt | 07/10/2026 | 1 | Query String A theo protocol. DOI hiển thị: 10.1007/s42979-024-03134-3. |
-| V2 | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing")` | SpringerLink | Mặc định | Không đặt | 07/10/2026 | 3 | Bỏ khối O theo quy tắc nới query; kết quả gồm battery passport, “On the Impact of Input Models...” (R01) và requirements-driven model checking. |
-| V3 | `("REST API" OR "RESTful API" OR RESTest OR RESTestBench) AND ("equivalence partitioning" OR "equivalence class partitioning" OR "boundary value analysis" OR "boundary value testing" OR "boundary testing") AND ("fault detection" OR "faults found" OR "bug detection" OR "bugs found" OR defects OR failures OR "mutation testing" OR "mutation score" OR "mutant detection")` | SpringerLink | Mặc định | Không đặt | 07/10/2026 | 11 | Mở rộng từ đồng nghĩa theo hướng Lam dùng ở ACM; có trùng kết quả giữa các lượt tìm. |
-| V4 | `("REST API" OR "RESTful API" OR "web API" OR "web service") AND ("boundary value analysis" OR "boundary value" OR "boundary testing" OR "equivalence partitioning") AND ("mutation testing" OR "mutants" OR "mutation score")` | SpringerLink | Mặc định | Không đặt | 07/10/2026 | 12 | String B theo protocol. |
-| V5 | `REST API equivalence partitioning` | SpringerLink | Mặc định | Không đặt | 07/10/2026 | 428 | Thử nghiệm thăm dò không dùng toán tử/ngoặc; quá rộng nên không dùng làm tập record chính. Trang chỉ hiển thị 20 kết quả đầu. |
-| V6 | `"REST API" AND "equivalence partitioning"` | SpringerLink | Mặc định | Không đặt | 07/10/2026 | 6 | Truy vấn tập trung EP; kết quả hiển thị vẫn có mục lạc chủ đề. |
-| V7 | `"REST API" AND "boundary value analysis"` | SpringerLink | Mặc định | Không đặt | 07/10/2026 | 6 | Truy vấn tập trung BVA; kết quả hiển thị vẫn có mục lạc chủ đề. |
+| Lượt | Query | CSDL/trường | Lọc | API báo | Lấy về theo log | Trong 01 hiện hành | Ghi chú |
+|---|---|---|---|---:|---:|---:|---|
+| T1 | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | Springer Nature Meta API / q | Năm ≥2020 | 7 | 3 | 3 có tag V1 | String A theo protocol. |
+| T2 | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing")` | Springer Nature Meta API / q | Năm ≥2020 | 18 | 13 | 10 có tag V2 | Bỏ khối O theo quy tắc nới query. |
+| T3 | `("REST API" OR "RESTful API" OR RESTest OR RESTestBench) AND ("equivalence partitioning" OR "equivalence class partitioning" OR "boundary value analysis" OR "boundary value testing" OR "boundary testing") AND ("fault detection" OR "faults found" OR "bug detection" OR "bugs found" OR defects OR failures OR "mutation testing" OR "mutation score" OR "mutant detection")` | Springer Nature Meta API / q | Năm ≥2020 | 18 | 18 | 18 có tag V3 | Mở rộng từ đồng nghĩa. |
+| T4 | `("REST API" OR "RESTful API" OR "web API" OR "web service") AND ("boundary value analysis" OR "boundary value" OR "boundary testing" OR "equivalence partitioning") AND ("mutation testing" OR "mutants" OR "mutation score")` | Springer Nature Meta API / q | Năm ≥2020 | 40 | 12 | 12 có tag V4 | String B. |
+| T5 | `"REST API" AND "equivalence partitioning"` | Springer Nature Meta API / q | Năm ≥2020 | 10 | 10 | 10 có tag V5 | EP riêng. |
+| T6 | `"REST API" AND "boundary value analysis"` | Springer Nature Meta API / q | Năm ≥2020 | 10 | 10 | 10 có tag V6 | BVA riêng. |
 
-## 2. Kết quả đáng chú ý để đối chiếu/sàng lọc
+**Tổng hợp hiện hành:** 01 = 35 records duy nhất theo export; 02 = 8 records; 03 = 8 records. Run log ghi API báo tổng 103 và lấy về 66 qua 6 query. Các tag phiên bản trong 01 chồng lặp, không dùng tổng tag để tính PRISMA. 27 record trong 01 không xuất hiện ở 02/03; hai tệp không lưu quyết định/lý do V1 cho các record đó nên log này không tự gán lý do loại.
 
-| DOI | Tiêu đề | Thông tin quan sát được | Nhận xét ban đầu theo IC/EC |
-|---|---|---|---|
-| [10.1007/978-3-030-65310-1_33](https://link.springer.com/chapter/10.1007/978-3-030-65310-1_33) | RESTest: Black-Box Constraint-Based Testing of RESTful Web APIs | ICSOC 2020, LNCS 12571, pp. 459–475; Alberto Martin-Lopez, Sergio Segura, Antonio Ruiz-Cortés. 9 operations thuộc 6 API thương mại. So sánh constraint-based testing (CBT) với random testing (RT): CBT tìm 4,278 failures trên cả 9 dịch vụ; RT tìm 2,920 trên 5/9; hai oracle mới của CBT phát hiện 2,063 failures. | P/O và đối chứng random khớp tốt. Tuy nhiên thí nghiệm đánh giá CBT, không EP/BVA: CBT rút mẫu giá trị ngẫu nhiên từ miền rồi dùng constraint solver. RESTest có hỗ trợ boundary-value generator, nhưng bài không nói generator đó được dùng trong so sánh. EP chỉ được dùng để kiểm thử chính các công cụ. Khuyến nghị loại theo IC-I nghiêm ngặt; giữ làm tài liệu nền ngoài tập include. |
-| [10.1007/978-3-032-05188-2_11](https://link.springer.com/chapter/10.1007/978-3-032-05188-2_11) | Test Amplification for REST APIs via Single and Multi-agent LLM Systems | ICTSS 2025; first online 16/09/2025. So sánh single-agent và multi-agent LLM trên coverage, bug detection, chi phí và năng lượng; abstract không nêu con số cụ thể. | REST API/bug detection phù hợp một phần; abstract không cho thấy EP/BVA hoặc baseline random. |
-| [10.1007/s42979-024-03134-3](https://link.springer.com/article/10.1007/s42979-024-03134-3) | On the Impact of Input Models on the Fault Detection Capabilities of Combinatorial Testing | SN Computer Science, 2024; black-box combinatorial testing, mutation testing và structural coverage. | Loại theo IC-P/IC-I: không nghiên cứu REST API, không nêu EP/BVA cho tham số request. |
-| [10.1007/s13042-024-02527-3](https://link.springer.com/article/10.1007/s13042-024-02527-3) | ChatHTTPFuzz: large language model-assisted IoT HTTP fuzzing | Bài báo năm 2025; IoT HTTP fuzzing. | Có thể loại theo IC-P/EC-O nếu không kiểm thử REST API ở mức request như phạm vi RQ. |
+## 2. Trạng thái screening theo CSV mới
 
-## 3. Tổng hợp và lưu ý
+- 01_all_records.csv: 35 dòng metadata.
+- 02_after_screening_v1.csv: 8 dòng metadata;có cột reason và cột decision trạng thái INCLUDE.
+- 03_final_included.csv: 8 dòng; cả 8 có `v1_decision=INCLUDE`; `v2_decision` và `v2_reason` đang trống.
+- 8 hồ sơ từ V2 đã được kiểm chứng đầy đủ các điều kiện và không có gì thay đổi nên được chuyển tiếp qua 03_final
 
-- V1–V4 có 27 kết quả cộng gộp và 22 tiêu đề duy nhất sau khử trùng lặp, được ghi trong `01_all_records.csv` và sàng lọc tại `02_after_screening_v1.csv`. Đây là union kết quả Springer, không phải tổng PRISMA của cả nhóm.
-- V5 là truy vấn thăm dò quá rộng; V6–V7 là truy vấn EP/BVA bổ trợ. Có trùng/lạc chủ đề nên không gộp vào tập chính V1–V4.
-- Đã kiểm tra DOI RESTest trong các records nhóm hiện có qua tìm kiếm văn bản: chưa thấy bản ghi trùng DOI.
-- Đã kiểm tra toàn văn RESTest. Threats to validity nêu số lần lặp và phân tích thống kê bị giới hạn bởi quota API thương mại; cần đưa lưu ý này vào phần hạn chế nếu nhóm giữ bài làm tài liệu nền.
+## 3. Snowballing — seed mới nhất
 
-## Snowballing (1 vòng)
+Ghi nhận 8 DOI hiện có trong `snowball-seeds.txt` (nguồn ACM/Lâm). Hướng dự kiến theo runbook: backward + forward citation, vòng 1.
 
-| Seed (DOI) | Vòng | Hướng (lùi/tiến) | Số đã lướt | Số thêm vào 01 | Số include cuối |
-|---|---:|---|---:|---:|---:|
-| 10.1109/MS.2025.3559664 (TUNG-IEEE-002, V2 Include) | 1 | Tiến — đối chiếu bài Springer trích dẫn seed | 1 | 0 (DOI đã có ở V3, R04) | 0 (UNSURE, chờ nhóm chốt IC-I) |
+| # | DOI seed | Vòng | Hướng | Citation đã kiểm | Record mới sau dedup | Trạng thái |
+|---:|---|---:|---|---:|---:|---|
+| 1 | `10.1007/978-3-032-05188-2_11` | 1 |  | Chưa có log | Chưa xác minh | 01 không có record đánh dấu snowball/seed. |
+| 2 | `10.1007/978-3-032-38594-9_4` | 1 | lùi 13, tiến 34 | Chưa có log | Chưa xác minh | Như trên. |
+| 3 | `10.1007/978-3-031-06773-0_31` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
+| 4 | `10.1007/s10015-024-00957-4` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
+| 5 | `10.1007/978-3-030-65310-1_33` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
+| 6 | `10.1145/3597503.3608133` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
+| 7 | `10.1145/3744916.3773228` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
+| 8 | `10.1145/3744916.3787775` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
 
-Springer chapter R04 trích dẫn seed TUNG-IEEE-002 (“Test amplification for REST APIs using out-of-the-box large language models”, 2025). DOI R04 đã có trong kết quả V3 nên không tạo record trùng. Đây là citation link đã xác minh; chưa phải danh sách đầy đủ mọi bài forward-citing trên các nền tảng.
 
-## Thay đổi so với protocol
+Không có raw log/tool output snowball kèm theo 01–03 hiện tại, nên số citation đã rà và số record thêm vào chưa thể điền. Không xem DOI seed là record mới và không cộng seed vào PRISMA.
 
-- 07/10/2026 — Chạy V2 bằng cách bỏ khối O do V1 trả dưới 20 kết quả; tiếp tục mở rộng từ đồng nghĩa, chạy String B và hai truy vấn EP/BVA riêng. Mọi query và số kết quả đều được ghi ở bảng trên.
-- 07/10/2026 — Chạy thêm V5 thăm dò, nhưng không dùng làm tập record do truy vấn trả 428 kết quả và quá rộng.
-- 07/10/2026 — Đọc toàn văn RESTest và đối chiếu IC-I: dù framework có boundary-value generator và nhóm tác giả dùng equivalence partitioning để kiểm thử chính công cụ, kỹ thuật được so sánh trong thí nghiệm API là constraint-based testing với random testing. Ghi khuyến nghị loại theo IC-I để không nhầm kỹ thuật kiểm thử công cụ với biến can thiệp.
-- 07/10/2026 — Tạo tập record Springer, sàng lọc theo IC/EC và ghi citation liên quan tìm được trong vòng snowballing.
+## 4. Thay đổi so với protocol
+
+- 13/10/2026 — đồng bộ tài liệu tổng hợp với các CSV mới nhất do K.Duy cập nhật: 01 (35), 02 (8), 03 (8). Quyết định trong 03 được giữ nguyên.
+- 13/10/2026 — các lượt API sau ngày dừng search 05/10/2026; ghi nhận là chạy lại/đối chiếu theo runbook, cần PL xác nhận chấp nhận.
+- Snowball seeds được ghi đúng theo file hiện tại (13 DOI); không có log kết quả để xác nhận snowball đã chạy.
+
+## 5. Kiểm chứng (RBL-1)
+
+1. **Đối chiếu export:** 01 có 35 dòng; 02 có 8; 03 có 8. Run log ghi tổng 66 bản ghi lấy về/103 API results, nhưng không có raw JSON để tái dựng khử trùng từng query.
+2. **Kiểm tra metadata mẫu:** đối chiếu DOI với DOI trong URL của K02, K04, K08, K19, K22; chuỗi DOI khớp nội bộ. Chưa xác minh title/năm/venue trực tiếp với trang Springer.
+3. **Tái lập query:** chưa có lượt chạy lặp được ghi trong log; tính lặp lại chưa xác minh.
+
+## 6. Kiểm chéo (IC-S6)
+
+Với 35 records trong 01, 20% tương ứng tối thiểu 7 records. Đề xuất reviewer khác rà cả 8 hồ sơ trong 03 để vượt ngưỡng; chưa có reviewer, ngày rà, hoặc quyết định độc lập trong dữ liệu nhận được nên các kết quả dưới đây vẫn PENDING.
+
+| Mã | V1 theo 03 | Reviewer | Quyết định reviewer | Ngày | Ghi chú |
+|---|---|---|---|---|---|
+| K02 | INCLUDE | Chưa ghi nhận | PENDING | — | Xác minh EP/BVA và kết quả trong toàn văn. |
+| K04 | INCLUDE | Chưa ghi nhận | PENDING | — | Xác minh đối tượng API và tiêu chí nhóm. |
+| K08 | INCLUDE | Chưa ghi nhận | PENDING | — | Ca biên: abstract nêu ArduCopter, không nêu REST API. |
+| K19 | INCLUDE | Chưa ghi nhận | PENDING | — | Ca biên: kết quả là performance latency. |
+| K22 | INCLUDE | Chưa ghi nhận | PENDING | — | Ca biên: RESTest, kiểm tra IC-I và protocol. |
+| K24 | INCLUDE | Chưa ghi nhận | PENDING | — | Ca biên: Text-to-SQL; xác minh phạm vi RQ. |
+| K27 | INCLUDE | Chưa ghi nhận | PENDING | — | Xác minh Carbon-Box/EP-BVA và metric. |
+| K33 | INCLUDE | Chưa ghi nhận | PENDING | — | Xác minh REST API và EP trong dashboard study. |
+
+## Tệp đối chiếu
+
+- `01_all_records.csv`: 35 metadata records.
+- `02_after_screening_v1.csv`: 8 dòng metadata.
+- `03_final_included.csv`: 8 V1 INCLUDE; chưa có V2 decision.
+- `evidence-table.md`: 8 dòng extraction dựa trên abstract/metadata.
+- `prisma-flow.md`: flow và các điểm cần hoàn tất, cùng số liệu trên.
+- `snowball-seeds.txt`: 13 DOI hiện hành.

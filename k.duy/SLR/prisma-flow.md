@@ -1,45 +1,47 @@
-# PRISMA flow — K.Duy · SpringerLink
+# PRISMA flow — K.Duy · Springer Nature
 
-*Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · Bản tạm ngày 07/10/2026. Số liệu tính từ các lượt tìm V1–V4 trong `search-log.md`; R04 còn UNSURE nên chưa chốt final inclusion.*
+Cập nhật 13/10/2026 theo các CSV hiện hành do K.Duy cập nhật: 01 có 35 records, 02 có 8, 03 có 8. Giữ nguyên các quyết định ở 03. Springer là nguồn phụ của K.Duy, không tự cộng vào PRISMA tổng IEEE/ACM/OpenAlex của nhóm.
 
-## Nhận diện (Identification)
+## Identification và screening
 
-| Nguồn/lượt tìm | Records tìm được |
-|---|---:|
-| V1 — String A | 1 |
-| V2 — String A bỏ khối O | 3 |
-| V3 — synonyms mở rộng | 11 |
-| V4 — String B | 12 |
-| **Tổng lượt tìm trước dedup** | **27** |
-| Bản ghi trùng giữa các lượt | **5** |
-| **Records duy nhất sau dedup** | **22** |
+| Giai đoạn | Số | Căn cứ / trạng thái |
+|---|---:|---|
+| Records trong 01_all_records.csv | 35 | Export Springer Nature sau gộp. |
+| Records có trong 02_after_screening_v1.csv | 8 | Tệp hiện tại chỉ có 8 dòng metadata. |
+| Records có trong 03_final_included.csv | 8 | Cả 8 mang `v1_decision=INCLUDE`. |
+| Records trong 01 nhưng không có trong 02/03 | 27 | Không có quyết định/lý do V1 trong hai tệp hiện tại; giữ là disposition chưa ghi nhận, không tự gán lý do loại. |
+| V2 decision đã ghi | 0 | Cột `v2_decision` đang trống cho cả 8. |
+| V2 đang chờ | 8 | Chưa có quyết định full-text được ghi nhận. |
+| Included cuối cùng xác nhận | 0 | Chưa hoàn tất V2; không tính V1 INCLUDE thành final included. |
 
-## Sàng lọc (Screening)
+```text
+Records identified in 01 (n = 35)
+  ├─ Records present in 02/03 with V1 INCLUDE (n = 8)
+  │    └─ V2 decision recorded (n = 0)
+  │         └─ V2 pending (n = 8)
+  └─ Not present in 02/03; V1 disposition not recorded (n = 27)
 
-| Giai đoạn | Số lượng |
-|---|---:|
-| Records được sàng lọc tiêu đề/tóm tắt | 22 |
-| Loại tại V1 | 21 |
-| Qua V1 / cần xác minh thêm | 1 (R04 — UNSURE) |
-| Toàn văn truy xuất/đọc được trong phiên này | 0 |
-| R04 chờ kiểm tra toàn văn và quyết định IC-I | 1 |
-| **Final included đã xác nhận** | **0** |
+Studies included after full-text/V2 (n = 0 confirmed)
+```
+
+### V1 fields recorded in 03
+
+| V1 label | Count | Note |
+|---|---:|---|
+| INCLUDE | 8 | K02, K04, K08, K19, K22, K24, K27, K33. |
+| EXCLUDE / Unsure | 0 in 03 | No such labels appear in the current 03 file. This does not establish the status of the other 27 records. |
+| V2 pending | 8 | `v2_decision` and `v2_reason` blank. |
 
 ## Snowballing
 
-| Vòng | Seed | Số quan hệ citation đã kiểm tra | Record mới sau dedup | Ghi chú |
-|---|---|---:|---:|---|
-| 1 | TUNG-IEEE-002 (10.1109/MS.2025.3559664; trạng thái V2 Include trong danh sách Tung) | 1 | 0 | R04 có trích dẫn seed và đã xuất hiện trong kết quả V3; không thêm record trùng. Đây là kiểm tra citation link đã xác minh, chưa phải quét đầy đủ forward citations trên mọi nền tảng. |
+`snowball-seeds.txt` currently contains 13 DOI seeds. No retrieved snowball records, citation counts, or seed/result links are recorded in 01–03 or the available run log. Snowballing totals remain unverified and are not added to the 35 Springer records.
 
-## Đối chiếu số
+## File consistency
 
-- `01_all_records.csv`: 22 record Springer đã dedup.
-- `02_after_screening_v1.csv`: 22 record — 21 EXCLUDE, 1 UNSURE.
-- `03_final_included.csv`: 1 ứng viên UNSURE/PENDING, **0 bài xác nhận final included**.
-- Cân bằng V1: 22 = 21 loại + 1 cần xác minh. Sau khi nhóm quyết định R04 và kiểm tra toàn văn, cập nhật lại flow này.
-
-## Lưu ý
-
-- Các tổng V1–V4 là tổng số lượt truy vấn trên SpringerLink, không cộng vào PRISMA toàn nhóm nếu protocol không quy định.
-- R04 có abstract về REST API test amplification nhưng hiện chưa xác nhận EP/BVA theo IC-I. Không tính R04 là included cho tới khi nhóm chốt và đối chiếu toàn văn.
-- Không tính các lượt thăm dò rộng V5–V7 vào tập chính vì chưa gộp/khử trùng lặp toàn bộ kết quả các lượt này.
+| File | Data rows | Status |
+|---|---:|---|
+| `01_all_records.csv` | 35 | Metadata export. |
+| `02_after_screening_v1.csv` | 8 | Eight metadata rows; no V1 decision/reason columns. |
+| `03_final_included.csv` | 8 | Eight V1 INCLUDE; V2 pending for all. |
+| `evidence-table.md` | 8 | Abstract/metadata extraction for the eight 03 records. |
+| `snowball-seeds.txt` | 13 | Current seed list. |
