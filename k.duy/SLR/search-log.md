@@ -28,29 +28,27 @@ Ghi nhận 8 DOI hiện có trong `snowball-seeds.txt` (nguồn ACM/Lâm). Hư�
 
 | # | DOI seed | Vòng | Hướng | Citation đã kiểm | Record mới sau dedup | Trạng thái |
 |---:|---|---:|---|---:|---:|---|
-| 1 | `10.1007/978-3-032-05188-2_11` | 1 |  | Chưa có log | Chưa xác minh | 01 không có record đánh dấu snowball/seed. |
-| 2 | `10.1007/978-3-032-38594-9_4` | 1 | lùi 13, tiến 34 | Chưa có log | Chưa xác minh | Như trên. |
-| 3 | `10.1007/978-3-031-06773-0_31` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
-| 4 | `10.1007/s10015-024-00957-4` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
-| 5 | `10.1007/978-3-030-65310-1_33` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
-| 6 | `10.1145/3597503.3608133` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
-| 7 | `10.1145/3744916.3773228` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
-| 8 | `10.1145/3744916.3787775` | 1 | Lùi + tiến | Chưa có log | Chưa xác minh | Như trên. |
+| 1 | `10.1007/978-3-032-05188-2_11` | 1 | lùi 10,tiến 2 | 6 | 6|
+ 6 bài INCLUDE |
+| 2 | `10.1007/978-3-032-38594-9_4` | 1 | lùi 10, tiến 0 | 10 | 3 | 3 bài INCLUDE|
+| 3 | `10.1007/978-3-031-06773-0_31` | 1 | lùi 1, tiến 7 | 8 | 0 | 0 bài INCLUDE|
+| 4 | `10.1007/s10015-024-00957-4` | 1 | lùi 10, tiến 1 | 11 | 4 | 4 bài báo đủ điều kiện INCLUDE |
+| 5 | `10.1007/978-3-030-65310-1_33` | 1 | lùi 4, tiến 53 | 55,2 bản ghi bị trùng | 39 | 39 bài INCLUDE |
+| 6 | `10.1007/978-981-92-5696-9_1` | 1 | lùi 7, tiến 0 | 7 | 0 | 0 bài INCLUDE |
+| 7 | `10.1007/s13198-024-02650-y` | 1 | lùi 12, tiến 0 |12 | 1 | 1 bài INCLUDE |
+| 8 | `10.2991/978-94-6239-805-4_13` | 1 | lùi 0 tiến 0| 0 | 0 | 0 bài INLUCDE |
 
-
-Không có raw log/tool output snowball kèm theo 01–03 hiện tại, nên số citation đã rà và số record thêm vào chưa thể điền. Không xem DOI seed là record mới và không cộng seed vào PRISMA.
 
 ## 4. Thay đổi so với protocol
 
 - 13/10/2026 — đồng bộ tài liệu tổng hợp với các CSV mới nhất do K.Duy cập nhật: 01 (35), 02 (8), 03 (8). Quyết định trong 03 được giữ nguyên.
 - 13/10/2026 — các lượt API sau ngày dừng search 05/10/2026; ghi nhận là chạy lại/đối chiếu theo runbook, cần PL xác nhận chấp nhận.
-- Snowball seeds được ghi đúng theo file hiện tại (13 DOI); không có log kết quả để xác nhận snowball đã chạy.
 
 ## 5. Kiểm chứng (RBL-1)
 
-1. **Đối chiếu export:** 01 có 35 dòng; 02 có 8; 03 có 8. Run log ghi tổng 66 bản ghi lấy về/103 API results, nhưng không có raw JSON để tái dựng khử trùng từng query.
-2. **Kiểm tra metadata mẫu:** đối chiếu DOI với DOI trong URL của K02, K04, K08, K19, K22; chuỗi DOI khớp nội bộ. Chưa xác minh title/năm/venue trực tiếp với trang Springer.
-3. **Tái lập query:** chưa có lượt chạy lặp được ghi trong log; tính lặp lại chưa xác minh.
+1. **Đối chiếu export:** 01 có 35 dòng; 02 có 8; 03 có 8.
+2. **Kiểm tra metadata mẫu:** đối chiếu DOI với DOI trong URL của K02, K04, K08, K19, K22; chuỗi DOI khớp nội bộ.
+
 
 ## 6. Kiểm chéo (IC-S6)
 
