@@ -16,7 +16,7 @@ Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày 
 | Lam | ACM Digital Library |
 | Khoi | OpenAlex |
 | T.Duy | Semantic Scholar + Google Scholar (seed & bổ sung) |
-| K.Duy | Snowballing lùi và tiến, seed là các paper dẫn chứng trên thẻ RQ |
+| K.Duy |Springer |
 
 ## 3. Phạm vi tìm
 
@@ -29,7 +29,15 @@ Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày 
 
 ## 4. Tiêu chí lọc
 
-Theo `team-synthesis/ie_criteria.md`.
+Theo `team-synthesis/ie_criteria.md`, với quy trình bổ sung sau:
+
+- Bước 1: thu thập `01_all_records.csv` từ các query chính; trước khi screening, bỏ trùng theo DOI (nếu thiếu DOI thì theo title + năm); giữ một bản ghi cho mỗi paper.
+- Bước 2: vòng 1 screening trên title + abstract; mỗi record gán `v1_decision` = `INCLUDE / EXCLUDE / Unsure` và `v1_reason` theo mã IC/EC.
+- Bước 3: vòng 2 screening trên full-text; chỉ xét record có `INCLUDE` hoặc `Unsure` ở V1; gán `v2_decision` và `v2_reason`.
+- Bước 4: snowballing áp dụng cùng quy trình V1–V2; record mới được thêm vào PRISMA như record bình thường và không được bỏ qua.
+- Bước 5: kiểm chéo 20% số paper hoặc tối thiểu 1 paper per reviewer/ vòng; ghi vào `search-log.md` kèm ngày và lý do.
+
+PRISMA đầu ra theo thứ tự: `01_all_records.csv` → `02_after_screening_v1.csv` → `03_final_included.csv`.
 
 ## 5. Cột Evidence Table
 
