@@ -1,35 +1,41 @@
-# Search log — T.Duy · nguồn phụ trách: Google Scholar + Semantic Scholar
+# Search log — T.Duy · Semantic Scholar + Google Scholar
 
-**Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · cập nhật 07/10/2026**
+## 1. Nhật ký query
 
-## 1. Nhật ký chạy query (mọi phiên bản chuỗi và số kết quả)
+| Lần | Chuỗi thực chạy (nguyên văn) | CSDL | Trường/bộ lọc | Ngày | Kết quả nguồn / thực thu | Ghi chú |
+|---|---|---|---|---|---|---|
+| S2-A (exact) | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | Semantic Scholar | Tìm mặc định | 15/10/2026 | Site báo không khớp / 0 | 250 là số gợi ý sau nới, không phải exact A. |
+| GS-A | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | Google Scholar | Mặc định; IC-Y≥2020 áp khi lọc | 15/10/2026 | 27 (ước lượng đầu 37) | Đã lấy hết 27; trang tiếp theo 0. |
+| S2-A-relaxed | `(REST API testing OR natural language requirement OR RESTestBench) AND (equivalence partitioning OR boundary-value analysis OR boundary testing) AND (fault detection OR mutant detection OR bugs found)` | Semantic Scholar | Mặc định; IC-Y≥2020 áp khi lọc | 15/10/2026 | 250 gợi ý / thu 10 | Site không khớp exact A, tự bỏ dấu nháy; chưa lấy hết gợi ý. |
+| S2-seed | `"Combining TSL and LLM to Automate REST API Testing"` | Semantic Scholar | Mặc định; IC-Y≥2020 áp khi lọc | 15/10/2026 | 1 / thu 1 | Tra title seed; bản trùng vẫn ghi 01. |
+| GS-B-random | `("REST API" OR "RESTful API") ("equivalence partitioning" OR "boundary value") random` | Google Scholar | Mặc định; IC-Y≥2020 áp khi lọc | 15/10/2026 | khoảng 206 / thu 10 | Mới lấy trang đầu. |
+| S2-B-random | `REST API equivalence partitioning boundary value random` | Semantic Scholar | Mặc định; IC-Y≥2020 áp khi lọc | 15/10/2026 | 25 / thu 10 | Mới lấy trang đầu; không coi TLDR là abstract. |
+| GS-MacroHive | `"Automated functional and robustness testing of microservice architectures"` | Google Scholar | Mặc định; IC-Y≥2020 áp khi lọc | 15/10/2026 | thu 1 | Tra cứu title từ đầu mối; không tạo nguồn mới ngoài GS. |
+| GS-budget | `("REST API" OR "RESTful API") "equivalence partitioning" "boundary value" "budget" "random"` | Google Scholar | Mặc định; IC-Y≥2020 áp khi lọc | 15/10/2026 | 7 / thu 7 | Đã lấy hết 7 kết quả. |
 
-| Lần       | Chuỗi tìm (nguyên văn)                                                                                                                                                                                                     | CSDL             | Trường tìm                                           | Bộ lọc                                           | Ngày chạy                      | Số kết quả                     | Ghi chú                                                                                                  |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- | ------------------------------------------------------- | -------------------------------------------------- | -------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| GS-V1      | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | Google Scholar   | Giao diện Scholar; trường chi tiết chưa xác nhận | 2020–2026 theo link đã gửi                     | Ngày tìm gốc chưa xác nhận | Khoảng25 (T.Duy báo)            | 5 link seed nhập; không nhận toàn bộ 25 results; số tổng chưa đối soát.                        |
-| S2-V1-P1   | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | Semantic Scholar | Giao diện web                                          | Bộ lọc UI chưa xác nhận; export có2018–2024 | Ngày tìm gốc chưa xác nhận | 250 (UI theo T.Duy); thu10 record | SWT_RBL.csv có10 record trang 1. Query được T.Duy xác nhận. Không dùng 250 làm raw count.        |
-| S2-V1-P2   | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | Semantic Scholar | Giao diện web, trang 2                                 | Như lượttrang 1 theo T.Duy                      | Ngày tìm gốc chưa xác nhận | Tổng UI 250; nhận 0 do lỗi     | HTTP 400 theo T.Duy; không có raw response. CSV 20 dòng mới không chứng minh trang 2 thành công.  |
-| GS-A-RETRY | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | Google Scholar   | Public Scholarsearch                                    | 2020–2026                                         | 07/10/2026                       | N/A — không xác định         | Lượt assistant thử lại bị chặn. Thu 0 record do lỗi; không ghi0 hits.                             |
-| S2-A-API   | `("REST API testing" \| "natural language requirement" \| "RESTestBench") + ("equivalence partitioning" \| "boundary-value analysis" \| "boundary testing") + ("fault detection" \| "mutant detection" \| "bugs found")`           | Semantic Scholar | GraphAPI bulk search                                    | 2020:2026                                          | 07/10/2026                       | N/A — không xác định         | HTTP 429. Nhận 0 record do lỗi; đây là lượt API riêng, không phủ nhận kết quả UI của T.Duy. |
-| S2-C-API   | `("REST API" \| "RESTful API") + ("boundary value" \| "equivalence partitioning")`                                                                                                                                             | Semantic Scholar | GraphAPI bulk search                                    | 2020:2026                                          | 07/10/2026                       | N/A — không xác định         | Probe query rút gọn; HTTP 429. Không có bản ghi mới.                                                |
+## 2. Xử lý dữ liệu
 
-**Kiểm chứng:** ngày 07/10 là ngày nhập/ghi nhận đối với export người dùng, không thay ngày search gốc. Không tự giả định AllField hoặc “không lọc”. Log còn thiếu ngày search thực tế và filter UI củaSemantic. API dùng cú pháp riêng được lưu nguyên văn, không tuyên bố UI và API diễn giải Boolean như nhau.
+Search/seed: 27+10+1+10+10+1+7=66 lượt → 61 bài sau bỏ trùng. Snowballing: 91 lượt → 63 bài mới. Tổng 01/02: 157 dòng; trùng EC-D 33; unique 124.
 
-## 2. Xử lý bổ sung trong quá trình tìm
+Giữ nguyên metadata nguồn và canonical_id trong 01/02. DOI/publisher/Crossref/OpenAlex và các lượt tìm lại full-text chỉ để xác minh; không cộng thành discovery mới. Không suy ra EC-A từ HTTP403/429/timeout. Bài loại/chờ giữ trong02; 03 chỉ Include.
 
-1. **Seed Google Scholar:** nhập 5 link do T.Duy đã gửi sau String A. Không Include thẳng; vẫn qua V1/V2. HaiProQuest chưa truy cập/đủ metadata giữUnsure/Pending.
-2. **Semantic Scholar:** SWT_RBL.csv nhập10 record trang 1. Tổng250 làreported hits củaUI, chưa đối soát độc lập. HTTP 400 trang 2 chưa thu thêm record.
-3. **Backward snowballing:** seed RestTSLLM → đọc References →7 lượt ứng viên; hai bản Survey gộp thành 1 paper. Log từng liên kết trong `snowballing-log.csv`. Forward qua Semantic chưa hoàn thành; lượt forward OpenAlex cũ ở archive, không cộng phần T.Duy.
-4. **CSV 20 dòng mới:**10 Semantic cũ đổi Key Zotero, đối soát DOI/title-year và không đếm thêm lượt search. 10 dòng bổ sung gồm 5 catalog Google Scholar,3 arXiv,2 Crossref; query/phân trang chưa xác nhận. Req2Test và RestTSLLM là 2 occurrence trùng seed; còn 8 paper mới. Catalog arXiv/Crossref không tự xác nhận nguồn tìm GS/Semantic.
-5. **Đối soát hiện hành:**5 seed +10 Semantic +7 backward +10 CSV bổ sung =**32 lượt**. Bỏ 3 trùng còn**29 paper**. V1 loại 11;18 chuyển toàn văn. Đã đọc 5:1 Include đề xuất/2 Exclude/2 Unsure;13 pending. Không cộng lại 10 re-export và không cộng250 hits thành250 record.
-6. **Metadata vàPDF:**DOI.org/Crossref/publisher dùng kiểm chứng, không đổi nguồn phát hiện. Với 5 dòng CSV chưa có nguồn search xácnhận, giữ nhãn “source unconfirmed”, không tự nhận là record ACM/IEEE/GS. Đường dẫn PDF máy cá nhân chưa có file nhận được thì không ghi FOUND.
-7. **Nguồn đếm:**theo protocol nhóm,GS/Semantic dùng seed/snowballing bổ sung, không cộng nhánh CSDL chính IEEE/ACM/OpenAlex. Bộ OpenAlex cũ giữ nguyên trong `reference-prior-run/`.
+## 3. Nới chuỗi và cập nhật toàn văn
 
-## 3. Thay đổi so với protocol
+Giữ nguyên String A ở GS-A và S2-A. S2 tự bỏ dấu nháy được ghi riêng; các query random/budget và title lookup ghi đúng chuỗi thực chạy ở bảng trên. Không sửa IC/EC; không đổi hạn search theo mẫu của Lâm.
 
-| Ngày      | Thay đổi                                                                          | Lý do và trạng thái                                                                            |
-| ---------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| 07/10/2026 | Sửa phân công T.Duy sang Google Scholar + Semantic Scholar; archive bộ OpenAlex | Theo xác nhận trực tiếp của T.Duy; protocol 1.2 giữ tiêu chí hiện hành.                  |
-| 07/10/2026 | Bổ sung đối soátCSV re-export và phiên bảnpaper                              | Ngăn đếm trùng khiKey Zotero thay đổi, hoặc cùng paper có preprint/published version.     |
-| 07/10/2026 | Đề xuất PICO tổng quan mở rộng vàIC-I-EXT                                    | Theo yêu cầuT.Duy; draft 1.3-PROPOSED, chưa thay IC-I của 1.2. Không tự Include thêm bài.  |
-| 07/10/2026 | Chuyển Evidence Table/search-log theo mẫu thành viên nhóm                      | Chỉ đổi trình bày và thêm chứng cứ; không đổi số liệu PRISMA hoặc quyết định V2. |
+Trạng thái cuối 15/10/2026: FAMRES chưa có toàn văn; Agentic có PDF nhưng chưa xác minh journal/conference (IC-T). Cả hai giữ Unsure. Có52PDF+4bản text đã đọc; hai bài Include được giữ nguyên.
+
+## 4. Snowballing — vòng 1
+
+Seed TD-0002 · 10.5753/sbes.2025.9670 · RestTSLLM (SBES2025): đã có PDF11trang và Include; sát Category-Partition/EP/BVA, có mutation metric. References từ S2 và PDF; citations từ GS và S2. Không chạy tiếp từ bài mới.
+
+| Seed DOI | Vòng | Hướng | Số đã lướt/ghi nhận | Số thêm vào 01 | Include mới |
+|---|---:|---|---:|---:|---:|
+| 10.5753/sbes.2025.9670 | 1 | Lùi | 84 | 84 | 0 |
+| 10.5753/sbes.2025.9670 | 1 | Tiến | 7 | 7 | 0 |
+
+Lùi: S2 thu27 references (header50; chưa lấy đủ50) +57 entries trong References PDF. Tiến: GS2 +S2 5 citations. Cùng bài có thể lặp giữa nguồn; các số84/7 là lượt trước bỏ trùng.
+
+Snowballing 91 lượt → 64 unique trong nhánh; giao search1 → mới63. Lọc: 63−36=27 đọc toàn văn; loạiV2 27; Include mới0. Search61+snowball mới63=124.
+
+Số Include cuối và các lý do loại theo từng nhánh: prisma-flow.md; quyết định từng ID: 02_after_screening_v1.csv.
