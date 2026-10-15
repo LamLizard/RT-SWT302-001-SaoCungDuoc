@@ -1,64 +1,83 @@
-# Search log — Tùng · IEEE Xplore
+# Search log — Tùng · IEEE Xplore và snowballing
 
-Phiên ngày **03/10/2026**, múi giờ **Asia/Saigon (UTC+7)**. Bắt đầu 21:03:17; hạn phiên 21:23:17. Phạm vi: tìm paper và ghi log; chưa screening hoặc Evidence Table.
+Nhóm SaoCungDuoc · RQ FA26-EXT-12 · Đợt tìm mới 12–13/10/2026, múi giờ **Asia/Saigon (UTC+7)**. Matching ngày **13/10/2026**; kết hợp log IEEE với catalog và full-text screening snowball từ công cụ khác.
 
 ## Cách chạy và đọc số
 
-- String A nguyên văn được chạy đầu tiên. IEEE Command Search mặc định là All Metadata; lượt này chỉ dùng audit.
-- Các lượt chính gắn từng cụm từ với `Document Title`, `Abstract`, `Index Terms` rồi giữ nguyên quan hệ Boolean. `Index Terms` gồm Author Keywords, IEEE Terms và MeSH Terms theo [trợ giúp IEEE](https://ieeexplore.ieee.org/Xplorehelp/searching-ieee-xplore/command-search).
-- Mục tiêu năm: từ 2020 đến thời điểm truy cập 03/10/2026. Với lượt 0 kết quả mọi năm, trang không hiện bộ lọc năm; số từ 2020 cũng là 0 theo quan hệ tập con, **không phải thao tác lọc năm đã được thực hiện**.
-- “Số sau bỏ trùng” là số bản ghi duy nhất trong từng lượt; tổng hợp liên-query sẽ dùng DOI chuẩn hóa, rồi IEEE article number, rồi title chuẩn hóa + năm. Giữ toàn bộ Search IDs. Không gộp số lượt audit/rerun vào PRISMA.
+- Bảng chính gồm **5 lượt tìm kiếm**: A đầy đủ → A bỏ Outcome → B/C bỏ Outcome → mở rộng biến thể EP/BVA → mở rộng sinh/kiểm thử REST API. Các lượt chạy trùng và đối chiếu mọi năm không tạo dòng search bổ sung.
+- Nguồn tìm kiếm là **IEEE API**, dùng `querytext`, không gắn trường riêng. Giữ bộ lọc từ năm **2020** ở cả 5 lượt; loại ấn phẩm được xét khi screening.
+- “Số kết quả” là số bài tìm được trong phạm vi từ 2020. “Số sau bỏ trùng” là số paper duy nhất **trong từng lượt**; số paper mới và tổng tích lũy được trình bày ở phần tổng hợp.
+- Ghi chú nêu kết quả của từng lượt và lý do điều chỉnh search string cho lượt tiếp theo.
 
 ## Bảng log chính
 
-| # | Query nguyên văn đã gửi | CSDL | Trường tìm | Bộ lọc thực tế | Ngày | Số kết quả | Số sau bỏ trùng | Ghi chú |
+| # | Query đã sử dụng | CSDL | Trường tìm | Bộ lọc thực tế | Ngày | Số kết quả | Số sau bỏ trùng | Ghi chú |
 |---|---|---|---|---|---|---:|---:|---|
-| Q0 | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | IEEE Xplore | All Metadata (mặc định) | Mọi năm; chưa áp dụng loại ấn phẩm; 2020+ là tập con rỗng suy ra | 03/10/2026 | 0 | 0 | String A nhập nguyên văn; lượt kiểm tra mặc định All Metadata, không tính bổ sung PRISMA. |
-| Q1 | `("Document Title":"REST API testing" OR "Abstract":"REST API testing" OR "Index Terms":"REST API testing" OR "Document Title":"natural language requirement" OR "Abstract":"natural language requirement" OR "Index Terms":"natural language requirement" OR "Document Title":"RESTestBench" OR "Abstract":"RESTestBench" OR "Index Terms":"RESTestBench") AND ("Document Title":"equivalence partitioning" OR "Abstract":"equivalence partitioning" OR "Index Terms":"equivalence partitioning" OR "Document Title":"boundary-value analysis" OR "Abstract":"boundary-value analysis" OR "Index Terms":"boundary-value analysis" OR "Document Title":"boundary testing" OR "Abstract":"boundary testing" OR "Index Terms":"boundary testing") AND ("Document Title":"fault detection" OR "Abstract":"fault detection" OR "Index Terms":"fault detection" OR "Document Title":"mutant detection" OR "Abstract":"mutant detection" OR "Index Terms":"mutant detection" OR "Document Title":"bugs found" OR "Abstract":"bugs found" OR "Index Terms":"bugs found")` | IEEE Xplore | Document Title OR Abstract OR Index Terms | Mọi năm; chưa áp dụng loại ấn phẩm; 2020+ là tập con rỗng suy ra | 03/10/2026 | 0 | 0 | String A gắn trường theo cú pháp IEEE; không có kết quả mọi năm. |
-| Q2 | `("Document Title":"REST API testing" OR "Abstract":"REST API testing" OR "Index Terms":"REST API testing" OR "Document Title":"natural language requirement" OR "Abstract":"natural language requirement" OR "Index Terms":"natural language requirement" OR "Document Title":"RESTestBench" OR "Abstract":"RESTestBench" OR "Index Terms":"RESTestBench") AND ("Document Title":"equivalence partitioning" OR "Abstract":"equivalence partitioning" OR "Index Terms":"equivalence partitioning" OR "Document Title":"boundary-value analysis" OR "Abstract":"boundary-value analysis" OR "Index Terms":"boundary-value analysis" OR "Document Title":"boundary testing" OR "Abstract":"boundary testing" OR "Index Terms":"boundary testing")` | IEEE Xplore | Document Title OR Abstract OR Index Terms | Mọi năm; chưa áp dụng loại ấn phẩm; 2020+ là tập con rỗng suy ra | 03/10/2026 | 0 | 0 | A bỏ khối O vì Q1 <20; không có kết quả mọi năm. |
-| Q3 | `("Document Title":"REST API" OR "Abstract":"REST API" OR "Index Terms":"REST API" OR "Document Title":"RESTful API" OR "Abstract":"RESTful API" OR "Index Terms":"RESTful API" OR "Document Title":"web API" OR "Abstract":"web API" OR "Index Terms":"web API" OR "Document Title":"web service" OR "Abstract":"web service" OR "Index Terms":"web service") AND ("Document Title":"boundary value analysis" OR "Abstract":"boundary value analysis" OR "Index Terms":"boundary value analysis" OR "Document Title":"boundary value" OR "Abstract":"boundary value" OR "Index Terms":"boundary value" OR "Document Title":"boundary testing" OR "Abstract":"boundary testing" OR "Index Terms":"boundary testing" OR "Document Title":"equivalence partitioning" OR "Abstract":"equivalence partitioning" OR "Index Terms":"equivalence partitioning") AND ("Document Title":"mutation testing" OR "Abstract":"mutation testing" OR "Index Terms":"mutation testing" OR "Document Title":"mutants" OR "Abstract":"mutants" OR "Index Terms":"mutants" OR "Document Title":"mutation score" OR "Abstract":"mutation score" OR "Index Terms":"mutation score")` | IEEE Xplore | Document Title OR Abstract OR Index Terms | Mọi năm; chưa áp dụng loại ấn phẩm; 2020+ là tập con rỗng suy ra | 03/10/2026 | 0 | 0 | String B/C dự phòng của protocol, bổ sung các từ đồng nghĩa; không có kết quả mọi năm. |
-| Q4a | `("Document Title":"REST API" OR "Abstract":"REST API" OR "Index Terms":"REST API" OR "Document Title":"RESTful API" OR "Abstract":"RESTful API" OR "Index Terms":"RESTful API" OR "Document Title":"web API" OR "Abstract":"web API" OR "Index Terms":"web API" OR "Document Title":"web service" OR "Abstract":"web service" OR "Index Terms":"web service") AND ("Document Title":"boundary value analysis" OR "Abstract":"boundary value analysis" OR "Index Terms":"boundary value analysis" OR "Document Title":"boundary value" OR "Abstract":"boundary value" OR "Index Terms":"boundary value" OR "Document Title":"boundary testing" OR "Abstract":"boundary testing" OR "Index Terms":"boundary testing" OR "Document Title":"equivalence partitioning" OR "Abstract":"equivalence partitioning" OR "Index Terms":"equivalence partitioning")` | IEEE Xplore | Document Title OR Abstract OR Index Terms | Mọi năm (audit trước lọc năm) | 03/10/2026 | 14 | 14 | B bỏ khối O vì Q3 <20; đủ 14 article numbers khác nhau trên 1 trang; 12 bài trước 2020. |
-| Q4b | `("Document Title":"REST API" OR "Abstract":"REST API" OR "Index Terms":"REST API" OR "Document Title":"RESTful API" OR "Abstract":"RESTful API" OR "Index Terms":"RESTful API" OR "Document Title":"web API" OR "Abstract":"web API" OR "Index Terms":"web API" OR "Document Title":"web service" OR "Abstract":"web service" OR "Index Terms":"web service") AND ("Document Title":"boundary value analysis" OR "Abstract":"boundary value analysis" OR "Index Terms":"boundary value analysis" OR "Document Title":"boundary value" OR "Abstract":"boundary value" OR "Index Terms":"boundary value" OR "Document Title":"boundary testing" OR "Abstract":"boundary testing" OR "Index Terms":"boundary testing" OR "Document Title":"equivalence partitioning" OR "Abstract":"equivalence partitioning" OR "Index Terms":"equivalence partitioning")` | IEEE Xplore | Document Title OR Abstract OR Index Terms | Year 2020–2025 do IEEE tự chặn cận trên về năm lớn nhất của tập kết quả; All Results; không lọc loại ấn phẩm | 03/10/2026 | 2 | 2 | Đã nhập 2020–2026; URL và Filters Applied xác nhận 2020–2025. Tập Q4a không có bài 2026, nên hai bản ghi là toàn bộ tập 2020+ hiện quan sát. |
-| Q4c | `("Document Title":"REST API" OR "Abstract":"REST API" OR "Index Terms":"REST API" OR "Document Title":"RESTful API" OR "Abstract":"RESTful API" OR "Index Terms":"RESTful API" OR "Document Title":"web API" OR "Abstract":"web API" OR "Index Terms":"web API" OR "Document Title":"web service" OR "Abstract":"web service" OR "Index Terms":"web service") AND ("Document Title":"boundary value analysis" OR "Abstract":"boundary value analysis" OR "Index Terms":"boundary value analysis" OR "Document Title":"boundary value" OR "Abstract":"boundary value" OR "Index Terms":"boundary value" OR "Document Title":"boundary testing" OR "Abstract":"boundary testing" OR "Index Terms":"boundary testing" OR "Document Title":"equivalence partitioning" OR "Abstract":"equivalence partitioning" OR "Index Terms":"equivalence partitioning")` | IEEE Xplore | Document Title OR Abstract OR Index Terms | Rerun đúng URL Q4b; Year 2020–2025; All Results | 03/10/2026 | 2 | 2 | Hai title và số lượng không đổi; không cộng lần nữa vào PRISMA. |
+| Q1 | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")` | IEEE API | `querytext` | Từ 2020 | 12/10/2026 | 0 | 0 | String A đầy đủ không tìm thấy kết quả; bỏ khối Outcome theo quy tắc dưới 20 kết quả. |
+| Q2 | `("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing")` | IEEE API | `querytext` | Từ 2020 | 12/10/2026 | 0 | 0 | String A bỏ Outcome vẫn không tìm thấy kết quả; chuyển sang String B/C bỏ Outcome để mở rộng từ đồng nghĩa. |
+| Q3 | `("REST API" OR "RESTful API" OR "web API" OR "web service") AND ("boundary value analysis" OR "boundary value" OR "boundary testing" OR "equivalence partitioning")` | IEEE API | `querytext` | Từ 2020 | 12/10/2026 | 2 | 2 | Thu được 2 bài; bổ sung biến thể và thuật ngữ gần cho khối P/I để tăng độ phủ tìm kiếm, giữ nguyên năm tối thiểu và IC/EC. |
+| Q4 | `("REST API" OR "RESTful API" OR "web API" OR "web service" OR "RESTful web service" OR "HTTP API") AND ("boundary value analysis" OR "boundary-value analysis" OR "boundary value" OR "boundary testing" OR "equivalence partitioning" OR "equivalence class partitioning" OR "input partitioning" OR "input domain partitioning" OR "boundary analysis")` | IEEE API | `querytext` | Từ 2020 | 12/10/2026 | 2 | 2 | Mở rộng biến thể EP/BVA vẫn chỉ thu được 2 bài, trùng tập đã có; bổ sung nhánh sinh test, black-box, robustness và random testing cho REST API. |
+| Q5 | `("REST API" OR "RESTful API" OR "RESTful web service" OR "web API") AND ("test generation" OR "test case generation" OR "test amplification" OR "black-box testing" OR "black box testing" OR "robustness testing" OR "random testing")` | IEEE API | `querytext` | Từ 2020 | 13/10/2026 | 68 | 68 | Nhánh tìm kiếm rộng thu được 68 bài; giữ chuỗi này để screening theo IC/EC và khử trùng với các lượt trước. |
 
-## Tổng hợp phiên search 03/10/2026
+## Tổng hợp đợt tìm mới
 
-- Q0: audit phạm vi rộng, 0 records.
-- Q1–Q3: 0 records trước dedup và 0 sau dedup.
-- Q4a: 14 bài mọi năm, chỉ audit; không cộng 14 vào PRISMA 2020+.
-- Q4b: **2 trước dedup, 2 sau dedup (= 2 dòng 01_all_records.csv)**; DOI và article number khác nhau, 0 bản ghi trùng nội bộ.
-- Q4c rerun 2: không cộng thêm; Q0 và Q4a là audit. Chưa dedup với các nguồn khác của nhóm.
-- Tại cuối phiên search 03/10 chưa screening. Cập nhật 04/10: hai bài V2 Include ở bản AI; snowballing nhóm do K.Duy phụ trách.
+- Q1 = 0, Q2 = 0, Q3 = 2, Q4 = 2, Q5 = 68 → **72 lượt xuất hiện**, tương ứng **68 paper duy nhất** của đợt IEEE; catalog nguồn được giữ tại [01 IEEE](extras/original-export/01_all_records.csv).
+- Hai paper `10.1109/MS.2025.3559664` và `10.1109/ACCESS.2021.3056505` đều xuất hiện ở Q3, Q4 và Q5, tạo **4 lượt xuất hiện lặp**. Số paper mới ở Q1–Q5 lần lượt là **0, 0, 2, 0, 66**; tổng tích lũy **riêng đợt IEEE** là **68**.
+- Không cộng các lượt chạy trùng, lượt đối chiếu mọi năm hoặc occurrences do import V1/V2 vào tổng tìm kiếm. Tổng discovery/duplicates toàn hồ sơ chưa được manifest phục hồi; 72/4 là số lượt xuất hiện và số lặp của các search trong đợt này.
+- Q5 chạy lúc 00:02:54 ngày 13/10 theo UTC+7, trong khi [protocol nguồn](extras/original-export/extras/review-protocol.md) ghi `stopDate=2026-10-12`. [Protocol của bản matching](extras/review-protocol.md) ghi mốc thực tế 13/10/2026 và nguồn điều chỉnh; không đổi timestamp của lượt chạy.
 
-## Thay đổi / ánh xạ so với protocol
+## Thay đổi so với protocol
 
-- 03/10/2026: giữ String A nguyên văn ở Q0 và bổ sung field qualifiers ở Q1 để khớp Title/Abstract/Keywords. Không bỏ hoặc thêm khái niệm ở Q1.
-- 03/10/2026: Q2 bỏ khối O theo quy tắc <20.
-- 03/10/2026: Q3 dùng B/C dự phòng đã có trong protocol do Q2 vẫn <20.
-- 03/10/2026: dùng Index Terms làm Keywords; xem [decisions-for-review.md](../decisions-for-review.md) để nhóm duyệt ánh xạ.
+1. **Q1 → Q2:** String A trả 0 kết quả; bỏ khối Outcome theo quy tắc dưới 20 kết quả.
+2. **Q2 → Q3:** String A bỏ Outcome vẫn trả 0 kết quả; chuyển sang B/C bỏ Outcome để mở rộng từ đồng nghĩa.
+3. **Q3 → Q4:** Thu được 2 bài; bổ sung RESTful web service, HTTP API, equivalence class partitioning, input partitioning, input domain partitioning và boundary analysis; giữ mốc năm 2020 và IC/EC.
+4. **Q4 → Q5:** Mở rộng biến thể EP/BVA vẫn chỉ có 2 bài; bổ sung nhánh test generation, test amplification, black-box, robustness và random testing để tăng tập ứng viên.
+
+Các query mở rộng phục vụ thu thập ứng viên; paper vẫn cần đạt IC/EC khi screening. Bản export gốc được lưu tại [search-log-export-original.md](extras/original-export/extras/search-log-export-original.md).
 
 ## Kiểm chứng
 
-- Kết quả được đọc trực tiếp từ UI IEEE sau khi hết trạng thái Getting results; không dùng số ước lượng từ Google/Bing.
-- Trợ giúp IEEE qua web fetch báo HTTP 418; cùng trang đọc được trong trình duyệt. Không dùng lỗi fetch làm kết quả tìm.
-- Không dùng crawler/API tự viết, không dùng dữ liệu fixture/DEMO.
+- **Q3:** Đối chiếu IEEE thủ công: 14 bài mọi năm → **2 bài từ 2020**, khớp kết quả tool. Log nguồn trước matching dẫn raw response `raw-raw_5573fa34-e289-426d-8422-d9c986f617bc.json`, ghi `start_year=2020`, `total_records=2` và hai DOI. Raw file đó không có trong gói hiện tại; provenance còn truy được qua [origins.csv](extras/origins.csv).
+- **Q4:** Provenance ghi đúng query mở rộng có `input partitioning` và `boundary analysis`; kết quả vẫn là **2 bài** của lượt trước. Query được lưu trong [origins.csv](extras/origins.csv).
+- **Q5:** Đối chiếu IEEE: 76 bài mọi năm → **68 bài từ 2020**, khớp kết quả tool. Lượt mọi năm chỉ dùng đối chiếu; tám bài ngoài phạm vi năm không tính thành tám bài loại V1.
+- Kết quả tìm kiếm và bộ lọc năm đã được kiểm tra trong quá trình thực hiện.
 
-## Hồ sơ bàn giao
+## Snowballing từ công cụ khác — trạng thái hiện hành
 
-- Danh sách 2 records: [01_all_records.csv](01_all_records.csv); quyết định V1: [02_after_screening_v1.csv](02_after_screening_v1.csv).
-- Kết quả V2 Include: [03_final_included.csv](03_final_included.csv); bằng chứng: [evidence-table.md](evidence-table.md); số đếm: [prisma-flow.md](prisma-flow.md). Screening/extraction đã làm ngày 04/10; còn chờ nhóm kiểm chéo.
+Đối chiếu [catalog snowball nguồn](extras/original-export/snowballing/01_all_records.csv) với [catalog hợp nhất](01_all_records.csv), sau đó nối với [45 full-text screening results](snowballing/screening_results.csv) bằng DOI và metadata. Định danh catalog K và định danh PDF P được giữ để truy vết; số records catalog không phải tổng hits/citations của provider.
 
-## Cập nhật 04/10/2026 — screening và bàn giao
+| Seed được ghi trong catalog nguồn | DOI | Ghi chú |
+|---|---|---|
+| A Black Box Tool for Robustness Testing of REST Services | `10.1109/ACCESS.2021.3056505` | INCLUDE hiện hành; P12/K81, P17/K84, P38/K108 có provenance forward từ seed này |
+| LLM-Driven, Self-Improving Framework for Security Test Automation… | `10.1109/ACCESS.2025.3554960` | Seed discovery được giữ theo tool; quyết định screening hiện hành của seed là EXCLUDE — IC-I |
+| Test Amplification for REST APIs: Using “Out-of-the-Box” Large Language Models | `10.1109/MS.2025.3559664` | Seed discovery được giữ theo tool; quyết định screening hiện hành của seed là EXCLUDE — IC-I |
 
-- Đã xử lý tuần tự metadata, V1, full-text/V2, extraction, appraisal/AI đối chiếu và handoff trên đúng 2 records gốc. Không chạy thêm query IEEE hoặc cộng thêm records từ web/Crossref/kho tác giả/Figshare.
-- Bảng chính đã bỏ hai dòng trống tách Q4a/Q4c; nguyên văn query, bộ lọc và counts của 7 lượt giữ nguyên.
-- Bản AI: V1 Include 2; reports retrieved/assessed 2; V2 Include 2, Exclude 0, Unsure 0. Cả hai Near_RQ = Indirect; reviewer nhóm và dedup liên nguồn còn chờ.
-- IC-T002 và cách áp dụng IC-P đã được Tùng chấp nhận trong phiên04/10; chi tiết tại [decisions-for-review.md](../decisions-for-review.md). Keywords cuối của002 chưa xác minh; không lấy từ preprint.
-- Nguồn current metadata/full-text được thu ngày04/10, không gọi là native export hay snapshot gốc03/10. Tổng identified trước/sau dedup nội bộ vẫn2/2; xem [ieee-handoff.md](../ieee-handoff.md).
+| Phần đối chiếu | Số paper duy nhất | Diễn giải |
+|---|---:|---|
+| Catalog IEEE ban đầu | 68 | Q1–Q5: 72 occurrences − 4 repeated hits |
+| Records có provenance snowball | 99 | Unique records từ catalog đã giao; có backward và forward |
+| Trùng giữa IEEE và snowball | 17 | Gộp provenance vào cùng paper, không thêm 17 records |
+| Paper mới từ snowball | 82 | 99 − 17 |
+| Catalog hợp nhất | 150 | 68 + 99 − 17 = 150 |
+| Full-text snowball đã đánh giá | 45 | 37 EXCLUDE + 3 INCLUDE + 5 REVIEW; tất cả nối được với catalog |
+| Records snowball mới chưa screening | 37 | 82 − 45; giữ NOT_REVIEWED, không tự gán EXCLUDE/EC-A |
 
-## Đóng gói bộ nộp — 05/10/2026
+**Ba INCLUDE thêm vào tập evidence:** P12/K81 (`10.1145/3533767.3534401`), P17/K84 (`10.1145/3597926.3598131`), P38/K108 (`10.1145/3696630.3728545`). Xem căn cứ EP/BVA và kết quả số tại [evidence-table.md](evidence-table.md). Năm REVIEW chưa tính included.
 
-- Chuẩn hóa từ dữ liệu hiện có; không chạy query mới và không thay đổi query, ngày chạy, bộ lọc hoặc số kết quả.
-- Bộ nộp gồm 3 CSV và 3 Markdown trong thư mục này. Các CSV dùng Record_ID thống nhất, UTF-8 BOM, một hàng cho mỗi bài; bỏ 5 hàng rỗng và cột không tên của bản screening gốc.
-- Abstract/keywords gốc trong 01 được giữ nguyên nhãn Paraphrase/Unverified. Nguồn xác minh và Metadata_Status nằm trong 02; bài 002 vẫn Partial.
+Log OpenAlex nguồn từng ghi session bBOXRT mở **03:07:05 ngày 13/10/2026 UTC+7**, backward QUEUED/fetched 49/reported 64, forward QUEUED/fetched 0. Đây là [snapshot của công cụ đầu](extras/original-export/extras/search-log-export-original.md), không đại diện tiến độ catalog/full-text đã làm ở công cụ khác. Không thay 99 unique catalog records bằng số reported của provider, không tự cộng 49 pending references thành 49 paper mới.
 
+**Giới hạn truy vết:** gói chưa có raw provider log đầy đủ cho công cụ snowball thứ hai. Vì vậy chưa xác minh tổng citations/references available, số pages provider, hoàn tất từng hướng hoặc coverage forward 12 tháng. Không diễn giải thiếu log hoặc số 0 của snapshot thành không có citation. Matching records và đồng bộ quyết định không tự hoàn tất coverage snowball.
+
+## Hồ sơ bàn giao sau bổ sung toàn văn 13/10/2026
+
+12 PDF do người thực hiện bổ sung tại `snowballing/paper-bo-sung`; tất cả khớp DOI/title với K09,K18,K23,K30,K35,K38,K51,K52,K53,K55,K56,K64 đã có. Bổ sung file/evidence và re-open V1 exclusions; không tăng unique catalog hoặc snowball discovery counts, không tự tạo seed/direction mới.
+
+- 01/02: 150 records. V1 lịch sử giữ 68 quyết định; 12 exclusions được mở lại bằng full-text. 02 thêm V2/current và IC/EC evidence.
+- 04: 107 outcomes = 97 EXCLUDE + 5 INCLUDE + 5 REVIEW. 46 EC-A import giữ riêng; 61 full-text thực đọc = 49 cũ + 12 mới.
+- Lô bổ sung: 1 INCLUDE K52/P53 (operational EP có suy luận, đối chứng random cùng số request, failure results); 11 EXCLUDE. Final 03 và included copy có 5 bài.
+- Screening results: 57 = 45 snowball cũ + 12 recovered IEEE; evidence 537 = 405 cũ + 132 mới. screening_batch phân biệt hai nguồn.
+- V1 historical counts không đổi; luồng hiện hành disjoint: 150 = 6 V1-only exclusions + 107 outcomes + 37 NOT_REVIEWED.
+
+Thay đổi ngày 13/10/2026: sửa nhận định IC-P của K52 từ abstract bằng toàn văn Sections5–6, nhưng không sửa event V1 cũ. IC-I quyết định bằng phân lớp request thực dùng, không bằng câu EP/BVA của JUnit tests. Không đổi tiêu chí Git, không khẳng định K52 BVA, uniform distribution hoặc unique mutants. K52 HIGH_PARTIAL là nhận định độ gần tương đối, không đặt ngưỡng numeric mới.
+
+[Review bổ sung](snowballing/supplemental-review-2026-10-13.md) và [bảng lô bổ sung](snowballing/supplemental-screening-2026-10-13.csv) ghi lý do từng bài. Vẫn 37 NOT_REVIEWED, 5 REVIEW và thiếu coverage/provider logs; dossier chưa finalized.
