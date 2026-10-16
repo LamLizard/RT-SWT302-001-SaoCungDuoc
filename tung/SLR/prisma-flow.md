@@ -91,4 +91,4 @@ Hai seed `10.1109/ms.2025.3559664` và `10.1109/access.2025.3554960` hiện **EX
 - Forward và coverage 12 tháng chưa có bằng chứng bao phủ đầy đủ. Ledger có kết quả forward không đồng nghĩa coverage đã hoàn tất.
 - Raw discovery totals/duplicates toàn bộ hồ sơ chưa phục hồi. Không dùng bộ đếm snapshot cũ để thay số dòng hiện hành.
 - Matching/kiểm tra máy không thay thế kiểm chéo V1 hoặc Evidence bởi thành viên khác.
-- INCLUDE dùng [IC/EC nhóm](extras/team-criteria-source.md), EP **và/hoặc** BVA. RQ nghiên cứu vẫn là EP kết hợp BVA trên 45 yêu cầu; độ gần RQ được ghi riêng.
+- INCLUDE dùng [IC/EC nhóm], EP **và/hoặc** BVA. RQ nghiên cứu vẫn là EP kết hợp BVA trên 45 yêu cầu; độ gần RQ được ghi riêng.
