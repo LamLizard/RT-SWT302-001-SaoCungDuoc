@@ -32,7 +32,7 @@ Nhóm SaoCungDuoc · RQ FA26-EXT-12 · Đợt tìm mới 12–13/10/2026, múi g
 3. **Q3 → Q4:** Thu được 2 bài; bổ sung RESTful web service, HTTP API, equivalence class partitioning, input partitioning, input domain partitioning và boundary analysis; giữ mốc năm 2020 và IC/EC.
 4. **Q4 → Q5:** Mở rộng biến thể EP/BVA vẫn chỉ có 2 bài; bổ sung nhánh test generation, test amplification, black-box, robustness và random testing để tăng tập ứng viên.
 
-Các query mở rộng phục vụ thu thập ứng viên; paper vẫn cần đạt IC/EC khi screening. Bản export gốc được lưu tại [search-log-export-original.md](extras/original-export/extras/search-log-export-original.md).
+
 
 ## Kiểm chứng
 
