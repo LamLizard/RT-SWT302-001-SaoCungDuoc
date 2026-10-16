@@ -1,6 +1,6 @@
 # Search log — K.Duy (Springer Nature)
 
-Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · cập nhật 13/10/2026. Lấy 01, 02, 03 mới nhất của K.Duy làm nguồn chuẩn. 01 có 35 metadata records; 02 có 8 records; 03 có 8 records với V1 `INCLUDE`, V2 chưa được ghi. Không thay đổi quyết định trong các tệp này. Theo run log đã ghi cho RBL Paper Harvester v1.5.1, search API chạy ngày 13/10/2026, sau ngày dừng search protocol 05/10/2026; ghi nhận là lượt chạy lại/đối chiếu API và cần PL xác nhận chấp nhận.
+Nhóm 1 - SaoCungDuoc - RQ FA26-EXT-12 - cập nhật 16/10/2026. CSV mới nhất của K.Duy là nguồn chuẩn: 01 có 35 metadata records; 02 có 8; 03 có 8 record V1 INCLUDE. Theo xác nhận của K.Duy, cả 8 đã được rà soát từ 02 sang 03, không thay đổi và là included cuối cùng; các trường V2 để trống có chủ đích. Run log RBL Paper Harvester v1.5.1 ghi nhận API search ngày 13/10/2026, sau ngày dừng search protocol 05/10/2026; đây là lượt chạy lại/đối chiếu API và cần PL xác nhận chấp nhận.
 
 ## 1. Search log — lượt tool
 
@@ -17,10 +17,10 @@ Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · cập nhật 13/10/2026. Lấy 01, 
 
 ## 2. Trạng thái screening theo CSV mới
 
-- 01_all_records.csv: 35 dòng metadata.
-- 02_after_screening_v1.csv: 8 dòng metadata;có cột reason và cột decision trạng thái INCLUDE.
-- 03_final_included.csv: 8 dòng; cả 8 có `v1_decision=INCLUDE`; `v2_decision` và `v2_reason` đang trống.
-- 8 hồ sơ từ V2 đã được kiểm chứng đầy đủ các điều kiện và không có gì thay đổi nên được chuyển tiếp qua 03_final
+- `01_all_records.csv`: 35 dòng metadata.
+- `02_after_screening_v1.csv`: 8 record V1 có quyết định INCLUDE và lý do.
+- `03_final_included.csv`: 8 record; cả 8 có v1_decision=INCLUDE; các trường V2 để trống có chủ đích vì rà soát vòng 2 không làm thay đổi quyết định.
+- Theo xác nhận của K.Duy, cả 8 record đã được rà soát đầy đủ ở vòng 2 khi chuyển từ 02 sang 03; cả 8 đáp ứng điều kiện và được xác nhận included cuối cùng.
 
 ## 3. Snowballing — seed mới nhất
 
@@ -28,16 +28,14 @@ Ghi nhận 8 DOI hiện có trong `snowball-seeds.txt` (nguồn ACM/Lâm). Hư�
 
 | # | DOI seed | Vòng | Hướng | Citation đã kiểm | Record mới sau dedup | Trạng thái |
 |---:|---|---:|---|---:|---:|---|
-| 1 | `10.1007/978-3-032-05188-2_11` | 1 | lùi 10,tiến 2 | 6 | 6|
- 6 bài INCLUDE |
-| 2 | `10.1007/978-3-032-38594-9_4` | 1 | lùi 10, tiến 0 | 10 | 3 | 3 bài INCLUDE|
-| 3 | `10.1007/978-3-031-06773-0_31` | 1 | lùi 1, tiến 7 | 8 | 0 | 0 bài INCLUDE|
-| 4 | `10.1007/s10015-024-00957-4` | 1 | lùi 10, tiến 1 | 11 | 4 | 4 bài báo đủ điều kiện INCLUDE |
-| 5 | `10.1007/978-3-030-65310-1_33` | 1 | lùi 4, tiến 53 | 55,2 bản ghi bị trùng | 39 | 39 bài INCLUDE |
+| 1 | `10.1007/978-3-032-05188-2_11` | 1 | lùi 10, tiến 2 | 6 | 6 | 6 bài INCLUDE |
+| 2 | `10.1007/978-3-032-38594-9_4` | 1 | lùi 10, tiến 0 | 10 | 3 | 3 bài INCLUDE |
+| 3 | `10.1007/978-3-031-06773-0_31` | 1 | lùi 1, tiến 7 | 8 | 0 | 0 bài INCLUDE |
+| 4 | `10.1007/s10015-024-00957-4` | 1 | lùi 10, tiến 1 | 11 | 4 | 4 bài INCLUDE |
+| 5 | `10.1007/978-3-030-65310-1_33` | 1 | lùi 4, tiến 53 | 55 (2 bản ghi bị trùng) | 39 | 39 bài INCLUDE |
 | 6 | `10.1007/978-981-92-5696-9_1` | 1 | lùi 7, tiến 0 | 7 | 0 | 0 bài INCLUDE |
-| 7 | `10.1007/s13198-024-02650-y` | 1 | lùi 12, tiến 0 |12 | 1 | 1 bài INCLUDE |
-| 8 | `10.2991/978-94-6239-805-4_13` | 1 | lùi 0 tiến 0| 0 | 0 | 0 bài INLUCDE |
-
+| 7 | `10.1007/s13198-024-02650-y` | 1 | lùi 12, tiến 0 | 12 | 1 | 1 bài INCLUDE |
+| 8 | `10.2991/978-94-6239-805-4_13` | 1 | lùi 0, tiến 0 | 0 | 0 | 0 bài INCLUDE |
 
 ## 4. Thay đổi so với protocol
 
@@ -52,7 +50,7 @@ Ghi nhận 8 DOI hiện có trong `snowball-seeds.txt` (nguồn ACM/Lâm). Hư�
 
 ## 6. Kiểm chéo (IC-S6)
 
-Với 35 records trong 01, 20% tương ứng tối thiểu 7 records. Đề xuất reviewer khác rà cả 8 hồ sơ trong 03 để vượt ngưỡng; chưa có reviewer, ngày rà, hoặc quyết định độc lập trong dữ liệu nhận được nên các kết quả dưới đây vẫn PENDING.
+Kiểm tra chéo độc lập IC-S6 vẫn PENDING: chưa ghi nhận reviewer thứ hai, ngày rà soát hoặc quyết định độc lập. Việc này tách biệt với V2 đã hoàn tất và không thay đổi trạng thái included cuối cùng của 8 record.
 
 | Mã | V1 theo 03 | Reviewer | Quyết định reviewer | Ngày | Ghi chú |
 |---|---|---|---|---|---|
@@ -69,7 +67,7 @@ Với 35 records trong 01, 20% tương ứng tối thiểu 7 records. Đề xu�
 
 - `01_all_records.csv`: 35 metadata records.
 - `02_after_screening_v1.csv`: 8 dòng metadata.
-- `03_final_included.csv`: 8 V1 INCLUDE; chưa có V2 decision.
-- `evidence-table.md`: 8 dòng extraction dựa trên abstract/metadata.
+- `03_final_included.csv`: 8 bài included cuối cùng sau V2; các trường V2 để trống vì không có quyết định thay đổi.
+- `evidence-table.md`: bảng evidence của 8 bài included cuối cùng trong 03.
 - `prisma-flow.md`: flow và các điểm cần hoàn tất, cùng số liệu trên.
 - `snowball-seeds.txt`: 13 DOI hiện hành.
