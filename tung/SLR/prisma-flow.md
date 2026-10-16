@@ -82,8 +82,6 @@ Hai seed `10.1109/ms.2025.3559664` và `10.1109/access.2025.3554960` hiện **EX
 | [02_after_screening_v1.csv](02_after_screening_v1.csv) | 150 | Giữ V1 lịch sử, thêm V2/current, route mở lại full-text và các record chưa review. |
 | [04_fulltext_screening.csv](04_fulltext_screening.csv) | 107 | Outcomes: EXCLUDE 97, INCLUDE 5, REVIEW 5. |
 | [03_final_included.csv](03_final_included.csv) | 5 | Chỉ INCLUDE; thêm K52 / P53. |
-| [03_included_only.csv](extras/03_included_only.csv) | 5 | Tập INCLUDE đồng nhất với CSV 03. |
-| [matching-crosswalk.csv](extras/matching-crosswalk.csv) | 150 | Nối canonical ID, K và P. |
 | [evidence-table.md](evidence-table.md) | 5 bài INCLUDE | Evidence và độ gần PICO. |
 
 ## Những phần chưa chốt
