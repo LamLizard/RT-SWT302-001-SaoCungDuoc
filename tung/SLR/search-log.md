@@ -64,8 +64,6 @@ Các query mở rộng phục vụ thu thập ứng viên; paper vẫn cần đ�
 
 **Ba INCLUDE thêm vào tập evidence:** P12/K81 (`10.1145/3533767.3534401`), P17/K84 (`10.1145/3597926.3598131`), P38/K108 (`10.1145/3696630.3728545`). Xem căn cứ EP/BVA và kết quả số tại [evidence-table.md](evidence-table.md). Năm REVIEW chưa tính included.
 
-Log OpenAlex nguồn từng ghi session bBOXRT mở **03:07:05 ngày 13/10/2026 UTC+7**, backward QUEUED/fetched 49/reported 64, forward QUEUED/fetched 0. Đây là [snapshot của công cụ đầu](extras/original-export/extras/search-log-export-original.md), không đại diện tiến độ catalog/full-text đã làm ở công cụ khác. Không thay 99 unique catalog records bằng số reported của provider, không tự cộng 49 pending references thành 49 paper mới.
-
 **Giới hạn truy vết:** gói chưa có raw provider log đầy đủ cho công cụ snowball thứ hai. Vì vậy chưa xác minh tổng citations/references available, số pages provider, hoàn tất từng hướng hoặc coverage forward 12 tháng. Không diễn giải thiếu log hoặc số 0 của snapshot thành không có citation. Matching records và đồng bộ quyết định không tự hoàn tất coverage snowball.
 
 ## Hồ sơ bàn giao sau bổ sung toàn văn 13/10/2026
@@ -80,4 +78,3 @@ Log OpenAlex nguồn từng ghi session bBOXRT mở **03:07:05 ngày 13/10/2026 
 
 Thay đổi ngày 13/10/2026: sửa nhận định IC-P của K52 từ abstract bằng toàn văn Sections5–6, nhưng không sửa event V1 cũ. IC-I quyết định bằng phân lớp request thực dùng, không bằng câu EP/BVA của JUnit tests. Không đổi tiêu chí Git, không khẳng định K52 BVA, uniform distribution hoặc unique mutants. K52 HIGH_PARTIAL là nhận định độ gần tương đối, không đặt ngưỡng numeric mới.
 
-[Review bổ sung](snowballing/supplemental-review-2026-10-13.md) và [bảng lô bổ sung](snowballing/supplemental-screening-2026-10-13.csv) ghi lý do từng bài. Vẫn 37 NOT_REVIEWED, 5 REVIEW và thiếu coverage/provider logs; dossier chưa finalized.
