@@ -21,11 +21,10 @@ Nhóm SaoCungDuoc · RQ FA26-EXT-12 · Đợt tìm mới 12–13/10/2026, múi g
 
 ## Tổng hợp đợt tìm mới
 
-- Q1 = 0, Q2 = 0, Q3 = 2, Q4 = 2, Q5 = 68 → **72 lượt xuất hiện**, tương ứng **68 paper duy nhất** của đợt IEEE; catalog nguồn được giữ tại [01 IEEE](extras/original-export/01_all_records.csv).
+- Q1 = 0, Q2 = 0, Q3 = 2, Q4 = 2, Q5 = 68 → **72 lượt xuất hiện**, tương ứng **68 paper duy nhất** của đợt IEEE
 - Hai paper `10.1109/MS.2025.3559664` và `10.1109/ACCESS.2021.3056505` đều xuất hiện ở Q3, Q4 và Q5, tạo **4 lượt xuất hiện lặp**. Số paper mới ở Q1–Q5 lần lượt là **0, 0, 2, 0, 66**; tổng tích lũy **riêng đợt IEEE** là **68**.
 - Không cộng các lượt chạy trùng, lượt đối chiếu mọi năm hoặc occurrences do import V1/V2 vào tổng tìm kiếm. Tổng discovery/duplicates toàn hồ sơ chưa được manifest phục hồi; 72/4 là số lượt xuất hiện và số lặp của các search trong đợt này.
-- Q5 chạy lúc 00:02:54 ngày 13/10 theo UTC+7, trong khi [protocol nguồn](extras/original-export/extras/review-protocol.md) ghi `stopDate=2026-10-12`. [Protocol của bản matching](extras/review-protocol.md) ghi mốc thực tế 13/10/2026 và nguồn điều chỉnh; không đổi timestamp của lượt chạy.
-
+- Q5 chạy lúc 00:02:54 ngày 13/10 theo UTC+7
 ## Thay đổi so với protocol
 
 1. **Q1 → Q2:** String A trả 0 kết quả; bỏ khối Outcome theo quy tắc dưới 20 kết quả.
@@ -37,14 +36,11 @@ Các query mở rộng phục vụ thu thập ứng viên; paper vẫn cần đ�
 
 ## Kiểm chứng
 
-- **Q3:** Đối chiếu IEEE thủ công: 14 bài mọi năm → **2 bài từ 2020**, khớp kết quả tool. Log nguồn trước matching dẫn raw response `raw-raw_5573fa34-e289-426d-8422-d9c986f617bc.json`, ghi `start_year=2020`, `total_records=2` và hai DOI. Raw file đó không có trong gói hiện tại; provenance còn truy được qua [origins.csv](extras/origins.csv).
-- **Q4:** Provenance ghi đúng query mở rộng có `input partitioning` và `boundary analysis`; kết quả vẫn là **2 bài** của lượt trước. Query được lưu trong [origins.csv](extras/origins.csv).
+- **Q3:** Đối chiếu IEEE thủ công: 14 bài mọi năm → **2 bài từ 2020**, khớp kết quả tool. Log nguồn trước matching dẫn raw response `raw-raw_5573fa34-e289-426d-8422-d9c986f617bc.json`, ghi `start_year=2020`, `total_records=2` và hai DOI. Raw file đó không có trong gói hiện tại; 
+- **Q4:** Provenance ghi đúng query mở rộng có `input partitioning` và `boundary analysis`; kết quả vẫn là **2 bài** của lượt trước. 
 - **Q5:** Đối chiếu IEEE: 76 bài mọi năm → **68 bài từ 2020**, khớp kết quả tool. Lượt mọi năm chỉ dùng đối chiếu; tám bài ngoài phạm vi năm không tính thành tám bài loại V1.
 - Kết quả tìm kiếm và bộ lọc năm đã được kiểm tra trong quá trình thực hiện.
 
-## Snowballing từ công cụ khác — trạng thái hiện hành
-
-Đối chiếu [catalog snowball nguồn](extras/original-export/snowballing/01_all_records.csv) với [catalog hợp nhất](01_all_records.csv), sau đó nối với [45 full-text screening results](snowballing/screening_results.csv) bằng DOI và metadata. Định danh catalog K và định danh PDF P được giữ để truy vết; số records catalog không phải tổng hits/citations của provider.
 
 | Seed được ghi trong catalog nguồn | DOI | Ghi chú |
 |---|---|---|
@@ -66,15 +62,4 @@ Các query mở rộng phục vụ thu thập ứng viên; paper vẫn cần đ�
 
 **Giới hạn truy vết:** gói chưa có raw provider log đầy đủ cho công cụ snowball thứ hai. Vì vậy chưa xác minh tổng citations/references available, số pages provider, hoàn tất từng hướng hoặc coverage forward 12 tháng. Không diễn giải thiếu log hoặc số 0 của snapshot thành không có citation. Matching records và đồng bộ quyết định không tự hoàn tất coverage snowball.
 
-## Hồ sơ bàn giao sau bổ sung toàn văn 13/10/2026
-
-12 PDF do người thực hiện bổ sung tại `snowballing/paper-bo-sung`; tất cả khớp DOI/title với K09,K18,K23,K30,K35,K38,K51,K52,K53,K55,K56,K64 đã có. Bổ sung file/evidence và re-open V1 exclusions; không tăng unique catalog hoặc snowball discovery counts, không tự tạo seed/direction mới.
-
-- 01/02: 150 records. V1 lịch sử giữ 68 quyết định; 12 exclusions được mở lại bằng full-text. 02 thêm V2/current và IC/EC evidence.
-- 04: 107 outcomes = 97 EXCLUDE + 5 INCLUDE + 5 REVIEW. 46 EC-A import giữ riêng; 61 full-text thực đọc = 49 cũ + 12 mới.
-- Lô bổ sung: 1 INCLUDE K52/P53 (operational EP có suy luận, đối chứng random cùng số request, failure results); 11 EXCLUDE. Final 03 và included copy có 5 bài.
-- Screening results: 57 = 45 snowball cũ + 12 recovered IEEE; evidence 537 = 405 cũ + 132 mới. screening_batch phân biệt hai nguồn.
-- V1 historical counts không đổi; luồng hiện hành disjoint: 150 = 6 V1-only exclusions + 107 outcomes + 37 NOT_REVIEWED.
-
-Thay đổi ngày 13/10/2026: sửa nhận định IC-P của K52 từ abstract bằng toàn văn Sections5–6, nhưng không sửa event V1 cũ. IC-I quyết định bằng phân lớp request thực dùng, không bằng câu EP/BVA của JUnit tests. Không đổi tiêu chí Git, không khẳng định K52 BVA, uniform distribution hoặc unique mutants. K52 HIGH_PARTIAL là nhận định độ gần tương đối, không đặt ngưỡng numeric mới.
 
