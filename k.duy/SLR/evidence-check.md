@@ -42,14 +42,8 @@ Dòng hiện tại trong bảng gộp được lấy từ abstract.
 | Code | Không nêu | Chưa thấy trong PDF | — | Giữ |
 | Hạn chế | "Không nêu số kịch bản; không outcome về mutant" (nhận xét của người chấm, không phải của tác giả) | Phần Discussion/Limitations: 100% chỉ là tỉ lệ đạt kịch bản định trước, không chứng minh khả năng mở rộng hay hiệu năng; IPA chỉ 14 người, là đánh giá ban đầu; không đo response time, throughput, số người dùng đồng thời, tài nguyên server | P4 | Thay bằng hạn chế thật |
 
-## 3. Chưa kiểm chứng
 
-- Số trang của K33 và bản LNCS chính thức của K02: chưa đối chiếu, cần kiểm nếu dẫn số trang.
-- Link figshare của K02: chưa xác nhận trực tiếp trong PDF.
-- Số liệu K02 trong bảng này lấy từ PDF trong `Paper-source/41-K02.pdf`.
-- Bước 2: chưa làm, chờ hướng dẫn Bước 2.
-
-## 4. Tổng thay đổi 
+## 3. Tổng thay đổi 
 
 | # | Mã (gộp) | Paper (tên + năm + venue + DOI) | Nguồn | Tool/LLM | Dataset | Metric | Kết quả | Code | Hạn chế | Gần RQ |
 |---|---|---|---|---|---|---|---|---|---|---|
