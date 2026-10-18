@@ -4,12 +4,13 @@
 
 **Ngày:** 18/10/2026
 
-**Nguồn đối chiếu:** PDF trong `Paper-source/` (17-K46 … 22-K68, 41-K02, 42-K33). 
+**Nguồn đối chiếu:** PDF trong `Paper-source/` (17-K46 … 22-K68, 41-K02, 42-K33).
 
 **Quy ước chấm:** theo `rq-evidence-map.md` §1. ✓ = khớp đúng giá trị RQ; ◐ = gần (không tính vào số ✓); "Không" = không có. Ngưỡng phản chứng: ≥ 3 ô ✓.
 
-## 1. RQ của nhóm (nguyên văn trên thẻ FA26-EXT-12)
+## Mục 1 · Bảng đối chiếu paper với RQ (P/I/C/O + hạn chế cụ thể)
 
+### 1.1 RQ của nhóm
 > Trên 45 yêu cầu của RESTestBench, phân hoạch tương đương kết hợp phân tích giá trị biên, so với sinh dữ liệu ngẫu nhiên đồng đều cùng ngân sách, khác nhau thế nào về số mutant riêng biệt bị phát hiện theo từng dạng yêu cầu?
 
 - **P:** 45 yêu cầu RESTestBench
@@ -17,8 +18,7 @@
 - **C:** random đồng đều cùng ngân sách
 - **O:** số mutant riêng biệt được oracle xác nhận
 
-## 2. Bảng phản chứng P/I/C/O
-
+### 1.2 Bảng P/I/C/O
 | # | Paper | P | I | C | O | Số ✓ | Hạn chế paper nêu (tóm tắt) |
 |---|---|---|---|---|---|---|---|
 | 17 | K46 · Black-Box and White-Box Test Case Generation for RESTful APIs: Enemies or Allies? (2021) | ◐ | ◐ | ◐ | ◐ | 0/4 | Chỉ 4 SUT; lỗi của công cụ có thể ảnh hưởng kết luận; yếu tố ngẫu nhiên |
@@ -30,13 +30,9 @@
 | 41 | K02 · Test Amplification for REST APIs via Single and Multi-agent LLM Systems (2026) | Không | Không | Không | ◐ | 0/4 | 1 ứng dụng (PetStore); LLM có thể đã biết PetStore; mọi bug tính ngang nhau; 1 model, không tất định |
 | 42 | K33 · Integrated Executive Dashboard on the PPMPP Portal (2026) | ◐ | ◐ | Không | Không | 0/4 | IPA chỉ 14 người; không đo hiệu năng; 100% chỉ là tỉ lệ đạt kịch bản định trước |
 
+Ô ◐ lấy từ cột "Gần RQ" của bảng gộp. Tôi đối chiếu với PDF và không thấy chỗ nào cần đổi.
 
-**Kết luận phần của K.Duy:** trong 8 bài được giao, **không bài nào ≥ 3/4 ô ✓**. Cao nhất là K49 với 1/4 (ô C: random search cùng thời gian, Table 8). Các bài còn lại 0/4. Phần của K.Duy cho kết quả: **RQ đứng vững trong phạm vi tài liệu đã tìm**, không khẳng định tuyệt đối.
-
-Lưu ý với K49: random search ở đây là gray-box trong EvoMaster, chưa chắc đồng đều trên không gian input. Bảng gộp đã ghi điểm này, nên ô C của K49 nên xem là ✓ yếu.
-
-## 3. Hạn chế cụ thể và trích nguyên văn (mỗi paper một câu trích)
-
+### 1.3 Hạn chế cụ thể paper nêu, kèm trích nguyên văn và mục/trang
 | # | Paper | Hạn chế paper tự nêu | Trích nguyên văn | Mục / trang |
 |---|---|---|---|---|
 | 17 | K46 | Lỗi trong RESTest hoặc EvoMaster (đã mở rộng cả hai) có thể ảnh hưởng kết luận; thuật toán ngẫu nhiên; tác giả muốn thêm case study | "Faults in such tools might compromise the validity of our conclusions." | §VIII Internal validity, tr. 10 |
@@ -50,13 +46,7 @@ Lưu ý với K49: random search ở đây là gray-box trong EvoMaster, chưa c
 
 Ghi chú: ở K46, K49 và K67, hạn chế "gần RQ" như random cùng ngân sách hoặc mutant riêng biệt là nhận xét của người chấm (REVIEWER_INFERRED), không phải của tác giả. Tôi chỉ đưa vào cột này những hạn chế tác giả tự nêu.
 
-**Gợi ý hạn chế để nhóm xét khi tìm gap** (chưa phải kết luận):
-- **GAP-D (dữ liệu):** K02, K60 và K33 chỉ chạy trên 1 hệ thống; K46 chỉ 4 SUT; K67 8 SUT. Chưa bài nào dùng RESTestBench.
-- **GAP-M (khía cạnh đo):** K46, K49, K56, K60, K67, K68 đo coverage, độ chính xác suy luận kiểu hoặc đếm 5XX/bug, không phải mutant riêng biệt theo oracle.
-- **GAP-T (công cụ):** chưa bài nào làm EP+BVA kết hợp đúng nghĩa trên tham số request, có đối chứng random cùng ngân sách.
-
-## 3b. Kết quả đối chiếu với `evidence-table-merged.md` và `rq-evidence-map.md`
-
+### 1.4 Đối chiếu với `evidence-table-merged.md` và `rq-evidence-map.md`
 Lưu ý: số thứ tự (#) trong `rq-evidence-map.md` **khác** `evidence-table-merged.md` (map xếp theo thứ hạng, bảng gộp xếp theo nguồn). Tôi đối chiếu theo **Mã (gộp)**.
 
 | Mã | # trong bảng gộp | # trong map | Gần RQ (bảng gộp) | Ma trận P/I/C/O (map) | Rq-check của tôi |
@@ -74,14 +64,36 @@ Cả 8 dòng khớp giữa 3 nguồn (bảng gộp, map, rq-check). Hai ghi chú
 - **K49 (C ✓):** map ghi "uniform input distribution chưa xác nhận", nên đây là ✓ yếu. Tôi đã ghi điểm này ở mục 2.
 - **K56 (C ◐):** map ghi ngân sách hai bên không bằng nhau (TnT 1.000/param lớn hơn Leif), nên chỉ ◐.
 
-## 4. Đối chiếu nhãn tính mới trên thẻ RQ
+## Mục 2 · Kết luận phần của tôi
 
-- Thẻ FA26-EXT-12 trong `SWT302_Tuan_7.docx` chỉ liệt kê paper nền, không thấy nhãn new / extension / replication.
-- Nhãn của tôi theo bảng mục 2: không paper nào giống ≥ 3/4, nên nghiêng về **new** trong phạm vi nguồn của tôi.
-- Nếu nhãn máy gán trên thẻ web khác, ghi lý do tại đây: ___ (chờ PL xác nhận).
+### 2.1 Kết luận
+**Kết luận phần của tôi:** trong 8 bài được giao, **không bài nào ≥ 3/4 ô ✓**. Cao nhất là K49 với 1/4 (ô C: random search cùng thời gian, Table 8). Các bài còn lại 0/4. Phần của tôi cho kết quả: **RQ đứng vững trong phạm vi tài liệu đã tìm**, không khẳng định tuyệt đối.
 
-## 5. Rà nghiên cứu mạnh nhất gần đây (12 tháng gần nhất, từ 10/2025)
+Lưu ý với K49: random search ở đây là gray-box trong EvoMaster, chưa chắc đồng đều trên không gian input. Bảng gộp đã ghi điểm này, nên ô C của K49 nên xem là ✓ yếu.
 
+### 2.2 Hạn chế gợi ý cho gap
+**Gợi ý hạn chế để nhóm xét khi tìm gap** (chưa phải kết luận):
+- **GAP-D (dữ liệu):** K02, K60 và K33 chỉ chạy trên 1 hệ thống; K46 chỉ 4 SUT; K67 8 SUT. Chưa bài nào dùng RESTestBench.
+- **GAP-M (khía cạnh đo):** K46, K49, K56, K60, K67, K68 đo coverage, độ chính xác suy luận kiểu hoặc đếm 5XX/bug, không phải mutant riêng biệt theo oracle.
+- **GAP-T (công cụ):** chưa bài nào làm EP+BVA kết hợp đúng nghĩa trên tham số request, có đối chứng random cùng ngân sách.
+
+### 2.3 Nhãn tính mới trên thẻ RQ (new / extension / replication)
+
+**Nhãn của tôi (theo bảng "Kết quả / Nghĩa là / Làm gì"): `new` trong phạm vi nguồn của tôi.**
+
+| Căn cứ | Kết quả |
+|---|---|
+| Số paper giống ≥ 3/4 yếu tố P/I/C/O | 0/8 (cao nhất K49: 1/4 ✓ ở ô C) |
+| Số paper giống đủ 4/4 (replication) | 0/8 |
+| Paper gần nhất ngoài nguồn của tôi (mục 2.4) | RESTestBench, bài log coverage, Vibe Testing: khác can thiệp (LLM) hoặc khác metric, đều không so EP+BVA với random cùng ngân sách |
+
+**Đối chiếu với thẻ FA26-EXT-12:**
+- Thẻ trong tài liệu tuần 7 liệt kê kho bài nền gồm 20 bài (2 nền tảng, 16 mới, 1 SLR, 1 khác). Thẻ không có trường nhãn riêng.
+- Trong 20 bài đó **không có bài nào thuộc 8 bài của tôi**. Bài gần nhất về tên là "Prompt-Based REST API Test Amplification in Industry" (2026); đây là bài khác K02 (K02 là "Test Amplification for REST APIs via Single and Multi-agent LLM Systems"), và K02 chỉ giống 0/4.
+- Vì vậy phần của tôi **không đưa ra bằng chứng nào mâu thuẫn** với nhãn `new`.
+
+
+### 2.4 Rà nghiên cứu mạnh nhất gần đây (12 tháng gần nhất)
 Thứ tự chọn: cùng bài toán/metric, rồi venue/benchmark lớn, rồi mới nhất. Tôi chỉ đọc abstract, trang bài hoặc trang replication package, chưa đọc toàn văn.
 
 | Paper | Ngày | Đo gì | Chưa đo gì so với RQ của nhóm |
@@ -94,25 +106,4 @@ Thứ tự chọn: cùng bài toán/metric, rồi venue/benchmark lớn, rồi m
 
 **Cần kiểm khi tải dataset:** bài RESTestBench và blog tác giả nêu 106 yêu cầu NL, còn thẻ RQ ghi 103. Có thể là khác phiên bản.
 
-## 6. Ghi vào `search-log.md` (người chạy: K.Duy, ngày 17–18/10/2026)
 
-| # | Truy vấn | Kết quả | Quyết định |
-|---|---|---|---|
-| 1 | `RESTestBench LLM-generated REST API test cases natural language requirements mutation benchmark` | Bài RESTestBench (arXiv 2604.25862), gợi ý Vibe Testing | Giữ cả hai (cùng benchmark/metric) |
-| 2 | `boundary value analysis equivalence partitioning REST API random testing 2026` | Chủ yếu blog; 1 bài học thuật từ 2020 (arXiv 2001.06652) | Loại: ngoài 12 tháng gần nhất |
-| 3 | `Assessing REST API Test Generation Strategies with Log Coverage` | arXiv 2604.07073 | Giữ (cùng bài toán REST API, 04/2026) |
-
-## 7. Chưa kiểm chứng / cần lưu ý
-
-- Số liệu K46, K49, K56, K60, K67, K68 đã đối chiếu với PDF và khớp bảng gộp. Chưa kiểm: "5 lần chạy" của K68.
-- Hai ý trong cột Hạn chế của bảng gộp mà tôi **không tìm thấy** trong PDF nên không đưa vào cột hạn chế: K67 "prototype limitation (rest-news POST format)" và K56 "application-specific formats cần mở rộng FET". Cả hai đang gắn nhãn AUTHOR_STATED, nên Khôi (người chấm) nên kiểm lại nguồn.
-- Ý "cải tiến cách lưu identifier" của K60 đã xác nhận ở tr. 9.
-- Trang của K02 (LNCS) và K33 chưa đối chiếu số trang bản in; số trang trong bảng là trang trong PDF.
-- Các paper ở mục 5 mới đọc abstract hoặc trang mô tả.
-- Nhãn tính mới trên thẻ web chưa có, chờ PL.
-
-## 8. Chỗ cần sửa trong `evidence-table-merged.md`
-
-- **#42 (K33), cột Kết quả:** còn dính ghi chú của người chấm: "Cụm 'chưa đánh giá định lượng' không đúng, bài có số". Nên xoá cụm này, chỉ giữ số liệu.
-- **#41 (K02), cột Code:** còn chữ "theo evidence-table cá nhân". Nên bỏ và ghi "Có reproduction package (figshare)" kèm link.
-- **#17 (K46), cột Kết quả:** câu "hơn WB 1,2–60,3%, hơn BB 1,1–4,8% ở 3/4 SUTs" dễ hiểu nhầm. Theo PDF (tr. 8), HYBRID hơn WB ở cả 4 SUT và hơn BB ở 3/4 SUT.
