@@ -1,4 +1,4 @@
-# PRISMA flow — Khôi · nguồn phụ trách: OpenAlex
+# PRISMA flow — Duy · nguồn phụ trách: Springer Nature 
 *Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · Cập nhật: 16/10/2026 · tạo bởi RBL Paper Harvester*
 
 ## Nhánh 1 — Tìm trong CSDL
