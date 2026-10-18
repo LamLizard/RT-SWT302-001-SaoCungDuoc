@@ -51,24 +51,43 @@ Không được phân công L1–L3. Bảng gộp có N = 42 ≥ 12, nên cổng
 - Cần **kiểm spec OpenAPI** của RESTestBench trước khi chạy, vì K32 phải sửa tay 7/14 spec.
 
 ## 4. Nhãn tính mới (bước cá nhân 3)
-- Nhãn trên thẻ RQ: **extension** (mã thẻ FA26-**EXT**-12).
-- Nhãn đề xuất từ phần của tôi: **extension**. Lý do: không bài nào trong 8 bài giống từ 3/4 yếu tố trở lên. Riêng paper gốc **RESTestBench (2026)**, xem mục 5, đã khớp đúng **P** (RESTestBench) và **O** (requirements-based mutation score). RQ của nhóm khác ở **I** (EP + BVA thay vì LLM) và **C** (random đồng đều cùng ngân sách). Paper đó **không có** baseline EP/BVA hay random.
+- **Nhãn trên thẻ RQ: chưa xác định.** Thẻ chỉ ghi mã FA26-EXT-12, loại và độ khó, không hiển thị nhãn new / extension / replication. Ý nghĩa của "EXT" trong mã chưa được xác nhận (các đề khác có mã W4, W5…); nhóm đã mail hỏi giảng viên ngày 18/10.
+- **Nhãn theo bảng "Bốn kết luận": new (trong phạm vi tài liệu đã xét).** Lý do:
+  - 8 bài của tôi: không bài nào có ô ✓ (0/4).
+  - Toàn bảng gộp 42 bài: cao nhất 2/4 ✓ (TD-0002).
+  - Paper gốc RESTestBench (mục 5): khớp 2/4 (P, O), khác I và C.
+  - Req2REST-Guard (mục 5, bài duy nhất tìm được dùng RESTestBench): 2/4 (P, O); I là LLM, C là Manual/EvoMaster/GPT, không có random đồng đều cùng ngân sách.
+  - Không paper nào giống từ 3/4 trở lên → chưa đủ điều kiện extension theo bảng.
+- **Ghi chú:** RQ dùng lại benchmark và thước đo của RESTestBench, chỉ đổi I (EP + BVA) và C (random đồng đều cùng ngân sách). Nếu giảng viên xác định nhãn theo nghĩa "mở rộng một nghiên cứu có sẵn" thì có thể đổi sang extension; khi có trả lời sẽ cập nhật và ghi lý do thay đổi.
 
 ## 5. Rà nghiên cứu mạnh nhất 12 tháng gần đây (bước cá nhân 4)
-Truy vấn (tìm ngày 2026-10-18; ghi vào `search-log.md`):
-1. `REST API test generation 2026 ICSE OR FSE OR ISSTA OR TOSEM black-box mutation score`
-2. `RESTestBench mutation testing REST API test generation benchmark`
+Khôi tự chạy trên **Google Scholar**, ngày 2026-10-18, lọc **2025–2026**, sắp theo relevance (đã ghi vào `search-log.md` mục 8):
+1. `"REST API" "test generation" "mutation score"` → khoảng 44 kết quả.
+2. `"RESTestBench"` → 5 kết quả.
 
 Thứ tự ưu tiên khi chọn: cùng bài toán và metric trước, rồi đến venue/benchmark lớn, cuối cùng mới xét độ mới.
 
-| Paper | Vì sao chọn | Họ đo gì | RQ của nhóm đo thêm điều gì họ chưa đo |
+| Paper | Vì sao chọn | P / I / C / O | RQ của nhóm đo thêm điều gì họ chưa đo |
 |---|---|---|---|
-| **RESTestBench: A Benchmark for Evaluating the Effectiveness of LLM-Generated REST API Test Cases from NL Requirements** — Kogler et al., arXiv 2604.25862 (04/2026, bài blog tác giả ghi được nhận ở EASE 2026) | Đúng bài toán và đúng metric của RQ; là nguồn của P | 3 dịch vụ, 106 yêu cầu, 228 mutant; 10 LLM; requirements-based mutation score (Eq. 1, Table 3) | Họ chỉ thử LLM. Họ **không** có baseline EP/BVA hay random cùng ngân sách. Tác giả tự nêu: "Our benchmark includes only three services" và "Each experiment was executed only three times" (§6) |
-| **MASTOR: A Multi-Agent Approach to Semantic Test Oracle Generation for RESTful APIs** — Deng et al., ACM 2026 (arXiv 2606.10465) | Cùng metric (mutation score bằng PITest), 13 API mã mở | Oracle do LLM sinh, mutation score trung bình 75,4% | Họ tập trung vào **oracle**, không phải thiết kế input. RQ của nhóm cố định oracle và so sánh kỹ thuật sinh input (EP+BVA vs random) |
-| **RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning** — Zhou et al., ISSTA 2026 | Venue lớn, mới nhất | Assertion từ cặp request/response, F1 85,42%, dữ liệu công nghiệp | Họ dùng dữ liệu nội bộ, không đếm mutant, không so kỹ thuật sinh input |
+| **RESTestBench: A Benchmark for Evaluating the Effectiveness of LLM-Generated REST API Test Cases from NL Requirements** — Kogler et al., arXiv 2604.25862 (04/2026, tác giả ghi được nhận ở EASE 2026) | Đúng bài toán và đúng metric của RQ; là nguồn của P | ✓ / — / — / ✓ → **2/4**. 3 dịch vụ, 106 yêu cầu, 228 mutant; 10 LLM; requirements-based mutation score (Eq. 1, Table 3) | Chỉ thử LLM, **không** có baseline EP/BVA hay random cùng ngân sách. Tác giả tự nêu: "Our benchmark includes only three services" và "Each experiment was executed only three times" (§6) |
+| **Requirement-Aware LLM Testing for Backend REST APIs (Req2REST-Guard)** — Xue, Ying, Ding, Wang, Qing, Hu, 2026, bản PDF trên ResearchGate (6 trang, không ghi venue) | Bài duy nhất trong kết quả **dùng RESTestBench** và đo mutation score | ✓ / — / ◐ / ✓ → **2/4**, chạm 3/4. P: "three REST services from the RESTestBench benchmark … 106 … requirements … 228 … mutations" (§IV-B, tr. 4). I: GPT-4o + bộ kiểm tra assertion. C: Manual, EvoMaster, GPT-OAS, GPT-NL (§IV-C, tr. 4), không có random đồng đều cùng ngân sách. O: "percentage of requirement-based mutants killed", MS 61,0% (Table I, tr. 4) | Không thử kỹ thuật không dùng AI (EP + BVA), không có đối chứng random cùng ngân sách, không đếm mutant theo dạng yêu cầu. Tác giả tự nêu: "has not yet been validated on large-scale real-world REST APIs" (§VII, tr. 6) |
+| **MASTOR: A Multi-Agent Approach to Semantic Test Oracle Generation for RESTful APIs** — Deng et al., ACM 2026 (arXiv 2606.10465) | Cùng metric (mutation score bằng PITest), 13 API mã mở | — / — / — / ✓ → 1/4 | Tập trung vào **oracle**, không phải thiết kế input. RQ của nhóm cố định oracle và so sánh kỹ thuật sinh input (EP + BVA vs random) |
 
-Loại: MioHint (arXiv 2504.05738), vì đây là kiểm thử hộp trắng và xuất bản 04/2025, nằm ngoài 12 tháng gần nhất.
+**Lưu ý về độ tin cậy của Req2REST-Guard (nhận xét của người đọc):**
+- Tên 3 dịch vụ trong bài (Features-Service, REST-Countries, CatFactAPI) **khác** 3 dịch vụ trong paper RESTestBench gốc (FastAPI template, TodoApp, RealWorld), dù tổng 106 yêu cầu và 228 mutant trùng khớp.
+- Table I có cột bị lệch so với văn bản. Ví dụ văn bản ghi EvoMaster "highest executability (95.2%) … only 25.6% requirement coverage", nhưng trong bảng hai số này nằm ngược cột. Dòng GPT-NL trong bảng cũng không khớp số trong văn bản (58,5 / 51,2 / 20,8).
+- Bài chưa có venue, nhiều tài liệu tham khảo không liên quan tới kiểm thử.
+→ Chỉ dùng bài này để đối chiếu tính mới, **không dùng làm nguồn số liệu chính**.
 
-⚠️ **Cần báo PL ngay:** paper gốc RESTestBench có **106 yêu cầu trên 3 dịch vụ** (63 / 14 / 29), không phải "45 yêu cầu, 15 mỗi dịch vụ" như trong P của nhóm. Cần xác nhận 45 = 15×3 là **tập con nhóm tự chọn** và ghi rõ cách chọn. Nếu không ghi, giảng viên sẽ hỏi.
+**Đã loại:**
+- Combining TSL and LLM… (Barradas et al., 2025): đã có trong bảng gộp (TD-0002).
+- Req2test (França et al., 2026): sinh unit test từ user story, khác bài toán.
+- A Comparative Survey of Mutation Testing… (Falah & Routaib, 2025) và LLM-Based Test Generation: Information Sources… (Liang et al., 2026): bài survey.
+- Bài tiếng Ukraina (Хацько, Назарова), Multi-level testing of conversational AI systems (Masserini, 2026), A quantized LLM driven framework… (Ahmed, 2026), luận án Sue (2025), TestPrism (Li et al., 2026), TestSuiteBench (Egashira et al., 2026): khác bài toán (không phải sinh test REST API đo bằng mutant).
+- RESTOR (ISSTA 2026): không xuất hiện trong 2 truy vấn Scholar trên; bản nháp trước có nhắc nhưng đã bỏ vì dùng dữ liệu công nghiệp nội bộ và không đo mutant.
 
-Nguồn: [RESTestBench (arXiv)](https://arxiv.org/pdf/2604.25862) · [EASE 2026 (blog tác giả)](https://research.casablanca.at/post/restestbench-evaluating-llm-generated-api-tests--our-latest-paper-accepted-at-ease-2026) · [MASTOR (arXiv)](https://arxiv.org/pdf/2606.10465) · [RESTOR (ISSTA 2026)](https://conf.researchr.org/details/issta-2026/issta-2026-research-papers/94/RESTOR-Automated-Test-Oracle-Generation-for-RESTful-APIs-via-Reinforcement-Learning)
+**Kết luận mục 5:** không paper nào trong 12 tháng gần đây giống RQ từ 3/4 yếu tố trở lên. Hai bài dùng RESTestBench (RESTestBench, Req2REST-Guard) đều chỉ thử LLM; RQ của nhóm đo điều họ chưa đo: **kỹ thuật thiết kế input không dùng AI (EP + BVA) so với random đồng đều cùng ngân sách**, trên cùng benchmark và cùng thước đo mutant.
+
+⚠️ **Cần báo PL:** paper gốc RESTestBench có **106 yêu cầu trên 3 dịch vụ**, không phải "45 yêu cầu, 15 mỗi dịch vụ" như trong P của nhóm. Cần xác nhận 45 = 15×3 là **tập con nhóm tự chọn** và ghi rõ cách chọn.
+
+Nguồn: [RESTestBench (arXiv)](https://arxiv.org/pdf/2604.25862) · [EASE 2026 (blog tác giả)](https://research.casablanca.at/post/restestbench-evaluating-llm-generated-api-tests--our-latest-paper-accepted-at-ease-2026) · [Req2REST-Guard (ResearchGate)](https://www.researchgate.net/publication/407162719_Requirement-Aware_LLM_Testing_for_Backend_REST_APIs) · [MASTOR (arXiv)](https://arxiv.org/pdf/2606.10465)

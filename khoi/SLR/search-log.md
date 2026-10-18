@@ -71,3 +71,14 @@
 - **V2:** Khôi tự tải toàn văn: lấy được **46/73** PDF (bản nhà xuất bản hoặc bản arXiv/tác giả của bài đã đăng); 27 bài không tải được → EXCLUDE (24 EC-A, K08 IC-L, K99/K180 EC-S). **AI (Claude) hỗ trợ đọc 46 PDF** theo IC/EC (số trang, Table/Figure có số, kỹ thuật sinh input, có thực nghiệm) và đề xuất quyết định kèm bằng chứng; Khôi rà và nhập quyết định cuối vào tool.
 - **Kết quả V2:** 34 INCLUDE (nhánh CSDL 28 + snowballing 6), 39 EXCLUDE — khớp `03_final_included.csv` và `prisma-flow.md`. Các ca ranh giới cần PL xác nhận ghi ở cuối `prisma-flow.md`.
 - Người thực hiện (Khôi) chịu trách nhiệm quyết định cuối; evidence table lập từ chính các PDF đã tải, có AI hỗ trợ trích số.
+
+## 8. RBL-2 — Rà nghiên cứu mạnh nhất 12 tháng gần đây (18/10/2026)
+
+Không dùng cho PRISMA (không thêm bài vào 01–03 CSV); chỉ để đối chiếu tính mới của RQ. Kết quả chi tiết: `rq-check.md` mục 5.
+
+| # | Ngày | Công cụ | Truy vấn (nguyên văn) | Bộ lọc | Số kết quả | Bài chọn | Lý do chọn / loại |
+|---|---|---|---|---|---|---|---|
+| R1 | 18/10/2026 | Google Scholar (Khôi tự chạy) | `"REST API" "test generation" "mutation score"` | 2025–2026, sort by relevance | khoảng 44 | Req2REST-Guard (Xue et al., 2026); RESTestBench (Kogler et al., 2026); MASTOR (Deng et al., 2026) | Chọn: cùng bài toán REST API + metric mutation score. Loại: TSL+LLM (đã có, TD-0002); Req2test (unit test); survey Falah 2025; bài tiếng Ukraina; conversational AI (Masserini); quantized LLM (Ahmed); luận án Sue — khác bài toán hoặc là survey |
+| R2 | 18/10/2026 | Google Scholar (Khôi tự chạy) | `"RESTestBench"` | 2025–2026, sort by relevance | 5 | RESTestBench; Req2REST-Guard | Chọn: dùng đúng benchmark của P. Loại: LLM-Based Test Generation survey (Liang et al., 2026), TestPrism, TestSuiteBench — survey/benchmark chung, không phải REST API |
+
+Toàn văn Req2REST-Guard tải từ ResearchGate (6 trang, chưa có venue); đọc §IV–VII để chấm P/I/C/O. Bản nháp trước (web search do Claude chạy, cùng ngày) có thêm RESTOR (ISSTA 2026) — không xuất hiện trên Scholar với 2 truy vấn trên nên đã bỏ khỏi rq-check.
