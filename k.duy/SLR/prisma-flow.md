@@ -1,47 +1,71 @@
-# PRISMA flow — K.Duy · Springer Nature
+# PRISMA flow — Khôi · nguồn phụ trách: OpenAlex
+*Nhóm 1 — SaoCungDuoc · RQ FA26-EXT-12 · Cập nhật: 16/10/2026 · tạo bởi RBL Paper Harvester*
 
-Cập nhật 13/10/2026 theo các CSV hiện hành do K.Duy cập nhật: 01 có 35 records, 02 có 8, 03 có 8. Giữ nguyên các quyết định ở 03. Springer là nguồn phụ của K.Duy, không tự cộng vào PRISMA tổng IEEE/ACM/OpenAlex của nhóm.
+## Nhánh 1 — Tìm trong CSDL
 
-## Identification và screening
-
-| Giai đoạn | Số | Căn cứ / trạng thái |
-|---|---:|---|
-| Records trong 01_all_records.csv | 35 | Export Springer Nature sau gộp. |
-| Records có trong 02_after_screening_v1.csv | 8 | Tệp hiện tại chỉ có 8 dòng metadata. |
-| Records có trong 03_final_included.csv | 8 | Cả 8 mang `v1_decision=INCLUDE`. |
-| Records trong 01 nhưng không có trong 02/03 | 27 | Không có quyết định/lý do V1 trong hai tệp hiện tại; giữ là disposition chưa ghi nhận, không tự gán lý do loại. |
-| V2 decision đã ghi | 0 | Cột `v2_decision` đang trống cho cả 8. |
-| V2 đang chờ | 8 | Chưa có quyết định full-text được ghi nhận. |
-| Included cuối cùng xác nhận | 0 | Chưa hoàn tất V2; không tính V1 INCLUDE thành final included. |
-
-```text
-Records identified in 01 (n = 35)
-  ├─ Records present in 02/03 with V1 INCLUDE (n = 8)
-  │    └─ V2 decision recorded (n = 0)
-  │         └─ V2 pending (n = 8)
-  └─ Not present in 02/03; V1 disposition not recorded (n = 27)
-
-Studies included after full-text/V2 (n = 0 confirmed)
+```
+[Paper từ Springer Nature (N = 63)]         ← search-log: V1 3 + V2 10 + V3 18 + V4 12 + V5 10 + V6 10
+        ↓                                   
+[Sau dedup (N = 35)]                        ← bỏ 28 bản trùng
+        ↓
+[Vào 01 → screening V1 (N = 35)]            ← = số dòng của nhánh này trong 01_all_records.csv
+        ↓
+[Loại V1 (N = 27): IC-P = 20, EC-N = 5, IC-I = 2] ← EXCLUDE trong 02_after_screening_v1.csv (mã chính)
+        ↓
+[Full-text đọc (N = 8)]                     ← INCLUDE 8 + Unsure 0 ở 02 = số dòng trong 03
+        ↓
+[Loại V2 (N = 5): EC-A = 5]                 
+        ↓
+[Included (N = 3)]                          ← INCLUDE trong cột v2_decision của 03_final_included.csv
 ```
 
-### V1 fields recorded in 03
+**Kiểm cộng trừ:** 63 − 28 = 35 · 35 − 0 = 35 · 35 − 27 = 8 · 8 − 5 = 3 ✓
 
-| V1 label | Count | Note |
-|---|---:|---|
-| INCLUDE | 8 | K02, K04, K08, K19, K22, K24, K27, K33. |
-| EXCLUDE / Unsure | 0 in 03 | No such labels appear in the current 03 file. This does not establish the status of the other 27 records. |
-| V2 pending | 8 | `v2_decision` and `v2_reason` blank. |
+### Lý do loại ở V1
 
-## Snowballing
+| Mã chính | Số bài | Bài |
+|---|---|---|
+| IC-P (không về kiểm thử REST API mức request) | 20 | K03, K06, K07, K09, K10, K12, K13, K14, K15, K16, K17, K18 … (+8) |
+| EC-N (không có thực nghiệm) | 5 | K05, K11, K26, K30, K31 |
+| IC-I (không dùng EP/BVA) | 2 | K01, K32 |
 
-`snowball-seeds.txt` currently contains 13 DOI seeds. No retrieved snowball records, citation counts, or seed/result links are recorded in 01–03 or the available run log. Snowballing totals remain unverified and are not added to the 35 Springer records.
+### Lý do loại ở V2
 
-## File consistency
+| Mã chính | Số bài | Bài |
+|---|---|---|
+| EC-A (không có full text) | 5 | K04, K08, K19, K24, K27 |
 
-| File | Data rows | Status |
-|---|---:|---|
-| `01_all_records.csv` | 35 | Metadata export. |
-| `02_after_screening_v1.csv` | 8 | Eight metadata rows; no V1 decision/reason columns. |
-| `03_final_included.csv` | 8 | Eight V1 INCLUDE; V2 pending for all. |
-| `evidence-table.md` | 8 | Abstract/metadata extraction for the eight 03 records. |
-| `snowball-seeds.txt` | 13 | Current seed list. |
+## Nhánh 2 — Snowballing vòng 1
+
+Seed: 2 bài (INCLUDE của nhánh 1) · lấy bài từ năm 2020 ở cả hai hướng
+
+```
+[Tìm được qua snowballing (N = 12)]         ← lùi + tiến, SB1 0 + SB1 12
+        ↓                                   
+[Sau dedup (N = 12)]                        ← bỏ 0 bản trùng (trùng nhau hoặc đã có ở bước trước)
+        ↓
+[Vào 01 → screening V1 (N = 12)]            ← = số dòng của nhánh này trong 01_all_records.csv
+        ↓
+[Loại V1 (N = 11): IC-I = 7, IC-P = 2, IC-T = 2] ← EXCLUDE trong 02_after_screening_v1.csv (mã chính)
+        ↓
+[Full-text đọc (N = 1)]                     ← INCLUDE 1 + Unsure 0 ở 02 = số dòng trong 03
+        ↓
+[Loại V2 (N = 0)]                           
+        ↓
+[Included (N = 1)]                          ← INCLUDE trong cột v2_decision của 03_final_included.csv
+```
+
+**Kiểm cộng trừ:** 12 − 0 = 12 · 12 − 0 = 12 · 12 − 11 = 1 · 1 − 0 = 1 ✓
+
+### Lý do loại ở V1
+
+| Mã chính | Số bài | Bài |
+|---|---|---|
+| IC-I (không dùng EP/BVA) | 7 | K36, K37, K38, K40, K43, K46, K47 |
+| IC-P (không về kiểm thử REST API mức request) | 2 | K41, K42 |
+| IC-T (không phải hội nghị/tạp chí) | 2 | K44, K45 |
+
+## Tổng
+
+- Included cuối = nhánh 1 (3) + snowballing vòng 1 (1) + snowballing vòng 2 (0) = **4**
+- Tất cả phép kiểm cộng trừ: ✓ khớp
