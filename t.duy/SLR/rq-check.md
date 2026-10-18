@@ -1,7 +1,7 @@
 # Kiểm chứng RQ — phần của T.Duy
 
 **Nguồn phụ trách:** Semantic Scholar + Google Scholar  
-**Lớp bổ sung:** L 2 · **Ngày:** 18/10/2026 · **RQ:** FA26-EXT-12
+**Lớp bổ sung:** L2 · **Ngày:** 18/10/2026 · **RQ:** FA26-EXT-12
 
 **RQ:** Trên 45 yêu cầu của RESTestBench, phân hoạch tương đương kết hợp phân tích giá trị biên, so với sinh dữ liệu ngẫu nhiên đồng đều cùng ngân sách, khác nhau thế nào về số mutant riêng biệt bị phát hiện theo từng dạng yêu cầu?
 
@@ -28,22 +28,22 @@ Theo bản đồ nhóm: ✓ khớp, ◐ gần, · không khớp. O✓ cho mutati
 | **TD-0029 — RESTestBench**, [arXiv](https://arxiv.org/abs/2604.25862), 28/04/2026 | Gần P/O: 106 yêu cầu, 228 mutants, 3 dịch vụ; không EP+BVA-vs-random. Không coi tập 106 yêu cầu là tập 45 của nhóm |
 | **K100 — FDRRestTest**, [publisher](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ESEM.2026.20), 05/10/2026, ESEM | Gần baseline/ngân sách: 12 REST services, 5 đối chứng, budget 600 giây và một protocol fixed-request; FRE 0,9878 so 0,9294 là ước lượng có giới hạn. Không EP+BVA, không implementation-mutant outcome; không đáp ứng trọn RQ |
 
-Ba bài được ưu tiên theo độ khớp I, P/O và thiết kế baseline; FDRRestTest bổ sung venue ESEM và benchmark 12 services. RestTSLLM tháng 09/2025 ngoài cửa sổ, vẫn là ứng viên chính. Overlay là đối chiếu L 2 riêng, không thay thử nghiệm EP+BVA; đã chạy hai query kết quả âm 18/10(search-log§6); chưa thấy phản chứng trực tiếp trong tập đã rà.
+Ba bài được ưu tiên theo độ khớp I, P/O và thiết kế baseline; FDRRestTest bổ sung venue ESEM và benchmark 12 services. RestTSLLM tháng 09/2025 ngoài cửa sổ, vẫn là ứng viên chính. Overlay là đối chiếu L2 riêng, không thay thử nghiệm EP+BVA; đã chạy hai query kết quả âm 18/10(search-log§6); chưa thấy phản chứng trực tiếp trong tập đã rà.
 
-## 2. Lớp tìm kiếm bổ sung L 2
+## 2. Lớp tìm kiếm bổ sung L2
 
 **Rà seed ngày 18/10:** K33 online 07/10, K100/FDRRestTest 05/10 mới hơn K19118/05. K02 năm in 2026 nhưng online 2025; K43 chỉ có năm 2026, chưa xác minh ngày: chưa khẳng định seed mới nhất toàn tập. K33/K100 là seed của tập Include nhóm, chỉ tra cứu, không thêm record của người khác vào 01.
 
 | Lượt | Query/thao tác | Kết quả |
 |---|---|---|
-| L 2 mục tiêu | S 2 tra nguyên tiêu đề K33; nguyên tiêu đề K100 và `FDRRestTest` | Đều No Papers Found; không đọc được danh sách citations, không suy 0 citations |
-| L 2 bổ trợ đã làm | K191, citing-papers |1/1 citation TD-0158, PDF 10 trang, EXCLUDE V2 IC-I; không có Include mới |
+| L2 mục tiêu | S2 tra nguyên tiêu đề K33; nguyên tiêu đề K100 và `FDRRestTest` | Đều No Papers Found; không đọc được danh sách citations, không suy 0 citations |
+| L2 bổ trợ đã làm | K191, citing-papers |1/1 citation TD-0158, PDF 10 trang, EXCLUDE V2 IC-I; không có Include mới |
 | Kết quả âm rộng | `"REST API" ("negative result" OR "did not improve" OR "fails") ("equivalence partitioning" OR "boundary value")` |~88 kết quả, thu 10 trangđầu; chưa bao phủ hết |
 | Kết quả âm chặt | `"REST API" ("negative result" OR "did not improve") ("equivalence partitioning" OR "boundary value")` |7/7 kết quả; đã rà hết tập 7 |
 
-**Kết quả:**17 lượt GS→11 bài mới; V 1 loại 9, V 2 loại 1(TD-0160:IC-E), Unsure 1(TD-0159:IC-T). TD-0159 có tên trong SRDS 2026 accepted/program nhưng bản proceedings chưa xác minh; không đưa vào 03/evidence. TD-0160 có EP/BVA§3.3/p 6, nhưng Table 1/2 chỉ cấu hình nên không đạtIC-E. Trích giới hạn tác giả “provides no marginal benefit over schema-driven baseline generation”(§6.1, PDF p 10) chỉ là đầu mối cho kết quả âm, không chứng minh EP+BVA kém random.
+**Kết quả:**17 lượt GS→11 bài mới; V1 loại 9, V2 loại 1(TD-0160:IC-E), Unsure 1(TD-0159:IC-T). TD-0159 có tên trong SRDS2026 accepted/program nhưng bản proceedings chưa xác minh; không đưa vào 03/evidence. TD-0160 có EP/BVA§3.3/p 6, nhưng Table 1/2 chỉ cấu hình nên không đạtIC-E. Trích giới hạn tác giả “provides no marginal benefit over schema-driven baseline generation”(§6.1, PDF p 10) chỉ là đầu mối cho kết quả âm, không chứng minh EP+BVA kém random.
 
-**L 2 chưa đủ bao phủ:** seed mục tiêu chưa tìm được trênS 2; không đủ 10–15 citations để đọc. Đã làm các bước tra cứu khả dụng và ghi giới hạn, không tự đánh dấu hoàn tất. [TD-0158 PDF](fulltext/TD-0158.pdf) được lưu làm dấu vết V2, không phải Include.
+**L2 chưa đủ bao phủ:** seed mục tiêu chưa tìm được trênS2; không đủ 10–15 citations để đọc. Đã làm các bước tra cứu khả dụng và ghi giới hạn, không tự đánh dấu hoàn tất. [TD-0158 PDF](fulltext/TD-0158.pdf) được lưu làm dấu vết V2, không phải Include.
 
 | Đối soát | Số hiện hành |
 |---|---:|
@@ -53,9 +53,9 @@ Ba bài được ưu tiên theo độ khớp I, P/O và thiết kế baseline; F
 | Đã đọc / chưa lấy |59/1(FAMRES)|
 | Loại V2 / Unsure đã đọc |55/2(Agentic, TD-0159)|
 | 03 / evidence-table / luồng cá nhân |**2/2/2** —TD-0002, TD-0015|
-| Snowball |91 lượt Tuần 6+1 L 2=92;64 bài mới;0 Include|
+| Snowball |91 lượt Tuần 6+1 L2=92;64 bài mới;0 Include|
 
-Kiểm:`175−39=136;136−76=60;60−1=59;59−55−2=2`. Search 72 unique+snowball mới 64=136. Ba bài Unsure tổng gồm một bài chưa toàn văn và hai bài đã đọc. SourceS 2/GS không cộng vào PRISMA tìm kiếm chính của nhóm. Nhật ký lệch hạn 05/10 và tra cứu mới:search-log§6–7.
+Kiểm:`175−39=136;136−76=60;60−1=59;59−55−2=2`. Search 72 unique+snowball mới 64=136. Ba bài Unsure tổng gồm một bài chưa toàn văn và hai bài đã đọc. SourceS2/GS không cộng vào PRISMA tìm kiếm chính của nhóm. Nhật ký lệch hạn 05/10 và tra cứu mới:search-log§6–7.
 
 ## 3. Ghi chú khả thi từ các paper đã đọc
 
@@ -81,3 +81,5 @@ Kiểm:`175−39=136;136−76=60;60−1=59;59−55−2=2`. Search 72 unique+snow
 |Evidence|TD-0002(1/2 hàng); khuyến nghị kiểm cảTD-0015|CHỜ|
 
 Không tính kiểm số bằng script hoặc AI tự đọc lại là kiểm chéo độc lập.
+
+**Cổng evidence cá nhân:** tự kiểm P2/P3/P4 lần lượt 2/2 hàng (100%); P5 đủ tên metric và đơn vị/định nghĩa ở cả 2 hàng. Chi tiết tại evidence-table.md. P1 thuộc bảng gộp nhóm; kiểm chéo độc lập vẫn CHỜ.
