@@ -1,0 +1,977 @@
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+DOI: 10.4018/IJSSMET.399173
+
+1
+
+This article published as an Open Access article distributed under the terms of the Creative Commons Attribution License (http://creative-
+
+commons.org/licenses/by/4.0/) which permits unrestricted use, distribution, and production in any medium, provided the author of the
+
+original work and original publication source are properly credited.
+Experimental Test and Run Using
+
+Equivalence Partitioning and Control-Limit
+
+Techniques for Mobile Software
+
+Nalinee Sophatsathit
+
+https:// orcid .org/ 0009 -0009 -6196 -2186
+
+Suan Sunandha Rajabhat University, Thailand
+
+Received: September 16th, 2025 | Accepted: December 28th, 2025
+
+ABSTRACT
+
+Mobile software development turns around quickly, which induces inadequate testing to meet this
+
+short-lived pace of development and release process. The traditional testing procedures just do not fit
+such a rapid mobile paradigm. This study sets out to exploit two straightforward techniques, namely
+
+equivalence partitioning and control-limit techniques, based on software cost and quality. The first
+
+technique divides input domain into proper partitions that suit the software functions and selects cost
+
+representative data from each partition for testing. The second technique keeps the outcomes within
+
+the limits to ensure acceptable output. The contributions of these techniques prove to be reliable
+steppingstones for mobile software development without losing sight of the founding methodologies.
+
+The study envisions that future work should incorporate well-established techniques for developers
+
+to set up rapid test-and-run procedures, whereby quality mobile software can be developed from this
+
+fast paced and short-lived cycle.
+
+KEYWORDS
+
+Equivalence Partitioning, Control-Limit, Software Testing, Mobile Software Development
+
+INTRODUCTION
+Traditional software development has been ongoing for decades and, in essence, has become a
+
+well-established process over the years. The advent of mobile applications has brought about new
+
+development paradigms that change the game entirely. Perhaps the key factor of this change is time.
+
+The fact that most mobile apps are small, short-lived, and abandoned by users when new comparable
+
+apps arrive makes it unsuitable to maintain them in the same fashion as the traditional software
+counterparts. One area to look into is the testing stage of the development process. The work processes
+
+performed by developers (during unit tests, integration tests, combined test-run during system tests,
+
+user acceptance tests, and the remaining stress tests, regression tests, etc.), are all time-consuming
+
+processes that can take months to complete before the software is released. This is one thing mobile
+
+apps cannot embrace in their development process because this process may not exceed 6–9 months
+from start to release. Hence, it is obvious that, to abide by the typical testing process, the procedures
+
+must be adjusted and arranged to fit this time constraint.
+
+In principle, the test method involves many manual procedures that are time-consuming. Many
+
+traditional test procedures are straightforward to use yet may not be suitable in some test scenarios
+
+2
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+and environments. For example, in the mobile environment, users are anonymous, which makes it
+
+hard to set up proper coverage of input data partitions manually (let alone performing the analyses of
+
+user acceptance tests, test efficiency, cost, etc.). Conversely, this may inevitably lengthen the mobile
+
+development life cycle.
+
+To reduce this development life cycle, this study focused on shortening the test-and-run process.
+The unit, integration, and system tests were combined into one test-and-run step whose procedures
+
+were governed by two well practiced techniques in traditional software testing: equivalence partitioning
+
+and control-limit techniques. These two techniques were chosen because they are straightforward to
+
+understand, apply, and verify since they can be observed, performed, and examined visually both by
+
+the developers and users, making the agile team work smoothly.
+The first technique arranges input data in groups whose members are said to be equivalent,
+
+that is, each datum can represent the group. The number of groups, or partitions, confines the size
+
+of input data sets to be used in each test step. Thus, exhaustive testing does not constitute an issue.
+
+The second technique sets up an interval to keep test outputs within the predefined range, having
+
+lower and upper bounds. This scope is known as the control limit, which is a well-known statistical
+technique. Should any of the test outputs fall outside this predefined range, a procedural correction
+
+is called for to rectify the corresponding software functions. In so doing, the development process
+
+can be sped up considerably.
+
+The above two techniques offer developers the flexibility of data selection and representation
+
+within a defined operational range. They are simple and straightforward to implement based on
+well-defined theoretical fundaments. It will be evident how the development progresses as the
+
+proposed methodology unfolds.
+
+This paper is organized into six sections: the introduction in Section 1, Section 2 recounting
+
+some prior works relating to testing, a systematic derivation of proposed methodology is prepared
+
+to set up the reference framework in Section 3 with some pertinent procedures presented along with
+the derivation, Section 4 explaining the experiment in detail as to how the proposed methodology is
+
+carried out and some idiosyncrasies demonstrated to express the oddity, Section 5 discussing a few
+
+important issues precipitated from the proposed methodology, Section 6 points out some threats to
+
+validity, and final thoughts and future work are given in the concluding Section 7.
+
+RELATED WORK
+
+Modernization has increasingly used software to operate all functions for some time. This software
+runs on traditional systems such as the world wide web, which gradually switched to mobile devices
+
+in the form of mobile apps. Their development life cycle runs from the annual scale in traditional
+
+systems to months in mobile systems. The most important deciding factor of this development is the
+
+time required to release the product. This constraint imposes not only the crunch on development
+
+pressure but also on development quality and cost. The rush on releasing apps in shorter timeframe
+creates faulty software products, which in turn increases the “faulty” cost. Tassey (2002) revealed
+
+the estimates of the economic costs of faulty U.S. software that ranged in the tens of billions of U.S.
+
+dollars per year, representing just under 1% of the nation’s gross domestic product.
+
+At the core of these issues is the difficulty in defining and measuring software quality. Common
+
+attributes include functionality, reliability, usability, efficiency, maintainability, and portability. These
+quality metrics are largely subjective and do not support quantification that can be used to design
+
+testing methods for software developers. Muccini et al. (2012) investigated the challenges and future
+
+research directions of testing mobile applications. They found contextual and mobility issues to look
+
+into, namely, performance, security, reliability, and energy. The concerns were fault detection, test
+
+case (random) selection, and test artifacts.
+Edwards (2004) presented one aspect of studies on software testing based on Bloom’s
+
+taxonomy, pointing out five perceived roadblocks that plagued learners, from trial-and-error to
+
+3
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+reflection-in-action. To detect certain types of faults, Briand (2007) administered a systematic
+software undertest to obtain a predictable result for detection rates by using a test technique covering
+
+criteria and oracle, also exploring both internal and external issues to see whether it was beneficial to
+
+combine two or more test techniques under validity of test costs for test suite size and fault detection
+
+rates. There were factors pertinent to managing conflict in software testing (Cohen et al., 2004),
+namely, allocation of time, people, and organizations. Understanding point of view by people and
+
+team organizations had to be taken care of in allotted time.
+
+Dunietz et al. (1997) presented a comprehensive approach to functional testing that could be
+
+applied even before code was developed. They employed feature analysis of factors relating to failure
+
+occurrence to partition inputs into subgroups and sampled inputs within each selected subgroup.
+Grønli et al. (2019) looked into how mobile devices, the Internet of Things, and wearable devices
+
+could come together in one ecosystem. This would further complicate the types of inputs to the test
+
+and run experiment of mobile software.
+
+Amen et al. (2015) explained on automated and manual testing for mobile application. In absence
+
+of input data description, the distinction between both testing techniques were unclear as to how inputs
+were categorized, prioritized, and executed procedurally. Thus, we could envision that succinct and
+
+clear input data description were vital to the development of test and run of mobile software.
+
+Durelli et al. (2019) discussed in detail on automating software testing using ML to improve cost
+
+overruns and poor quality. By categorizing study type and testing activity, a number of ML algorithms
+
+could be employed to aid in automation such as test-case generation, refinement, and evaluation. At
+any rate, they still advocated manual searches and selects ML tools based on supervised learning
+
+artificial neural networks for decision making, refinement, and cost prediction. We thus exploited
+
+the cost idea to enhance cost analysis of this study.
+
+Godefroid et al. (2008) advocated automatic code driven test generation using a program analysis
+
+technique. They elaborated both static and dynamic test generations to create a set of input values
+that examined as many program statements as possible with the help of additional constraint solver
+
+techniques. Both approaches proved to be valuable procedures for testing in this study. The types
+
+of failure had to be recognized to make it work effectively since Itkonen et al.’s (2013) study on
+
+exploratory testing showed how the types of knowledge, application, and recognition of failure by
+
+testers using this technique could be used as an oracle. At any rate, the scope of the effort had to be
+thorough and efficient (Kuhn et al., 2004) to maximize effectiveness.
+
+From small development team size such as agile, Talby et al. (2006) suggested pair programming,
+
+collective ownership, and coding standard practices to focus on continuous creation of user acceptance
+
+tests, where everyone tested to maintain the product size at test size. As product scale becomes larger,
+
+software test size must expand. One suggestion to migrate software testing to the cloud was studied by
+Parveen and Tilley (2010), who offered resources such as virtualized hardware, storage, and software
+
+services that aided in reducing the execution time of large test suites in a cost-effective manner. This
+
+encompassed test case independence, operational environment, high-volume automated testing, and
+
+so forth. Finally, as software specification changed, regression testing had to be adjusted accordingly
+(Leung & White, 1989) for test plan and test cases on reusable, retestable, obsolete, new-structural,
+
+and new-specification test cases.
+
+These prior works served as the bases for devising the proposed methodology in this study. We
+
+will explore its detail in the sections that follow.
+
+PROPOSED METHODOLOGY
+
+This study exploited two classical testing techniques as the basis for theoretical foundation,
+
+namely, equivalence partitioning (Beizer, 2009; Hübner et al., 2019; Juristo et al., 2012; Reid, 1997)
+and control-limit techniques (Jensen et al., 2006; Nedumaran & Pignatiello, 2001; Woodall & Faltin,
+
+4
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+2019). The research confined the scope of data used in this study to integer value only. Details of
+
+these technical applications are explained:
+
+Definition 1: Let X = {X 1, X 2, …, X j} be the set of theoretical input data in domain D, j = 1, 2,
+…, n, X 1 denotes input data from partition 1, X 2 denotes input data from partition 2, and X j denotes
+
+input data from partition n.
+
+Definition 2: Let X’ = {X 1’, X 2’, …, X j’} be the set of actual input data used in the test run, j =
+
+1, 2, …, n, X 1’ denotes actual input data from partition 1, X 2’ denotes actual input data from partition
+
+2, and X j’ denotes actual input data from partition n.
+
+Definition 3: Let f(X) be the cost function of software to run on input data X’. Define
+
+f(x) = {4*x x ≠ 0
+{0 x = 0
+
+Denote f(X) and f(X’) to be the cost values obtained from running the software on X and X’,
+
+respectively.
+
+Definition 4: Denote the set of errors E = {E 1, E 2, …, E n} as follows. E 1 = |X 1 – X 1’|, E 2 = |X 2 –
+
+X 2’|, and E n = |X n – X n’|, where f is defined in Definition 3. The value X n and X n’ are obtained from
+
+X and X’ in partition n.
+
+Divide the input domain D into n partitions to implement X, X’, f(), and E, that are deployed to
+
+associate them by means of this procedure:
+Procedure setup_partition
+
+input domain D, cost function f, control limit L
+
+output cost C, partitioned domain P
+
+Begin
+
+initialize first partition and associated cost
+
+          C ← 0, i ← 1, j ← 1
+
+while not EOF(D)
+
+          E ← 0
+
+//one partition at a time
+
+while E < L
+
+                              compute f(dj) and f(dj’)
+
+                              C = C + |f(dj) – f(dj’)|          //
+
+cost
+
+                    E = |dj – dj’|           //jth data point
+                              Pi ← {(dj, dj’), E}           //assign
+
+partition
+
+                    increment j
+
+endwhile
+
+increment i //next partition
+
+endwhile
+
+End
+
+This procedure divides data domain D into n parts whose cost f(X i) and f(X i’) yield the partition
+
+{(d i, d i’), E}. Further define the quality attribute to be the average out-going quality of the test
+
+partition i.
+
+Definition 5: Denote q(X i) to be the out-going quality of X i in partition i running over n partitions.
+This q(X i) measures errors occurred during test-and-run process for every partition {(d i, d i’), E}. Thus,
+
+the average out-going quality Q(a, b) of n partitions can be computed as shown in Equations 1 and 2.
+
+q(X i) = E i = |d 1 – d 1’| (1)
+
+Q(a, b) = {
+
+5
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+ ∑
+
+1
+
+n
+
+q
+
+(
+
+Xi
+
+)
+
+
+
+} / n (2)
+Equations 1 and 2 account for the desired quality of X i in partition i established by the procedure
+
+over the control limit range [a, b], where a < X i < b. The associated cost (M) obtained from the
+
+procedure based on cost function f(X) is therefore as shown in Equation 3.
+
+M = Q(a, b) * f(X) (3)
+
+Hence, the classical founding methodologies, such as equivalence partitioning and control limits,
+
+are exercised without having to reinvent the wheel, whereby cost and effort expended can be kept
+within the control limits.
+
+EXPERIMENTS
+
+The experiments were performed in two steps, namely, data collection and the test-and-run
+
+process. The first step was carried out in two separate tracks: manual and automatic. The manual
+
+track gathered test data sets from users and divided them into partitions manually. The automatic
+
+track used the same data sets and ran them through the described partitioning procedure. After this
+first step, equivalence partitions of the input test data sets were obtained. The second step ran both
+
+manual and automatic tracks separately so as to compare their cost and average out-going quality
+
+outcomes accordingly. Details are described:
+
+Data Collection
+
+The experiments were set up with the development of simple apps as the target problem since the
+
+emphasis was on input and test data partitioning rather than the app itself. The set up was completed
+with awareness of some programming tactics such as feedback from log files (Meier & Lepp, 2022)
+
+that could improve programming solving time. Thus, all unwanted variations to control a uniform
+
+development process were precluded such as odd data (unique values, extreme points, over/under
+
+limit values), exceptions, rare cases, local min/max, and data normalization.
+
+There were two experimental apps for this study and one real industrial app that was just completed
+recently. The experimental apps were an average/standard deviation app, a max/min app, while the
+
+real industrial app was a straightforward user input patch to add additional fields to a purchase order
+
+for a local company (identity was withheld for confidentiality and anonymity purposes).
+
+A set of input mobile data was collected from the users to be used by the experimental apps. The
+
+fact that both of those apps were number-oriented, where mobile phone did not have a wide range
+of numeric coverage for input data, we decided to opt for integers since they were straightforward to
+
+handle. In so doing, we incorporated additional coverage of input data patterns (Sets 1–11) to ensure
+
+that the proposed procedure would cover the work properly. Table 1 shows the representatives of
+
+input data used for the experimental apps.
+
+6
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+Table 1. Input Test Data
+Set Sample data Description
+
+1 5, 5, …, 5 uniform positive data
+
+2 -4, -4, …, -4 uniform negative data
+
+3 0, 0, …, 0 zeros
+
+4 1, 2, …, n-1, n monotonic increasing data
+
+5 n, n-1, …, 2, 1 monotonic decreasing data
+
+6 (no data) missing input
+
+7 (group of data), singleton OR singleton, (group of data) two groups: big VS singleton
+
+8 1, 5, 1, 5, 1, 5, …, 1, 5 periodic pattern
+
+9 B, …, s, …, B B-big, s-small values
+
+10 s, …, B, …, s s-small, B-big values
+
+11 -n, +n, -m, +m, … opposite signs
+12 user data normal user provided data
+
+Note. VS = versus.
+
+Sets 1 and 2 represent one value partitions, set 3 denotes zero value data, sets 4 and 5 represent
+
+monotonic increasing or decreasing data, set 6 ensures no program crashes when missing input, set
+
+7 denotes lop-sided data partition, set 8 represents periodic pattern, sets 9 and 10 represent bimodal
+
+partition, set 11 represents opposite signs partition, and set 12 represents normal user input data.
+Thus, the average, standard deviation, maximal, and minimal values can be computed accordingly
+
+in both apps. However, some sets may not yield any proper results such as set 6.
+
+One interesting note on set 11 occurred years ago with my very first programming assignment in
+
+Introduction to Programming class, where many inputted test data but set 11 were given to students.
+
+Here is the assignment.
+
+Write a program to read two input integers, print their sum, and continue reading the next two
+integers. Repeat this process until both input integers are zeros and stop. Sample input test data given
+
+were such as (11, 8), (-5, 3), (0, 9), (-6, 0), …, (-2, -7), (0, 0), (8, 4). The last (8, 4) pair was added
+
+to show programs that would not stop on (0, 0) pair. This set up was intended for submission and
+
+grading to be done automatically by a shell script. One shrewd student wrote this code:
+
+int main(void)
+
+{
+
+int a, b;S
+
+scanf(&a, &b);
+
+while (a+b != 0)          //should be (a!=0 || b!=0)
+
+{
+printf(“%d + %d = %d\n”, a, b, a+b);
+
+scanf(&a, &b);
+
+     }
+
+          return 0;
+
+}
+
+The program ran smoothly by the shell script with the given test data which, in fact, was not
+
+correctly written according to the problem specification. If the test data were properly prepared by
+
+including input values from set 11, the program would have failed.
+
+7
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+The third app was an input purchase order screen for additional merchandise description as shown
+
+in Figure 1. The left accounting screen was for accounting clerk (Ac) to enter customer information,
+
+namely, customer ID (ID), purchase order (PO), Mlist (merchandise list), amount (amount), Desc
+
+(merchandise description which was a newly added field along with other fields), addr1 and addr2
+
+(address fields), and etc (3 dots). The right delivery screen was for delivery clerk (Dc) to set up
+delivery pickup truck schedule and route. This screen was created because the Dc happened to walk
+
+by while the Ac was reviewing her input screen. The Dc made a remark to keep only the information
+
+she needed since she had to run in and out between the storage area and the loading area and had
+
+no time to look at other superfluous information except what she really needed for delivery setup.
+
+Thus, what was displayed on this screen had to be short, succinct, and relevant which resulted in the
+right delivery screen.
+
+Figure 1. Input Screens for Accounting (left) and Delivery (right)
+
+Test and Run
+
+The described setup was designed and implemented on a PC-based client-server configuration, as
+
+shown in Figure 2. The first point of entry was the user who would be taking input data to the GUI/UX
+
+subsystem and distributing (AWS amplify) to downstream functions, which included micro-services
+
+and data-repository subsystems. A gateway (Amazon API) and cloud storage (Amazon S3) were set
+up to handle the communication channels. Minor supporting micro-services were also provided to
+
+automate those administrative transactions such as email and notification (simple notification service—
+
+SNS), web data access (Restful API), and automatic service invocation (AWS lambda trigger).
+
+The third app was run on a local PC since it was text-based input that required correctness to
+
+actual data. There were only two input text data partitions, namely, correct input and incorrect input
+partitions. The former had to match verbatim, whereas the latter mainly contained typographic errors,
+
+misspelled, and extraneous words.
+
+8
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+Figure 2. Overview of System Architecture
+
+Note. GUI = graphical user interface; UX = user experience; AWS = Amazon Web Services; API =
+
+Application Program Interface; SNS = simple notification service.
+The test process was designed as an incremental process to test each app. The inputs to each
+
+app were broken down into test items (or partitions) to be tested one at a time using the proposed
+
+procedure. Each item was set up according to the test cases, called test backlog. Each test backlog had
+
+to go through test operations op1 to opk, which were transactions taken on the test cases, where op1
+
+would encompass set 1, op2 would encompass set 2, and opk would encompass set 12, progressively.
+The test outputs would then be approved by the tester as a working increment, which signified to be
+
+completed for that test item. The next test item was retrieved and underwent the same process until
+
+all the remaining test items were exercised. All test results of this app then became a test deliverable.
+
+This process is depicted in Figure 3.
+
+Figure 3. Incremental Testing Process
+
+Testing the third app was different from the former two apps since its inputs were characters
+(text). However, it was straightforward to handle. The correct partition was confined to verbatim input
+
+text, while the incorrect partition was randomly made-up input text just for subsequent verification
+
+and correction. All character inputs were read as ASCII (integer) code so as to ensure that they were
+
+printable characters (94 characters) to be described in the next sub-section.
+
+Results
+
+Test-and-run procedures were performed using the traditional method and proposed method to
+compare the advantages and disadvantages between them. The traditional method is a manual process
+
+that manually divides input data into partitions. Many test bases were confined to be the same for
+
+both methods such as input test data, number of partitions, and control limits to prevent potential
+
+variations on outputs that might be unwittingly affected by those factors.
+
+9
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+For testing the first app, all data sets from Table 1 were deployed to compute the average and
+
+standard deviation of the data. Errors turned out to be small since data partitions were definitive. X i’
+
+was picked from the defined partitioning algorithm, thereby the results ran smoothly. Testing of the
+
+second app also ran in a similar manner. Table 2 shows test results obtained from the stated analyses,
+
+where I and II denote average/standard and max/min apps, respectively. The input data partitioned
+for each apps are divided into two groups, namely, 1–3 partitions having +N to -N control limits
+
+and the n partitions having p to q control limits. The average out-going quality measures the average
+
+percentage of input data in each partition to the total input data that affect the test output. Comparisons
+
+of average out-going quality and associated cost between traditional and proposed methods are also
+
+determined and plotted in Figures 4 and 5, respectively.
+
+Table 2. Test Results
+Traditional method Proposed method
+
+apps partition C-limit avg quality cost
+
+I 1-3 +N, -N 56.762 227.05
+
+n p, q 68.548 253.63
+
+II 1-3 +N, -N 60.823 243.29
+
+n p, q 71.014 262.75
+
+apps partition C-limit avg quality cost
+
+I 1-3 +N, -N 72.015 194.44
+
+n p, q 90.862 190.81
+
+II 1-3 +N, -N 78.124 210.93
+
+n p, q 89.268 187.46
+
+Figure 4. Average Out-Going Quality
+
+Figure 5. Associated Cost
+
+Testing of the third app used input text from correct (partition 1) and incorrect text (partition
+2) partitions interchangeably. The control limits were set to ‘0’ for upper limit representing correct
+
+outcome and ‘print’ for lower limit representing printable characters in ASCII Table. They were 26
+
+lowercases, 26 uppercases, 10 digits, 32 special characters from the first 128 characters (0 – 127) for a
+
+total of 94 printable characters used in this app. The average out-going quality in the traditional method
+was estimated to 80% of the input text size, whereas the proposed method was 74% of the input 94
+
+10
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+characters text size. Costs were based on 30 man-hours for both methods. The exchange rate was taken
+
+from current value at $1 = B31.53. Table 3 shows test result statistics obtained from the third app.
+
+Table 3. Test Results
+
+Traditional method Proposed method
+apps partition C-limit avg quality cost
+
+screen 1 0 100 945.9
+
+2 print 80 756.7
+
+apps partition C-limit avg quality cost
+
+screen 1 0 100 945.9
+
+2 print 74 700.1
+
+Figure 6 shows the plots of average out-going quality for both methods from Table 3. Figure
+
+7 depicts the associated cost of both methods so obtained. The left bar graph denotes the values
+
+obtained from correct input text partition, while the right bar graph denotes the values obtained from
+the incorrect input text partition. It can be seen that the proposed method yields higher out-going
+
+quality than the traditional method at a slightly lower expense.
+
+Figure 6. Average Out-Going Quality
+
+Figure 7. Associated Cost
+
+From the results, the proposed method yields higher average out-going quality with lower cost
+
+than the traditional test method for all apps. The results do not include the time it takes since it would
+be excessively time consuming to incorporate the manual operation of the traditional input data
+
+partitioning process. Hence, the proposed method exhibits slightly better prospects to be adapted for
+
+the future test automation process.
+
+11
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+DISCUSSION
+
+One of the important reasons for mobile software testing is continuity between the stages of
+development. As Fitzgerald and Stol (2017) pointed out in their study, keeping the continuity among
+
+the disconnects is imperative to be a roadmap for continuous software engineering. Since mobile
+
+software development is agile (Flora et al., 2014), somewhat fast, and ad hoc under time constraints,
+
+assembling all test results from many disconnects can make the apps less holistic and less in continuity
+
+in comparison with the proposed incremental testing process.
+In the introduction of equivalence partitioning and control-limit techniques advocated by the
+
+proposed test-and-run procedure, it was intended to keep the test stages as simple, straightforward,
+
+and automated as possible, whereby the mobile app development life cycle would be agile, less time
+
+consuming, and suitable for this fast-paced development process.
+
+Although we picked two experimental apps as the case studies for the proposed test-and-run
+procedure, their simplicity did not preclude both techniques from successful implementation. The
+
+third app proved to be a similar success story since input data pattern fit with equivalence partitioning,
+
+while the control limits were natural language that was straightforward to handle.
+
+It is worth noting that many software testing processes focus primarily on the technical aspects
+
+of the development. The associated cost analysis is an accountable step imposing on this forerunning
+test process to gauge its effectiveness and financial worth. Thus, they are seldom combined as an
+
+integral step into process planning and analysis. The proposed methodology devised a procedure that
+
+combined these two steps into one with the least complication involved. In addition, quality was also
+
+taken into account in the proposed methodology by means of the control-limit technique of using a
+
+simple measuring function. Hence, quality and cost could be attained at the same time.
+A small point to note: This study proposed an average time efficient procedure to perform the
+
+equivalence partitioning process with the help of the control-limit technique, along with cost function
+
+analysis. Nevertheless, time measurements were not conducted since most mobile apps are proprietary,
+
+which made it difficult to investigate procedurally.
+
+THREATS TO VALIDITY
+
+One of the logical arguments to raise is different input data types that cannot be combined using
+the same analysis and explanation. In this study, the two experimental apps and the third real app took
+
+integers and characters as their inputs, respectively. Thus, statistical measurements would undergo
+
+different procedures, wherein the explanations should be treated accordingly. There were two reasons
+
+to justify this cause. Firstly, we considered character input to be ASCII code, which meant that they
+were integer values. Equivalence partitioning was a general technique that could handle this type of
+
+data adequately. Since we used simple measurements, namely, control limit and average out-going
+
+quality, to explain the experimental outcome, numerical computations could be carried out directly for
+
+both input data types. Secondly, the theoretical setup was simple and straightforward without having
+
+to incorporate any advanced mathematical analysis. In addition, the software process with properly
+set up environment would also run different apps in the same environment. Since we targeted to make
+
+it with the least complication in the first place, the set up worked out as we introduced a new and
+
+simple technique to implement in mobile software environment. Anything out of ordinary would be
+
+superfluous and was not taking into consideration.
+
+CONCLUSION
+
+This study embarked on the test-and-run aspects of mobile software development with one
+important objective in mind: continuous software engineering with high quality and low cost. The
+
+input test data manipulation process was investigated, since it is a time-consuming stage in traditional
+
+12
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+software development, using equivalence partitioning and control-limit techniques. A procedure
+to handle data partitioning in relation to the control limit was analyzed and created to arrive at a
+
+suitable solution. The test results were measured based on average out-going quality and cost that
+
+were compared with the traditional method from their benefits point of view. The results show that the
+
+proposed method exhibits slightly better average out-going quality and lower cost than its traditional
+
+counterparts. The test-and-run procedure also simplifies and eases the mobile development process
+to some degree, in particular, for character type input. At any rate, the benefits may stack up to be
+
+significant for development as the number and size of mobile apps grow.
+
+Future work should focus on a number of issues relating to the input data coverage of this
+
+test-and-run process—ranging from mobile programming languages, adaptation of apps, connectivity
+
+to networks, and limited resources to issues of lesser importance such as user interface, look and feel
+for different types of input data, and diversity of input data. Thus, future Internet of Thing works
+
+having many input data types as mentioned by Grønli et al. (2019) can be carried out straightforwardly
+
+based on these the proposed equivalence partitioning and control-limit techniques with minimal effort
+
+to resort to software tool assistance or data conversion.
+
+COMPETING INTERESTS
+
+There is no conflict of interest.
+
+FUNDING STATEMENT
+
+There is no funding support.
+
+CORRESPONDING AUTHOR
+Correspondence should be addressed to Nalinee Sophatsathit: nalinee.so@ ssru .ac .th.
+
+13
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+
+REFERENCES
+
+Amen, B. M., Mahmood, S. M., & Lu, J. (2015). Mobile Application Testing Matrix and Challenges, Computer
+
+Science & Information Technology (CS & IT-CSCP 2015). CCSIT, SIPP, AISC, NLP – 2015, 27-40.
+Beizer, B. (2009). Software testing techniques (2nd ed.). Van Nostrand Reinhold Electrical/Computer Science
+
+and Engineering Series.
+
+Briand, L. C. (2007). A critical analysis of empirical research in software testing. First International Symposium
+
+on Empirical Software Engineering and Measurement, 1-8.
+
+Cohen, C. F., Birkin, S. J., Garfield, M. J., & Webb, H. W. (2004). Managing conflict in software testing.
+
+Communications of the ACM, 47(1), 76–81.
+Dunietz, I. S., Ehrlich, W. K., Szablak, B. D., Mallows, C. L., & Iannino, A. (1997). Applying design of
+
+experiments to software testing: Experience Report. In ICSE ’97: Proceedings of the 19th International Conference
+
+on Software Engineering (pp. 205–215).
+
+Durelli, V. H. S., Durelli, R. S., Borges, S. S., Endo, A. T., Eler, M. M., Dias, D. R. C., & Guimar˜aes, M. P. (2019,
+
+September). Machine Learning Applied to Software Testing: A Systematic Mapping Study. IEEE Transactions
+on Reliability, 68(3), 1189–1212.
+
+Edwards, S. H. (2004). Using software testing to move students from trial-and-error to reflection-in-action. In
+
+SIGCSE’04 (pp. 26–30).
+
+Fitzgerald, B., & Stol, K. J. (2017). Continuous software engineering: A roadmap and agenda. Journal of Systems
+
+and Software, 123, 176–189.
+
+Flora, H. K., Chande, S. V., & Wang, X. (2014). Adopting an agile approach for the development of mobile
+
+applications. International Journal of Computer Applications, 94(17), 43–50.
+Godefroid, P., de Halleux, P., Nori, A. V., Rajamani, S. K., Schulte, W., Tillmann, N., & Levin, M. Y. (2008).
+
+Automating software testing using program analysis. IEEE Software, 25(5), 30–37.
+
+Grønli, T. M., Biørn-Hansen, A., & Majchrzak, T. A. (2019). Software Development for Mobile Computing,
+
+the Internet of Things and Wearable Devices: Inspecting the Past to Understand the Future, In Proceedings of
+
+the 52nd Hawaii International Conference on System Sciences (pp. 7451-7460).
+Hübner, F., Huang, W. L., & Peleska, J. (2019). Experimental evaluation of a novel equivalence class partition
+
+strategy. Software & Systems Modeling, 18(8), 1–21. DOI: 10.1007/s10270-017-0595-8
+
+Itkonen, J., Ma¨ntyla¨, M. V., & Lassenius, C. (2013). The role of the tester’s knowledge in exploratory software
+
+testing. IEEE Transactions on Software Engineering, 39(5), 707–724.
+
+Jensen, W. A., Jones-Farmer, L. A., Champ, C. W., & Woodall, W. H. (2006). Effects of parameter estimation
+on control chart properties: A literature review. Journal of Quality Technology, 38(4), 349–364.
+
+Juristo, N., Vegas, S., Solari, M., Abrahao, S., & Ramos, I. (2012). Comparing the effectiveness of equivalence
+
+partitioning, branch testing and code reading by stepwise abstraction applied by subjects. In 2012 IEEE Fifth
+
+International Conference on Software Testing, Verification and Validation (pp. 330–339).
+Kuhn, D. R., Wallace, D. R., & Gallo, A. M.Jr. (2004). Software fault interactions and implications for software
+
+testing. IEEE Transactions on Software Engineering, 30(6), 418–421.
+
+Leung, H. K. N., & White, L. (1989). Insights into regression testing. In Proceedings of the Conference on
+
+Software Maintenance (pp. 60–69).
+
+Meier, H., & Lepp, M. (2022). Effectiveness of feedback based on log file analysis in introductory programming
+
+courses. Journal of Educational Computing Research, 0(0), 1–24.
+Muccini, H., Francesco, A. D., & Esposito, P. (2012). Software testing of mobile applications: Challenges and
+
+future research directions. In AST 2012 (pp. 29–35).
+
+Nedumaran, G., & Pignatiello, J. J.Jr. (2001). On estimating X control chart limits. Journal of Quality Technology,
+
+33(2), 206–212.
+
+14
+
+International Journal of Service Science, Management, Engineering, and Technology
+
+Volume 17 • Issue 1 • January-December 2026
+Parveen, T., & Tilley, S. (2010). When to migrate software testing to the cloud? In Third International Conference
+
+on Software Testing, Verification, and Validation Workshops (pp. 424–427).
+
+Reid, S. C. (1997). An empirical analysis of equivalence partitioning, boundary value analysis and random
+
+testing. In Proceedings Fourth International Software Metrics Symposium, Albuquerque (pp. 64–73).
+
+Talby, D., Keren, A., Hazzan, O., & Dubinsky, Y. (2006). Agile software testing in a large-scale project. IEEE
+Software, 23(4), 30–37.
+
+Tassey, G. (2002). The economic impacts of inadequate infrastructure for software testing: Final report.
+
+Acquisition and Assistance Division, National Institute of Standards and Technology, Prepared by RTI Health,
+
+Social, and Economics Research Research Triangle Park, NC 27709, May 2002.
+
+Woodall, W. H., & Faltin, F. W. (2019). Rethinking control chart design and evaluation. Quality Engineering,
+
+31(4), 596–605.
