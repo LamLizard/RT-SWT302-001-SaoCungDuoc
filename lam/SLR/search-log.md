@@ -42,3 +42,13 @@
 - **Tổng:** rà **6 tiêu đề** (lượt lùi; lượt tiến không có mục nào); **thêm 6 dòng vào `01_all_records.csv`** (R889–R894); **include cuối = 0**.
 - **Nguồn lùi:** danh sách References trên trang bài OpenAlex. **Lượt tiến:** bài chưa ghi nhận trích dẫn (0) và tab Citations → 0.
 - **Kết quả sàng lọc (đủ 2 vòng):** 6 → loại V1 **5** (IC-P 1 · IC-Y 4) → vòng 2: **1** (R893) → loại V2 **1** (EC-A — không tìm thấy bản mở) → **giữ 0**. Chi tiết từng dòng: `02_after_screening_v1.csv` (vòng 1) + `03_final_included.csv` (vòng 2).
+
+## 5. Rà soát cho Bước 2 RBL-2 (18/10/2026)
+
+- **Mục đích:** tìm 2–3 paper mạnh nhất trong 12 tháng gần nhất cùng chủ đề (yêu cầu RBL-2 Bước 2 — mục “Rà nghiên cứu mạnh nhất gần đây”).
+- **Truy vấn:** Semantic Scholar Graph API — `query=REST API mutation testing`, `year=2025-2026`, `fields=title,year,venue,externalIds,citationCount`, ngày chạy **2026-10-18** → **12 kết quả**; kiểm tra chéo venue/năm/citation bằng OpenAlex theo DOI (cùng ngày).
+- **Đã chọn (thứ tự: cùng bài toán/metric → venue/benchmark lớn → mới nhất):**
+  - **LlamaRestTest** — FSE 2025, DOI `10.1145/3715737` (12 real-world services; so RESTGPT, RESTler, MoRest, EvoMaster, ARAT-RL).
+  - **RESTestBench** — EASE 2026, arXiv `2604.25862` (3 dịch vụ; 106 yêu cầu/228 mutation theo Table 3; benchmark cho LLM-generated tests).
+  - **MioHint** — ICSE 2026, DOI `10.1145/3744916.3773228` (whitebox, LLM-assisted request mutation).
+- **Kết quả kiểm tra:** cả 3 **không** so EP+BVA với uniform random cùng request budget; **không** báo cáo số mutant riêng biệt theo từng dạng yêu cầu; **không** dùng RESTestBench làm P → **không có phản chứng mới** cho RQ FA26-EXT-12.
