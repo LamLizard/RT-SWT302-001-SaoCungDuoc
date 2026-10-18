@@ -81,10 +81,32 @@ Tra cứu xuất bản/full-text 18/10 chỉ xác minh paper đã ghi nhận: [A
 |18/10/2026|Trường GS/S2 mặc định, không ép Title/Abstract/Keywords; lọc năm khi screening|Giới hạn giao diện; giữ query thật và số thực thu; IC/EC không đổi |
 |18/10/2026|Chuẩn hóa 01/02 từ 158 lượt thành một dòng/paper, sau bổ sung có 136 dòng|Đúng bước dedup trướcV1;175 occurrences và 39 lượt trùng vẫn truy vết trongCSV, không mất dữ liệu nguồn |
 |18/10/2026|Phân biệt Tuần 6 snowball 91 lượt với L2 cập nhật 1 lượt|Không lặp snowball từ seed Tuần 6; không chạy tiếp từTD-0158 |
-|18/10/2026|AI/tool hỗ trợ thu metadata, đọcPDF, đối soát và sửa hồ sơ|Không coi tự rà/kiểm máy là kiểm chéo thành viên khác |
+|18/10/2026|AI/tool hỗ trợ thu metadata, đọcPDF, đối soát và sửa hồ sơ|Giữ dấu vết nguồn và đối chiếu kết quả với toàn văn |
 
-**Kiểm chứng tool:** đối soát 175 occurrences/136 canonical; nguồn GS báo 88 ước lượng nhưng chỉ 10 được thu, query chặt 7/7; so 5 mẫu metadata TD-0002/TD-0015/TD-0158/TD-0159/TD-0160 với PDF/publisher, giữ raw metadata riêng. Chưa chạy lại đúngquery để đánh giá độ ổn định số kết quả; không ghi PASS cho kiểm này. Toàn văn đã đọc lưu trong fulltext/ và đường dẫn CSV kiểm được.
+**Kiểm chứng tool:** đối soát 175 occurrences/136 canonical; nguồn GS báo 88 ước lượng nhưng chỉ 10 được thu, query chặt 7/7; so 5 mẫu metadata TD-0002/TD-0015/TD-0158/TD-0159/TD-0160 với PDF/publisher, giữ raw metadata riêng. Chưa chạy lại đúngquery để đánh giá độ ổn định số kết quả; không ghi PASS cho kiểm này. Lịch sử đã đọc giữ trong CSV; bản PDF dùng chung được dẫn tới Paper-source. Bản lưu toàn văn cá nhân đã được bỏ sau khi chuyển sang RQ check.
 
-**Kiểm chéo độc lập: CHỜ.** Chưa có tên/ngày/kết quả thành viên khác; cross_review_status=PENDING. Cần kiểm V1 tối thiểu 28/136 paper; V2 tối thiểu 12/60 paper cần toàn văn; Evidence tối thiểu 1/2 hàng. Mẫu và ô xác nhận ở cuối rq-check.md; số mẫu là kế hoạch, không phải đã kiểm. Chỉ ghi người kiểm/ngày/bất đồng khi có phản hồi thật.
+**Giai đoạn hiện tại:** Bước 2 — RQ check cá nhân, bài #31–#38 theo phân công; xem rq-check.md.
 
-**Tự kiểm evidence P2–P5 (18/10/2026):** P2=2/2 hàng có Tool/LLM (100%); P3=2/2 có kết quả số từ Table 3 (100%); P4=2/2 có hạn chế tác giả nêu (100%); P5=2/2 metric có tên, đơn vị/định nghĩa. Mở lại TD-0002 PDF p8 và TD-0015 PDF p6 xác nhận số chính. Đã giữ 8 cột nội dung, không thêm cột Evidence vào bảng nộp. Không thay quyết định, số Include hoặc PRISMA; không coi đây là kiểm chéo độc lập.
+**Tự kiểm evidence P2–P5 (18/10/2026):** P2=2/2 hàng có Tool/LLM (100%); P3=2/2 có kết quả số từ Table 3 (100%); P4=2/2 có hạn chế tác giả nêu (100%); P5=2/2 metric có tên, đơn vị/định nghĩa. Mở lại TD-0002 PDF p8 và TD-0015 PDF p6 xác nhận số chính. Đã giữ 8 cột nội dung, không thêm cột Evidence vào bảng nộp. Không thay quyết định, số Include hoặc PRISMA.
+
+
+## 8. Bước 2 cá nhân — bài #31–#38 (18/10/2026)
+
+Theo phân công mới, đọc đúng số hàng trong `team-synthesis/evidence-table-merged.md`: **31 K93, 32 K100, 33 K127, 34 K136, 35 K166, 36 K168, 37 K191, 38 K192**. Đọc Methods/Evaluation/Threats/Discussion và các Table/Figure tương ứng trong tám PDF `Paper-source/`; trích hạn chế nguyên văn kèm trang vào rq-check §1. Không đổi quyền sở hữu nguồn, không cộng tám bài vào 01/02/03.
+
+**Tra cứu nghiên cứu gần đây, 18/10/2026, cửa sổ 18/10/2025–18/10/2026:** công cụ web-search mặc định, không lọc năm trên giao diện; năm/venue đối chiếu PDF và nguồn chính thức. Không chạy lại query Scholar/S2 trong lượt này.
+
+| Query nguyên văn | Kết quả dùng / lý do chọn | Phạm vi ghi nhận |
+| --- | --- | --- |
+| `"FDRRestTest" REST APIs 2026` | [Dagstuhl/publisher](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ESEM.2026.20): ESEM, 05/10/2026; 12 services, fixed-time và fixed-request | Lookup K100 đã có; 0 record mới |
+| `"SBFT Tool Competition 2026" "REST League"` | [University of Verona](https://www.di.univr.it/?ent=pubbdip&id=1193127&lang=it), [artifact tác giả](https://zenodo.org/records/18434145): benchmark 11 APIs/317 operations trong PDF | Lookup K136 đã có; 0 record mới |
+| `"RESTing-LLAMA" REST API Fuzzing` | Lookup K192, đối chiếu PDF ASIACCS2026: 15 apps/4 models. Mở [ACM DOI](https://dl.acm.org/doi/10.1145/3779208.3785383) trả 403; dùng bản PDF đã lưu để đọc | 0 record mới; không suy thiếu full-text do web 403 |
+
+Web-search không cung cấp tổng số kết quả đáng tin cho ba query này: **không ghi số ước lượng**. Ba paper được chọn vì cùng task, thiết kế ngân sách và quy mô/venue; K191 thấp hơn vì SUT đóng, K127 một ứng dụng; K93/K166/K168 ngoài cửa sổ. Không gọi ba bài là mạnh nhất toàn ngành. Chưa thấy bài nào trong tám bài trả lời trọn RQ; giữ kết luận trong phạm vi đã đọc.
+
+**Phát hiện cần PL review:** K166 PDF p8/Verifiability có link code + dataset dù bảng gộp ghi NOT_REPORTED; K100 96/120 là mẫu kiểm oracle gộp, không phải toàn bộ 96 lỗi riêng của FDRRestTest; K93 ít bugs hơn foREST trong Table 3 dù PRTT cao; K192 lượt đo throughput cùng thời gian không kiểm vulnerabilities. Chỉ ghi đính chính tại rq-check cá nhân, không sửa bảng gộp.
+
+**Số giữ nguyên:** 175 lượt − 39 trùng = 136 paper; V1 loại 76 → cần toàn văn 60 → đã đọc 59; V2 loại 55, Unsure đã đọc 2, Include 2. Snowball 92 lượt/64 paper mới/0 Include. 03/evidence/PRISMA = **2/2/2**, không phát sinh screening hay snowball mới. Nhãn trên thẻ cần PL đối chiếu khi tổng hợp RQ check; phần nhóm/Bước 3 do nhóm thực hiện.
+
+
+**Dọn bản toàn văn cá nhân — 18/10/2026:** theo yêu cầu T.Duy sau khi phần Include đã được chốt trong bảng gộp, bỏ thư mục fulltext cá nhân. Hai PDF Include giữ nguyên tại `Paper-source/39-TD-0002.pdf` và `Paper-source/40-TD-0015.pdf`. Các trường fulltext_file/pdf_file chuyển sang bản dùng chung nếu khớp SHA-256; các bản không còn lưu được bỏ đường dẫn cục bộ. Giữ metadata, nguồn toàn văn, số trang, trạng thái và quyết định đã đọc trong lịch sử; không coi việc xóa bản lưu là chưa từng đọc hoặc là EC-A. Số 59 đã đọc (55 PDF + 4 text) là lịch sử screening, không phải số file còn lưu; Include vẫn 2, snowball Include mới 0.

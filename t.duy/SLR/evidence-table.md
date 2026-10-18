@@ -11,7 +11,7 @@ Tự rà soát: **18/10/2026**. Chỉ ghi **2 bài Include**; số liệu đối
 | P4 · Hạn chế | ≥50% hàng có dữ liệu | **Đạt: 2/2 (100%)**. Hạn chế tác giả nêu, có mục/trang; tách riêng nhận xét của người đọc |
 | P5 · Metric | Tên cụ thể, có đơn vị/ý nghĩa | **Đạt: 2/2**. Mutation score (%), branch coverage (%), test success rate (%); C(T) là tỷ lệ yêu cầu chức năng được bao phủ (%) |
 
-P1 (≥12 Include) xét trên **bảng gộp nhóm**, không áp thành chỉ tiêu 12 bài cho cá nhân. Kết quả trên là tự kiểm nội dung; kiểm chéo độc lập vẫn chờ xác nhận.
+P1 (≥12 Include) xét trên **bảng gộp nhóm**, không áp thành chỉ tiêu 12 bài cho cá nhân. Trạng thái hiện tại: Bước 2 — RQ check cá nhân, xem rq-check.md.
 
 | # | Paper (tên + năm + DOI) | Tool/LLM | Dataset | Metric | Kết quả | Code | Hạn chế | Gần RQ |
 |---|---|---|---|---|---|---|---|---|
@@ -24,4 +24,4 @@ Snowballing: 1 vòng từ TD-0002 · 10.5753/sbes.2025.9670; 84 lượt lùi + 7
 
 Đính chính explain #40: Table 5, PDF p 7 của TD-0015 ghi M_maint **65,7% specification / 46,7% GPT-4 / 17,7% tích hợp**. Cụm “17,7% so LLM 65,7%” trong tài liệu tham khảo bị nhầm baseline; không dùng làm kết quả.
 
-Đối soát 18/10:01/02=136 paper(175 lượt−39 trùng); Include 03/evidence/luồng cá nhân=2/2/2. Tìm kết quả âm bổ sung 17 lượt không có Include mới. Kiểm chéo độc lập:CHỜ; tự rà không thay xác nhận thành viên khác.
+Đối soát 18/10:01/02=136 paper(175 lượt−39 trùng); Include 03/evidence/luồng cá nhân=2/2/2. Tìm kết quả âm bổ sung 17 lượt không có Include mới.

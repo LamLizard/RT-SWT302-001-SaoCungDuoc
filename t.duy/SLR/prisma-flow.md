@@ -31,4 +31,6 @@ Snowball riêng có65bài unique;giao search gốc1. Sau lượtGS18/10,giao hai
 
 Kiểm: **175−39=136; 136−76=60; 60−1=59; 59−55−2=2**. 01/02 mỗi file136dòng, một dòng/paper;39lượt trùng giữ trong `occurrences_json`, không đưa lại vào V1. Tổng toàn văn đọc:55 PDF+4 bảntext; bản tác giả AutoRestTest 2 trang chỉ dùng xác minhEC-S ở V1, không cộng đã đọcV 2.
 
-Chưa hoàn tất kiểm chéo độc lập. Ba Unsure tổng: FAMRES(chưa toàn văn), Agentic và TD-0159(chưa đủ chứng cứ xuất bản). Không tự chuyển sang Include/EC-A.
+Ba Unsure tổng: FAMRES(chưa toàn văn), Agentic và TD-0159(chưa đủ chứng cứ xuất bản). Không tự chuyển sang Include/EC-A.
+
+**Lưu trữ:** 59 toàn văn đã đọc là số lịch sử screening. Sau khi chuyển sang RQ check, đã bỏ bản lưu fulltext cá nhân; PDF Include dùng bản chung trong Paper-source. Việc dọn file không đổi quyết định hoặc số PRISMA.
