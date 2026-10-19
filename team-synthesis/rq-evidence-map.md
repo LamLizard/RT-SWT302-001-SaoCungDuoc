@@ -2,11 +2,13 @@
 
 **RQ (nguyên văn):** Trên 45 yêu cầu của RESTestBench, phân hoạch tương đương kết hợp phân tích giá trị biên, so với sinh dữ liệu ngẫu nhiên đồng đều cùng ngân sách, khác nhau thế nào về số mutant riêng biệt bị phát hiện theo từng dạng yêu cầu?
 
-**PICO:** P = 45 yêu cầu RESTestBench (15/dịch vụ) · I = EP + BVA · C = random đồng đều cùng ngân sách · O = số mutant riêng biệt được oracle xác nhận.
+**PICO:** P = 45 yêu cầu RESTestBench (**16 FastAPI + 15 NestJS RealWorld + 14 TodoApp**, thống nhất 20/10/2026, thay 15/dịch vụ) · I = EP + BVA · C = random đồng đều cùng ngân sách · O = số mutant riêng biệt được oracle xác nhận.
+
+**Đối chiếu 20/10/2026:** giữ ma trận 42 bài và rubric rộng để truy vết điểm nguồn; ✓ không bảo đảm khớp đầy đủ RQ. Guo 2024 là ứng viên ngoài 42, không thêm vào N/PRISMA. Mẫu P, phân biệt điểm rộng/khớp RQ, nhãn làm việc và trạng thái chưa kiểm chứng xem [rq-validation §1–3](rq-validation.md).
 
 ## 1. Quy tắc chấm (chuẩn hoá toàn nhóm)
 
-| Yếu tố | ✓ = khớp ĐÚNG giá trị RQ | ◐ = gần (không tính vào "Số yếu tố") | Trống |
+| Yếu tố | ✓ = đạt rubric đối chiếu rộng (không đồng nghĩa khớp đầy đủ RQ) | ◐ = gần (không tính vào "Số yếu tố") | Trống |
 |---|---|---|---|
 | P · dataset | Dùng RESTestBench | Dịch vụ REST mã mở/công khai chạy được (gieo mutant được như RESTestBench) | API thương mại/online, hệ nội bộ |
 | I · can thiệp | EP và/hoặc BVA là kỹ thuật chính | Phân hoạch/miền, combinatorial, giá trị biên/không hợp lệ, phân lớp theo kiểu | Không có |
@@ -19,10 +21,10 @@
 
 | Yếu tố | Giá trị trong RQ | Paper làm nền (từ bảng gộp) | Còn thiếu / cần kiểm |
 |---|---|---|---|
-| P · dataset | 45 yêu cầu RESTestBench (15/dịch vụ) | ✓ **chưa có** — 0 bài dùng RESTestBench. ◐ (28 bài): TD-0002, K49, TD-0015, K66, K167, K101, K37, K46, K68, K69, K76, K162 / bBOXRT … (+16 bài) | **nền P = 0** — yếu tố yếu nhất; cần L1/L3 soi |
-| I · can thiệp | EP + BVA (kết hợp) | ✓ (2): **TD-0002**, **TD-0015** (mức prompt/agent — cần kiểm chứng thêm). ◐ (21 bài): K52 / P53, K90, K34, K102, K66, K167, K101, K37, K46, K68, K69, K76 … (+9 bài) | Chưa bài nào làm can thiệp EP+BVA kết hợp **đúng nghĩa trên tham số request** + có đối chứng |
+| P · dataset | 45 yêu cầu RESTestBench (16 FastAPI/15 RealWorld/14 TodoApp) | ✓ **chưa có** — 0 bài dùng RESTestBench. ◐ (28 bài): TD-0002, K49, TD-0015, K66, K167, K101, K37, K46, K68, K69, K76, K162 / bBOXRT … (+16 bài) | **nền P = 0** — yếu tố yếu nhất; cần L1/L3 soi |
+| I · can thiệp | EP + BVA (kết hợp) | ✓ (2): **TD-0002** (prompt), **TD-0015** (module G Python tạo lớp/biên, §3.2/PDF6). ◐ (21 bài): K52 / P53, K90, K34, K102, K66, K167, K101, K37, K46, K68, K69, K76 … (+9 bài) | Chưa xác nhận bài nào có phép so EP+BVA kết hợp với uniform random cùng request budget trên RESTestBench |
 | C · đối chứng | Random đồng đều cùng ngân sách | ✓ (5): K52 / P53, K90, K34, K102, K49 | Nền C mỏng; chưa bài nào uniform-random hoá + cùng request budget **trên RESTestBench** |
-| O · thước đo | Số mutant riêng biệt được oracle xác nhận | ✓ (1): **TD-0002** (mutation score 40,8% — đã qua V2; chưa tách unique/theo dạng yêu cầu) | **Chưa bài nào đếm unique oracle-confirmed mutants** trên REST. Nguồn ngưỡng dự kiến: Case 1 / 2 / 3 — ⚠️ **chưa chốt** (phải chốt trước lần chạy chính W7) |
+| O · thước đo | Số mutant riêng biệt được oracle xác nhận | ✓ (1): **TD-0002** (mutation score 40,8% — đã qua V2; chưa tách unique/theo dạng yêu cầu) | **Trong 42 bài, chưa xác nhận bài nào đáp ứng đầy đủ O của RQ**: cùng oracle, cách đếm và phân tầng. Nguồn ngưỡng dự kiến: Case 1 / 2 / 3 — ⚠️ **chưa chốt** (phải chốt trước lần chạy chính W7) |
 
 ## 3. Ma trận P · I · C · O (42 bài — N sau gộp)
 

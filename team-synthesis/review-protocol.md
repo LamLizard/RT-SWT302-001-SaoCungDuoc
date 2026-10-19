@@ -7,7 +7,9 @@ Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày 
 - RQ (VN): Trên 45 yêu cầu của RESTestBench, phân hoạch tương đương kết hợp phân tích giá trị biên, so với sinh dữ liệu ngẫu nhiên đồng đều cùng ngân sách, khác nhau thế nào về số mutant riêng biệt bị phát hiện theo từng dạng yêu cầu?
 - H0: Số lỗi/mutant riêng biệt được oracle xác nhận (số đếm) của Phân hoạch tương đương kết hợp phân tích giá trị biên với ngân sách request cố định KHÔNG khác kỹ thuật/công cụ đối chứng không dùng AI.
 - H1: Số lỗi/mutant riêng biệt được oracle xác nhận (số đếm) của Phân hoạch tương đương kết hợp phân tích giá trị biên với ngân sách request cố định khác kỹ thuật/công cụ đối chứng không dùng AI.
-- PICO: P = 45 yêu cầu RESTestBench (15/dịch vụ) · I = EP + BVA · C = random đồng đều cùng budget · O = số mutant riêng biệt được oracle xác nhận.
+- PICO: P = 45 yêu cầu RESTestBench (**16 FastAPI + 15 NestJS RealWorld + 14 TodoApp**, thống nhất 20/10/2026, thay 15/dịch vụ) · I = EP + BVA · C = random đồng đều cùng budget · O = số mutant riêng biệt được oracle xác nhận.
+
+Thiết kế hiện hành và các điều kiện chưa khóa: [rq-validation §1](rq-validation.md). Chưa có snapshot/danh sách 45 ID hoặc kết quả pilot; chưa xác nhận thay đổi P đã được cập nhật trên thẻ/GV. Nhật ký thay đổi: [search-log ngày 20/10/2026](../lam/SLR/search-log.md).
 
 ## 2. Nguồn & phân công
 | Thành viên | Nguồn |

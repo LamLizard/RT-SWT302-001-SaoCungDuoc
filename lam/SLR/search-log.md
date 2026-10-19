@@ -52,3 +52,23 @@
   - **RESTestBench** — EASE 2026, arXiv `2604.25862` (3 dịch vụ; 106 yêu cầu/228 mutation theo Table 3; benchmark cho LLM-generated tests).
   - **MioHint** — ICSE 2026, DOI `10.1145/3744916.3773228` (whitebox, LLM-assisted request mutation).
 - **Kết quả kiểm tra:** cả 3 **không** so EP+BVA với uniform random cùng request budget; **không** báo cáo số mutant riêng biệt theo từng dạng yêu cầu; **không** dùng RESTestBench làm P → **không có phản chứng mới** cho RQ FA26-EXT-12.
+
+## 6. Đối chiếu và sửa tổng hợp RQ — 20/10/2026 (Asia/Saigon)
+
+- **Loại công việc:** rà tính nhất quán/nguồn của tài liệu tổng hợp; không phải lượt tìm kiếm hệ thống mới. Không thay N=42, screening decisions hoặc PRISMA.
+- **Quyết định đã được chấp nhận:** giữ 45 yêu cầu, đổi P từ 15/dịch vụ sang **16 FastAPI + 15 NestJS RealWorld + 14 TodoApp**. Cập nhật rq-validation, review-protocol, rq-evidence-map và notes; chưa khóa commit benchmark/danh sách ID hoặc cập nhật thẻ/GV.
+- **Kiểm ma trận:** tính lại 42 hàng §3: P ✓/◐/· = 0/28/14; I = 2/21/19; C = 5/25/12; O = 1/32/9. Điểm paper: 35 bài 0, 6 bài 1, 1 bài 2. Sửa bảng cá nhân: Tùng 4 bài 1/4 + 4 bài 0/4; K.Duy K49 1/4 + 7 bài 0/4.
+- **Guo 2024:** đọc toàn văn chính thức https://link.springer.com/article/10.1007/s11219-023-09659-9 (§5.2, §5.4–5.6). Giữ 3/4 theo rubric rộng; phân biệt với RQ đầy đủ vì nguồn biên từ mã, random theo phân hoạch, oracle đường thực thi. Bỏ câu “chỉ khác P” và quy tắc tự hạ điểm vì uniform mà không đổi rubric cho các bài khác. `extension` là nhãn làm việc theo rubric; chưa xác minh thẻ/GV gốc.
+- **RESTestBench:** đối chiếu paper https://arxiv.org/html/2604.25862v1 (Table 3/§3/§6), README Dataset và src/evaluator.py trên repo tác giả. Paper ghi 106 yêu cầu/228 mutations; README 103 yêu cầu, TodoApp 14. Không nội suy ~97 mutant thành số mutant của mẫu. Chưa lấy được snapshot/manifest qua lần kiểm này, chưa chạy benchmark.
+- **PDF trong repo:** đối chiếu các mục cụ thể của K46/PDF10, K32/PDF9, P12/PDF10, TD-0015/PDF8, K02/PDF14, K89/PDF27, K93/PDF21, K166/PDF7 cho GAP-D; K49/PDF17 cho GAP-M; TD-0002/PDF4/6–8 và TD-0015/PDF6 cho I/O. Không tuyên bố screening lại toàn bộ 42 bài. Tám paper GAP-D không đồng nghĩa tám nhóm tác giả độc lập; bỏ số đếm 11 nhóm chưa đủ truy vết/gộp nhóm.
+- **Nguồn bổ sung:** ghi rõ Req2REST-Guard có P/điểm chưa xác nhận, do rq-check Khôi nêu tên dịch vụ không khớp; ghi ngày rà Khôi là 18/10/2026, không nhầm với mốc xuất bản 04–06/2026. Giữ phân biệt nguồn đã đọc trực tiếp và điểm kế thừa rq-check.
+- **Thống kê:** đối chiếu SciPy 1.17 `wilcoxon` và ASA P-Value Statement. Sửa diễn giải bác bỏ H0 theo chiều hiệu ứng; không suy tương đương từ không bác bỏ H0, không suy tính khái quát từ p-value; bỏ khuyến nghị tăng lượt tùy kết quả. Đánh dấu phương án tổng hợp/kiểm định, B/miền uniform/CI/θ là điều kiện cần khóa trước chạy chính, không bịa số pilot.
+- **Giới hạn:** các file rq-check cá nhân giữ như nguồn lịch sử; chưa tái kiểm chính thức thẻ W6/ý kiến GV, chưa screening IC/EC lại toàn tập, chưa triển khai generator hoặc chạy Docker/pilot. Xem rq-validation §6–7 để biết trạng thái hiện hành.
+
+### Double-check lần hai — 20/10/2026
+
+- Kiểm lại bảng gộp: 42 mã khác nhau, số thứ tự #1–#42; đối chiếu điểm từng mã với ma trận, không chỉ kiểm tổng. Không đổi N hoặc điểm nguồn.
+- Bổ sung K66 cho GAP-D: §5/PDF10 nêu giới hạn đánh giá 11 REST APIs, rào cản authentication/quota và khả năng khác hiệu năng ở API/miền khác. Tổng hiện hành là **9 paper có đoạn trực tiếp**, không phải 9 nhóm độc lập; phần ghi 8 paper ở lượt trước là lịch sử đối chiếu.
+- Sửa locator K49: đoạn mutation tool nằm trong **§4.5.1/PDF17**, không phải §4.4; locator TD-0015 là PDF8, đoạn giới hạn thực nghiệm trước §3.4.
+- Bổ sung điều kiện precise/vague chưa khóa: cùng biến thể cho hai nhánh; 900 lượt là cho một điều kiện mô tả, không mặc định chạy cả hai. Không tạo dữ liệu chạy hoặc quyết định thực nghiệm mới.
+- Thu hẹp câu O trong rq-evidence-map về đúng phạm vi 42 bài và mức chưa xác nhận đầy đủ O của RQ.
