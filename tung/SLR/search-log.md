@@ -59,3 +59,42 @@ Nhóm SaoCungDuoc · RQ FA26-EXT-12 · Đợt tìm mới 12–13/10/2026, múi g
 **Ba INCLUDE thêm vào tập evidence:** P12/K81 (`10.1145/3533767.3534401`), P17/K84 (`10.1145/3597926.3598131`), P38/K108 (`10.1145/3696630.3728545`). Xem căn cứ EP/BVA và kết quả số tại [evidence-table.md](evidence-table.md). Năm REVIEW chưa tính included.
 
 **Giới hạn truy vết:** gói chưa có raw provider log đầy đủ cho công cụ snowball thứ hai. Vì vậy chưa xác minh tổng citations/references available, số pages provider, hoàn tất từng hướng hoặc coverage forward 12 tháng. Không diễn giải thiếu log hoặc số 0 của snapshot thành không có citation. Matching records và đồng bộ quyết định không tự hoàn tất coverage snowball.
+
+## RBL-2 — tiếp nhận kết quả và kiểm chứng full text (18/10/2026)
+
+**Mục đích:** rà nghiên cứu trong khoảng **18/10/2025–18/10/2026** để kiểm chứng RQ FA26-EXT-12. Nguồn: Google Scholar qua SerpAPI (RBL Paper Harvester), bộ lọc `as_ylo=2025`; kiểm ngày cụ thể khi chọn bài. **Không tính vào PRISMA** theo protocol §3.
+
+### Nhật ký tìm kiếm
+
+Số hits/lấy về theo [log Harvester chép từ chat](update-paper/FA26_EXT12_RBL2_audit_evidence_bundle/RBL2_log_Harvester_trich_tu_chat.md); cột cuối đếm từ CSV sau dedup.
+
+| Lượt | Query theo log Harvester | Ngày/giờ Việt Nam | Hits báo | Lấy về báo | ID có nhãn lượt tìm |
+| --- | --- | --- | ---: | ---: | ---: |
+| Q1 / v1 | `"RESTestBench"` | 18/10/2026 16:33 | 3 | 3 | 3 |
+| Q2 / v2 | `("REST API" OR "RESTful API" OR "web API") ("mutation testing" OR "mutation score" OR "mutant detection" OR "mutant killing")` | 18/10/2026 16:33 | 62 | 100 | 72 |
+| Q3 / v3 | `("REST API" OR "RESTful API" OR "web API") ("equivalence partitioning" OR "boundary value analysis" OR "boundary-value analysis" OR "boundary testing")` | 18/10/2026 16:34 | 90 | 82 | 68 |
+
+### Dedup và sàng lọc sơ bộ
+
+- Công cụ đã loại **46 bản trùng từ 185 bản ghi**, giữ **139 bản ghi**; kết quả loại trùng được người phụ trách xác nhận ngày 18/10/2026. Bước này thuộc phạm vi xử lý của người phụ trách, không yêu cầu kiểm lại từng cặp trùng trong hồ sơ cá nhân.
+- Nhãn lượt tìm trong CSV: **3 + 72 + 68 − 4 = 139**; bốn ID thuộc hai lượt là NEW01, NEW02, NEW05, NEW15. Cột query đại diện phân bố **3/70/66**, khác cách đếm nhãn lượt tìm. Cột `phien_ban` ghi membership truy vấn, không biểu thị phiên bản arXiv. CSV có 139 ID riêng biệt, khớp ID/title/query/year/DOI với workbook.
+- Ưu tiên từ title/snippet: **1 ưu tiên, 2 dự phòng, 14 liên quan gián tiếp, 4 cần kiểm thêm, 118 chưa ưu tiên**. Đây là triage, chưa phải quyết định IC/EC; “chưa ưu tiên” không đồng nghĩa EXCLUDE.
+
+### Paper chọn đọc full text
+
+Bốn nghiên cứu bổ sung khác nhau về tiêu đề, tác giả và định danh; chưa phát hiện trùng tiêu đề/DOI với 42 dòng bảng hợp nhất và catalog của Tùng. Các bản arXiv/conference của cùng nghiên cứu được gộp thành một đơn vị.
+
+Các nghiên cứu được ưu tiên theo độ gần bài toán/thước đo, thiết kế đánh giá/venue, sau đó đến ngày công bố. Ba bài chính và một bài dự phòng đã được phân tích toàn văn; đối chiếu PICO/S và trích dẫn tại [rq-check §2](rq-check.md#2-tìm-kiếm-bổ-sung-và-rà-12-tháng-gần-nhất).
+
+| Paper | Nguồn | Quyết định và lý do |
+| --- | --- | --- |
+| [R2R-01 · RESTestBench](update-paper/R2R-01-RESTestBench-2026.pdf) | Seed S1, ngoài 139 records | **Chọn chính**: đúng benchmark và requirements-based mutation metric; arXiv 28/04/2026. |
+| [R2R-02 · MioHint](update-paper/R2R-02-MioHint-2026.pdf) | NEW04, Q2 | **Chọn chính**: ICSE 2026 Research Track, có đối chứng và 10 lần chạy; đo request mutation và coverage. Xét bản conference tháng 04/2026; v4 ngày 05/03/2026 trong cửa sổ, v1 ngày 08/04/2025 ngoài cửa sổ. |
+| [R2R-03 · RESTOR](update-paper/R2R-03-RESTOR-2026.pdf) | Seed S3, ngoài 139 records | **Chọn chính**: gần oracle, có held-out evaluation và đánh giá công nghiệp; arXiv 27/07/2026. |
+| [R2R-04 · Prompt-Based REST API Test Amplification in Industry](update-paper/R2R-04-Prompt-Based-REST-API-Test-Amplification-in-Industry-2026.pdf) | Seed S2, ngoài 139 records | **Dự phòng**: arXiv 25/01/2026; chỉ đo API coverage/effort, 1 microservice/6 endpoints và chưa xác nhận venue chính thức; ít gần metric của RQ hơn RESTestBench, thiết kế đánh giá hẹp hơn MioHint/RESTOR. |
+
+**Lựa chọn trong phạm vi cá nhân — 18/10/2026:** ba bài chính là **RESTestBench, MioHint, RESTOR**; bài amplification là dự phòng. MioHint được xét theo mốc bản conference năm 2026, theo lựa chọn đã được người phụ trách xác nhận; ngày preprint đầu tiên vẫn được ghi riêng. Mỗi bài có căn cứ lựa chọn, phân tích toàn văn và đối chiếu phép đo còn thiếu so với RQ. Danh sách ưu tiên không biểu thị kết quả đánh giá toàn văn toàn bộ 139 bản ghi.
+
+**Giới hạn:** Q2 báo 62 hits nhưng lấy 100, chưa có raw JSON để giải thích; query Q2/Q3 trong CSV có thêm `AND` so với log. Chưa xác minh sort/phân trang hoặc screening toàn bộ 139 bài. Seed ngoài CSV không cộng vào 139.
+
+Bằng chứng từng bản ghi và quy tắc triage: [nhật ký kiểm chứng](update-paper/FA26_EXT12_RBL2_audit_evidence_bundle/RBL2_audit_trail.md) và [workbook audit](update-paper/FA26_EXT12_RBL2_audit_evidence_bundle/RBL2_bang_chung_tim_kiem_va_sang_loc.xlsx). Quan hệ sử dụng lại và bổ sung so với RESTestBench được phân tích tại [rq-check §2.3](rq-check.md#23-thành-phần-dự-kiến-kế-thừa-và-bổ-sung-so-với-restestbench). **Nhãn extension chưa được xác thực**; ý nghĩa nhãn chính thức của mã RQ và kết luận gap cấp nhóm chưa được xác minh/tổng hợp.
