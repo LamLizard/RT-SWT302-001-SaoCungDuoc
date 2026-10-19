@@ -1,6 +1,6 @@
 # Kiểm chứng RQ — FA26-EXT-12 (nhóm 1 · SaoCungDuoc)
 
-*Nguồn: 5 file `SLR/rq-check.md` + `team-synthesis/rq-evidence-map.md` + `team-synthesis/evidence-table-merged.md` (N = 42).
+*Nguồn: 5 file `SLR/rq-check.md` + `team-synthesis/rq-evidence-map.md` + `team-synthesis/evidence-table-merged.md` (N = 42).*
 
 ## 1. RQ (nguyên văn trên thẻ) + PICO
 
@@ -29,6 +29,16 @@
 Các bài 1/4 ✓: K52/P53, K90, K34, K102, K49 (đều ở C) và TD-0015 (I). **Không bài nào đạt 3/4 hoặc 4/4.**
 
 **Kết luận phản chứng:** Trong phạm vi 42 paper đã tìm, **không có phản chứng** cho RQ: chưa ai làm đủ 3/4 yếu tố, càng chưa ai làm đủ 4/4. RQ đứng vững trong phạm vi tài liệu đã tìm; không khẳng định “chưa ai làm” ngoài phạm vi này.
+
+### Rà bổ sung 2–3 paper mạnh nhất 12 tháng (ngoài 42)
+
+Ba paper này **không nằm trong 42** (rà riêng của Khôi, 04–06/2026) nên không đưa vào N = 42; chỉ dùng để kiểm tra RQ có bị lấp không:
+
+- **RESTestBench** — **2/4 (P, O):** 3 dịch vụ, 106 yêu cầu, 228 mutant; chỉ đánh giá LLM; tác giả tự nêu *“Our benchmark includes only three services”* và *“Each experiment was executed only three times”* (§6).
+- **Req2REST-Guard** — **2/4 (P, O):** dùng RESTestBench (106 yêu cầu/228 mutations), GPT-4o; không có EP+BVA hay random cùng ngân sách; bài chưa có venue, Table I có cột lệch — **chỉ dùng đối chiếu tính mới, không dùng số liệu**.
+- **MASTOR** — **1/4 (O):** sinh oracle, không sinh input; không lấp I/C.
+
+**Kết luận:** không bài nào ≥3/4; mức cao nhất vẫn là **2/4**; nhãn `new` không đổi. RQ vẫn đo phần chưa ai đo: **EP+BVA so với uniform random trên RESTestBench**.
 
 ### Nhãn tính mới của nhóm
 
@@ -68,13 +78,16 @@ Các bài 1/4 ✓: K52/P53, K90, K34, K102, K49 (đều ở C) và TD-0015 (I). 
 | Hạn chế | Paper nêu | Paper đã giải quyết | Còn lại | Mạnh/yếu | Loại |
 |---|---|---|---|---|---|
 | EP+BVA chưa được thử như can thiệp chính trên request black-box; 0/42 trên RESTestBench | **40/42 paper không dùng EP+BVA làm can thiệp chính** (dùng fuzz/RL/LLM/constraint; cột Tool/LLM); **2/42 chỉ prompt/module**: TD-0002, TD-0015; **0 paper tự nêu “chưa thử”** | Không — 2 bài chỉ prompt/module, chưa phải black-box request generator trên RESTestBench | 40/42 | **Mạnh theo Tool/LLM** (40/42); không có author-stated | **GAP-T** |
+| Ít SUT/dataset nhỏ (2–20 API/SUT; 1 app/service) — **GAP-D phụ** | **11 nhóm tác giả:** SCORE Lab (K52/K46/K76/K90/K34/K102), Corradini (K32/K167/K168/K191), Kim (P12/P17), Karlsson (K37/K67), Wu (K66), Moskalenko (TD-0015), K02, K33, He (K89), Chen (K93), Mirabella (K166) | Không — 0/42 dùng RESTestBench; P12 20 services nhưng khác metric/oracle | 11 nhóm | **Mạnh** | **GAP-D** |
 | Chưa đo số mutant riêng biệt/oracle-confirmed; metric coverage/bug xấp xỉ | **1 paper trực tiếp:** K49 (chưa có tool mutation cho system testing); **6 paper metric gián tiếp:** TD-0002 (mutation score 40,8% nhưng chưa tách unique), K07, K21, K02, K162/bBOXRT, K33 | TD-0002 có mutation score nhưng không tách unique/theo dạng yêu cầu → chưa giải quyết; K49 không có | 1 trực tiếp + 6 gián tiếp | **Yếu** | **GAP-M** |
+
+**Gộp nhóm tác giả (đếm GAP-D):** SCORE Lab (K52/K46/K76/K90/K34/K102) = **1 nhóm**; Corradini (K32/K167/K168/K191) = **1 nhóm**; Kim (P12/P17) = **1 nhóm**; Karlsson (K37/K67) = **1 nhóm**; còn lại K66, TD-0015, K02, K33, K89, K93, K166 mỗi bài 1 nhóm → **11 nhóm**, không đếm 20+ paper. K89 và K32 là **hạn chế tác giả tự nêu** (xem trích dẫn dưới).
 
 ### Phát biểu gap (dùng thẳng trong proposal §2)
 
 > Trong **42 paper** đã xem xét, **40/42 paper không dùng EP+BVA làm can thiệp chính** (dùng fuzz/RL/LLM/constraint); **2/42 paper chỉ dùng EP/BVA ở prompt/module** (TD-0002, TD-0015); **0/42 paper thử trên RESTestBench**. Đây là **khoảng trống kỹ thuật quan sát từ cột Tool/LLM**, không phải hạn chế tác giả tự nêu; trong phạm vi tài liệu đã tìm, chưa có paper nào lấp.
 
-**Theo bảng “Không dòng nào khớp”:** không paper nào **tự nêu** “chưa thử EP+BVA”, nên phát biểu trên là **giả định của nhóm**; không có câu trích author-stated nên **không được gọi là gap mạnh author-stated**. Nếu GV yêu cầu gap đủ 5 điều kiện, quay lại GAP-M (yếu).
+**Theo bảng “Không dòng nào khớp”:** không paper nào **tự nêu** “chưa thử EP+BVA”, nên phát biểu trên là **giả định của nhóm**; không có câu trích author-stated nên **không được gọi là gap mạnh author-stated**. Nếu GV yêu cầu gap đủ 5 điều kiện, chuyển sang **GAP-D** (mạnh, 11 nhóm; K89/K32 là author-stated); GAP-T chỉ là giả định.
 
 **Vì sao gap còn trống:** các bài 2020–2026 tập trung fuzz/RL/LLM; EP+BVA cổ điển ít được dùng làm can thiệp chính; RESTestBench mới công bố (2026) với requirements + mutant/oracle.
 
@@ -101,12 +114,14 @@ Các bài 1/4 ✓: K52/P53, K90, K34, K102, K49 (đều ở C) và TD-0015 (I). 
 - **TD-0015** §3.2, PDF5: *“It applies classical test design techniques (equivalent decomposition, boundary value analysis, and negative scenario generation)…”* — module G, 1 service; future list không nhắc EP+BVA.
 - **TD-0002** §3, PDF4: *“boundary testing, equivalence classes”* — trong prompt, không phải black-box request generator.
 - **K49** tr.17: *“we are not aware of any such tool aimed at system testing (i.e., they all seem to be tailored for unit testing)”* — chứng cứ cho GAP-M, không phải EP+BVA.
+- **K89** §5.4, PDF27: *“A broader evaluation would ideally include more heterogeneous APIs, additional recent baselines, and repeated runs with appropriate statistical analysis. We leave this expansion to future work.”* — 2 hệ GitLab/WordPress; hạn chế **ít SUT** do tác giả tự nêu (GAP-D).
+- **K32** §V.E, PDF9: *“Although we have sampled real REST APIs in our experimental validation, written in different programming languages and with different frameworks, we cannot assume that our results hold for any other arbitrary REST API.”* — 14 API; hạn chế **không khái quát** do tác giả tự nêu (GAP-D).
 - **TD-0002** §5, PDF8: *“the tests had a relatively low mutation rate given the black-box test generation…”* — chứng cứ cho GAP-M.
 
 ## 6. Quyết định: giữ RQ
 
 - **Giữ nguyên RQ FA26-EXT-12**, không đổi I (EP+BVA), C (uniform random cùng request budget) hay O (unique mutant/oracle).
 - **Gap chính:** **GAP-T** — mạnh theo cột Tool/LLM (**40/42** paper không dùng EP+BVA làm can thiệp chính), nhưng **không có paper tự nêu** → chỉ dùng như **giả định của nhóm** trong proposal §2; không gọi là gap author-stated.
-- **Gap phụ:** **GAP-M yếu** (1 trực tiếp K49 + 6 gián tiếp) — RQ đo O.
+- **Gap phụ:** **GAP-D mạnh (11 nhóm tác giả)** — chỉ dùng làm **nền cho P** (chứng cứ ít SUT/dataset nhỏ; K89/K32 là author-stated), không dùng để chọn gap chính; **GAP-M yếu** (1 trực tiếp K49 + 6 gián tiếp) — RQ đo O.
 - **Nhãn:** `new` theo số đông (3/5 ghi rõ; Tùng `extension` là thiểu số; T.Duy chưa ghi). GV chưa trả lời email hỏi nhãn; nếu GV xác nhận `extension`, chỉ cập nhật nhãn + lý do, **không đổi RQ**.
 - **Đã báo GV:** email hỏi nhãn (chưa có trả lời). Không đổi RQ nên không cần báo lại về RQ.
