@@ -17,3 +17,4 @@ Thumbs.db
 # File lớn (thêm nếu data > 100MB)
 # data/raw/
 rbl-step/
+AGENTS.md

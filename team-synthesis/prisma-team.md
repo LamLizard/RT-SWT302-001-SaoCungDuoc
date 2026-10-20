@@ -1,15 +1,15 @@
 # PRISMA nhóm — nhóm 1 (SaoCungDuoc) · RQ FA26-EXT-12
 
-*Khớp `team-synthesis/evidence-table-merged.md`: **N = 42** dòng bảng chính (đã gộp 5 bản EC-D trên 4 cặp bài).*
+**Cập nhật:** 20/10/2026. Phân biệt **42 bài INCLUDE qua screening** với **17 bài nền bổ sung**: [bảng merge](evidence-table-merged.md) và [map](rq-evidence-map.md) hiện có **59 bài evidence duy nhất**. Đợt này đồng bộ cách báo cáo; không screening lại IC/EC hoặc đổi quyết định INCLUDE của các nguồn.
 
-## Phễu nhóm
+## Phễu screening nhóm — giữ số liệu 42 bài
 
 ```text
 [IEEE Xplore n1 = 2] [ACM DL n2 = 2] [OpenAlex n3 = 28] [Scholar n4 = 2] [Included từ snowballing n5 = 10] [Springer bổ sung = 3]
         ↓  cộng lại (N = 2 + 2 + 28 + 2 + 10 + 3 = 47)
 [Bỏ trùng giữa các nguồn (N = 42)]   ← 5 bản EC-D trên 4 cặp bài: bBOXRT (n1 × Khôi-snowball) · No Time to Rest Yet ×2 (n3 × Tùng-snowball × K.Duy-snowball) · RESTest K22≡K90 (n3 × Springer) · EmRest R391≡K101 (n2 × n3)
         ↓
-[Final included của nhóm (N = 42)]   ← = 42 dòng bảng chính trong evidence-table-merged.md ✓
+[Final included qua screening (N = 42)]   ← = các dòng #1–#42 trong evidence-table-merged.md
 ```
 
 ## Số nhập form kiểm (hộp "Kiểm số PRISMA nhóm")
@@ -24,6 +24,25 @@
 | Springer (bổ sung — ngoài 5 ô gốc của form) | 3 |
 | Sau bỏ trùng giữa nguồn | 42 |
 | Final included nhóm | 42 |
+
+Các ô form trên chỉ phản ánh nhánh screening cũ. **Không điền 59 vào ô Final included** khi 17 bài nền chưa có quyết định IC/EC tương ứng được xác minh.
+
+## Bài nền bổ sung và đối soát bộ evidence
+
+| Phạm vi | Số bài | Nguồn và cách tính |
+|---|---:|---|
+| Records INCLUDE của các nguồn trước khử trùng liên nguồn | 47 | 2 + 2 + 28 + 2 + 10 + 3; không phải tổng records tìm được ban đầu. |
+| Bản trùng liên nguồn bị gộp | 5 | 4 nhóm paper: bBOXRT (1), No Time to Rest Yet (2), RESTest K22≡K90 (1), EmRest R391≡K101 (1). |
+| Paper INCLUDE sau screening và khử trùng | 42 | 47 − 5 = 42; các dòng #1–#42 của bảng merge. |
+| Paper nền do leader bổ sung, đã đọc phần toàn văn liên quan | 17 | GV-01–GV-17; các dòng #43–#59 của bảng merge, truy vết qua [nguồn Lâm](../lam/SLR/evidence-table.md) và [audit PDF](pico-audit-17-papers.md). |
+| Trùng giữa 17 bài nền và 42 bài screening | 0 | Theo đối chiếu DOI/arXiv và tên paper đã ghi trong bảng merge; không gộp hai nghiên cứu chỉ vì cùng tác giả hoặc công cụ. |
+| Bộ evidence dùng đối chiếu RQ | **59** | **42 + 17 − 0 = 59** dòng merge/map; không đồng nghĩa 59 bài đã INCLUDE theo IC/EC. |
+
+17 bài nền được bổ sung để kiểm tra RQ và gap, không đi ngược qua phễu CSDL/snowballing cũ. Audit PICO có **67/68 ô phân loại được**, còn **GV-13/P?**; việc đọc PDF và chấm PICO không thay cho screening. Ví dụ GV-01 là bài Android năm 2018, GV-17 chưa có kết quả định lượng trong bản đọc: không mặc nhiên coi mọi bài nền đều thỏa IC-Y/IC-P/IC-E. Đợt này không gán mới mã loại cho chúng.
+
+**Khử trùng alias:** GV-02 = R2R-01 (RESTestBench), GV-03 = R2R-04 (Prompt-Based), GV-04 = R2R-03 (RESTOR) ở hồ sơ Tùng; mỗi nghiên cứu chỉ có một dòng trong 59. Bản preprint/conference và bản PDF lưu ở hai thư mục không được tính thành hai paper. **Guo 2024 và MioHint/R2R-02 nằm ngoài ma trận 59**; vẫn được xét ở [phản chứng của nhóm](rq-validation.md), nhưng không cộng vào phễu hoặc số dòng merge.
+
+Đây là sơ đồ tổng hợp nguồn của nhóm, chưa phải một phễu PRISMA đầy đủ cho cả 59 bài: không có số records tìm/screen/loại theo IC/EC riêng cho nhánh 17 bài nền. Các số phễu cá nhân dưới đây được giữ theo hồ sơ nguồn; không suy ra số liệu screening chưa ghi nhận.
 
 ## Phễu từng nguồn (tóm tắt — bản đầy đủ trong `prisma-flow.md` của từng người)
 
