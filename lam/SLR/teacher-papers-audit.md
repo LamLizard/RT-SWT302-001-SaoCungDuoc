@@ -40,7 +40,7 @@ Ngày cập nhật: **20/10/2026 (Asia/Saigon)**. Nhánh `Lam`. Bảng đích: [
 
 ## Tái thẩm định PICO trực tiếp từ PDF —20/10/2026
 
-Đã đọc các trang phương pháp/thực nghiệm liên quan trong17 PDF, xem bảng/figures khi cần. [Báo cáo68 ô](../../team-synthesis/pico-audit-17-papers.md) và [JSON có SHA256](../../team-synthesis/pico-audit-17-papers.json) lưu từng dấu, lý do, locator và phạm vi trang đã đọc.67 ô phân loại được; P củaGV-13 giữ? vì chưa xác minh deployment/source đủ điều kiện P◐, không suy thành·.
+Đã đọc các trang phương pháp/thực nghiệm liên quan trong 17 PDF, xem bảng/figures khi cần. Dấu, lý do và locator cho 68 ô được đồng bộ trong [bảng evidence](evidence-table.md) và [đối chiếu cá nhân](rq-check.md); phạm vi trang đã đọc nằm ở bảng mapping phía trên, SHA256 được ghi trong hồ sơ kiểm chứng của đợt đọc PDF. 67 ô phân loại được; P của GV-13 giữ ? vì chưa xác minh deployment/source đủ điều kiện P◐, không suy thành ·.
 
 - GV-05: P◐→·; I·→◐ ở mức domain/type request generators thực sự được cấu hình và chạy, không phải EP+BVA primary.
 - GV-09: P◐→· do APIs online/source unavailable; giữ I·C·O◐.
@@ -48,4 +48,4 @@ Ngày cập nhật: **20/10/2026 (Asia/Saigon)**. Nhánh `Lam`. Bảng đích: [
 - GV-04/12/14/16/17 giữ····, nay có căn cứ riêng từngô. RESTOR KillRate là reward trên response variants; Crowdsourced rarity score chấm reports đầu vào; random CV củaHowFar không phải random input baseline.
 - Sửa locator RESTOR Fig3/Fig4→PDF12 (phân tíchF1 ởPDF11); GV-10 9095 build và pass existing tests; GV-14 64 crowdworkers.
 
-Đã đồng bộ kết quả vào bảng Lâm, merge, map và rq-check Lâm. Chưa chạy artifact hoặc làm lại rq-validation.
+Đợt đọc PDF đã đồng bộ kết quả vào bảng Lâm, merge, map và rq-check Lâm; chưa chạy artifact. Câu RQ và trạng thái kiểm chứng hiện hành được tổng hợp tại [rq-validation](../../team-synthesis/rq-validation.md).

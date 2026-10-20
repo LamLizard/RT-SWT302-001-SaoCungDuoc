@@ -18,3 +18,5 @@ Thumbs.db
 # data/raw/
 rbl-step/
 AGENTS.md
+# Local evidence snapshots retained outside the working Markdown documents
+/team-synthesis/.local-evidence/rbl2/

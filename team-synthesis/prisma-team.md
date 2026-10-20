@@ -34,7 +34,7 @@ Các ô form trên chỉ phản ánh nhánh screening cũ. **Không điền 59 v
 | Records INCLUDE của các nguồn trước khử trùng liên nguồn | 47 | 2 + 2 + 28 + 2 + 10 + 3; không phải tổng records tìm được ban đầu. |
 | Bản trùng liên nguồn bị gộp | 5 | 4 nhóm paper: bBOXRT (1), No Time to Rest Yet (2), RESTest K22≡K90 (1), EmRest R391≡K101 (1). |
 | Paper INCLUDE sau screening và khử trùng | 42 | 47 − 5 = 42; các dòng #1–#42 của bảng merge. |
-| Paper nền do leader bổ sung, đã đọc phần toàn văn liên quan | 17 | GV-01–GV-17; các dòng #43–#59 của bảng merge, truy vết qua [nguồn Lâm](../lam/SLR/evidence-table.md) và [audit PDF](pico-audit-17-papers.md). |
+| Paper nền do leader bổ sung, đã đọc phần toàn văn liên quan | 17 | GV-01–GV-17; các dòng #43–#59 của bảng merge, truy vết qua [nguồn Lâm](../lam/SLR/evidence-table.md) và PDF gốc được dẫn ở từng dòng. |
 | Trùng giữa 17 bài nền và 42 bài screening | 0 | Theo đối chiếu DOI/arXiv và tên paper đã ghi trong bảng merge; không gộp hai nghiên cứu chỉ vì cùng tác giả hoặc công cụ. |
 | Bộ evidence dùng đối chiếu RQ | **59** | **42 + 17 − 0 = 59** dòng merge/map; không đồng nghĩa 59 bài đã INCLUDE theo IC/EC. |
 
