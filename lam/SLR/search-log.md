@@ -72,3 +72,12 @@
 - Sửa locator K49: đoạn mutation tool nằm trong **§4.5.1/PDF17**, không phải §4.4; locator TD-0015 là PDF8, đoạn giới hạn thực nghiệm trước §3.4.
 - Bổ sung điều kiện precise/vague chưa khóa: cùng biến thể cho hai nhánh; 900 lượt là cho một điều kiện mô tả, không mặc định chạy cả hai. Không tạo dữ liệu chạy hoặc quyết định thực nghiệm mới.
 - Thu hẹp câu O trong rq-evidence-map về đúng phạm vi 42 bài và mức chưa xác nhận đầy đủ O của RQ.
+
+## 7. Bổ sung paper nền do giảng viên cung cấp — 20/10/2026
+
+- **Đầu vào:** 20 link do người phụ trách chuyển từ giảng viên: 1 SLR + 2 nền tảng + 16 mới + 1 liên quan khác. Đây là nguồn cung cấp có chủ đích, không phải 20 kết quả tìm kiếm ACM.
+- **Thao tác:** thử mở từng link DOI/Semantic Scholar; khi bị lỗi, tìm đúng bài trên publisher, trang tác giả, repository trường hoặc arXiv; đọc phương pháp, kết quả và hạn chế ở các bản toàn văn truy cập được. Không tải/chạy artifact thực nghiệm.
+- **Kết quả trích xuất:** thêm GV-01–GV-20 vào `evidence-table.md`, giữ nguyên 2 dòng ACM cũ; 13 bài đọc được các phần liên quan trong toàn văn, 6 bài chỉ abstract/preview, 1 bài chỉ metadata. Ghi nguồn, phiên bản và locator tại [teacher-papers-audit.md](teacher-papers-audit.md).
+- **Hiệu chỉnh có nguồn:** GV-03 giữ issue year 2025 (đầu vào ghi 2024); GV-01 tách issue 2025/online 2026; GV-15 dùng 39 endpoints/7 services theo thân bài; GV-19 chưa thấy kết quả định lượng đáp ứng IC-E. Phân biệt program mutants với input/response mutation và các metric proxy.
+- **Phạm vi:** bổ sung nền vào bảng Lâm trên nhánh `Lam`; chưa đổi 42 paper đã screening, PRISMA, CSV hoặc RQ. Nguồn ABS/META không tự coi đã qua V2. Nguồn ngoài IC-Y/IC-P/IC-I vẫn được giữ với nhãn nền theo chỉ định, chưa tự nới protocol.
+- **Khử trùng:** đối chiếu DOI/arXiv đầu vào với bảng gộp hiện tại không thấy trùng dòng chính; RESTestBench, RESTOR và Prompt-Based đã có bản PDF/tài liệu RBL-2 ở Tùng, phải gộp thành một paper khi tích hợp tiếp.
