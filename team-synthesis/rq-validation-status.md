@@ -1,38 +1,26 @@
-# Trạng thái rq-validation — checklist review
+# Trạng thái kiểm chứng RQ — FA26-EXT-12
 
-**Cập nhật:** 20/10/2026 · **Buổi review dự kiến:** 21/10/2026.
-**Tài liệu chi tiết:** [rq-validation.md](rq-validation.md). Đây là bản tóm tắt để đối chiếu cùng leader.
+**Cập nhật:** 20/10/2026. [Bản tổng hợp](rq-validation.md) · [Nguồn kiểm chứng](rq-validation-audit.md).
 
-## 1. Đã xử lý
+## 1. Những thay đổi trong lần chỉnh này
 
-- Đã thống nhất P: **45 yêu cầu = 16 FastAPI + 15 RealWorld + 14 TodoApp**; giữ câu RQ và I/C/O.
-- Đối chiếu điểm từng mã giữa bảng gộp và ma trận: **42 paper = 35 bài 0/4 + 6 bài 1/4 + 1 bài 2/4**; sửa điểm tổng hợp cá nhân Tùng/K.Duy.
-- Sửa mâu thuẫn phản chứng, suy luận từ H0 và các khẳng định khả thi chưa có số đo; bổ sung nguồn/mục/trang.
-- GAP-D: đã truy vết đoạn hạn chế trực tiếp ở **9 paper**, chưa kết luận số nhóm tác giả độc lập. RQ hiện tại không giải quyết GAP-D.
-- Đồng bộ tài liệu chung và ghi [nhật ký đối chiếu](../lam/SLR/search-log.md).
+- Sắp xếp `rq-validation.md` theo **6 mục của mẫu RBL-2**, bỏ phần lịch sử và chi tiết triển khai lặp lại.
+- Bổ sung bảng **Gap — Phát biểu gap — RQ lấp gap — Khác RQ ban đầu**, đặt GAP-T cạnh GAP-M và ghi rõ phần chưa đủ căn cứ.
+- Chỉ chỉnh hai file tổng hợp `rq-validation.md` và file trạng thái này; giữ nguyên các file cá nhân, review protocol và H0/H1 so với đầu lần chỉnh.
 
-**Trạng thái triển khai:** đã chỉnh tài liệu; chưa có bằng chứng generator/harness chạy đúng, chưa chạy Docker/benchmark/pilot. Chưa screening lại toàn văn 42 bài theo IC/EC.
+## 2. Kết luận trọng tâm
 
-## 2. Thiếu sót cần đối chiếu trong buổi review
+- **Bước 1 đã xác nhận; nhãn `extension` đã được GV bổ sung.** Bước 2 còn vấn đề biện minh gap; Bước 3 đã lập bảng nhưng chưa chốt khả thi.
+- **GAP-T:** giả định của nhóm, chưa có limitation tác giả tương ứng. **GAP-M:** bằng chứng P12 còn yếu, chưa đủ để lập RQ thay thế phù hợp. **GAP-D:** hạn chế lặp lại ở tối thiểu 18/42 paper, 10 cụm tác giả; RQ hiện tại không giải quyết việc thiếu đa dạng dịch vụ.
+- **Khả thi: 0 ❌ / 6 ⚠️ / 1 ✅**, rủi ro cao; đã có kế hoạch xử lý, chưa có bằng chứng chạy thử của nhóm. Chưa đánh dấu RBL-2 hoàn tất.
 
-- [ ] **Nhãn/thẻ/GV:** `extension` mới là nhãn làm việc theo rubric rộng (Guo 3/4); đối chiếu thẻ/phản hồi gốc và ghi nhận thay đổi P.
-- [ ] **Bằng chứng tài liệu:** rà tính phù hợp IC/EC của tập 42; xác minh nguồn/điểm Req2REST-Guard; thống nhất cách dùng rubric rộng so với mức khớp đầy đủ RQ. Không coi khớp số đếm là đã xác nhận chất lượng toàn bộ nguồn.
-- [ ] **Gap:** giữ GAP-T trong phạm vi tài liệu đã đối chiếu; nếu dùng số nhóm tác giả cho GAP-D thì chốt quy tắc gộp, xử lý chồng lấn tác giả/lab. Không gọi gap mạnh khi chưa đủ căn cứ.
+## 3. Các vấn đề nhóm cần cô hỗ trợ
 
-## 3. Công việc trước lần chạy chính
+1. **Gap ban đầu ghi muộn:** nhóm bổ sung câu gap ngày 20/10 sau khi tổng hợp paper, chưa đáp ứng yêu cầu ghi trước khi đếm. Xin cô hướng dẫn cách ghi nhận sai lệch này trong hồ sơ.
+2. **Chưa chốt cách biện minh GAP-T/GAP-M:** GAP-T phù hợp RQ nhưng chưa có limitation tác giả nêu trực tiếp; GAP-M hiện chỉ có hạn chế cụ thể của P12 và không tương ứng ngay với phép so EP+BVA–random. Xin cô góp ý nên giữ GAP-T như giả định của nhóm hay cần điều chỉnh hướng/RQ.
+3. **Paper gần nhất và phần mở rộng:** Guo đạt 3/4 theo rubric rộng, nhưng phương pháp sinh test, random baseline và oracle vẫn khác RQ. Xin cô góp ý paper làm căn cứ chính và cách trình bày đóng góp; nhóm giữ nhãn `extension` đã được cô bổ sung.
+4. **Số đếm GAP-D còn ở mức chủ đề:** nhiều paper cùng nêu giới hạn phạm vi dịch vụ nhưng không cùng một thiếu hụt dữ liệu cụ thể. RQ chỉ có 3 dịch vụ nên không lấp GAP-D; xin cô góp ý cách trình bày giới hạn này khi chọn gap chính.
+5. **Phân bổ mẫu thay đổi:** TodoApp chỉ có 14 yêu cầu; hồ sơ đề xuất **16 FastAPI + 15 RealWorld + 14 TodoApp**, thay 15/dịch vụ. Xin cô xác nhận cách cập nhật P/thẻ RQ. Nhóm còn phải khóa phiên bản để xử lý chênh lệch README 103/paper 106 yêu cầu.
+6. **Chưa đủ số liệu khả thi:** chưa chốt B, miền uniform random, dạng yêu cầu, precise/vague và runtime; chưa có log kiểm generator/oracle. Xin cô góp ý mức thu hẹp chấp nhận được nếu pilot cho thấy thiết kế 45 yêu cầu × 2 kỹ thuật × 10 lượt vượt nguồn lực/thời gian.
 
-| Thứ tự | Việc cần làm | Đầu ra cần có |
-|---|---|---|
-| 1 | Khóa dữ liệu và chọn mẫu 16–15–14; đối chiếu chênh lệch README 103/paper 106 | Commit benchmark, danh sách 45 ID, tổng mutant thực tế, quy tắc chọn mẫu/seed |
-| 2 | Định nghĩa dạng yêu cầu; chọn precise hoặc vague, giữ cùng thông tin cho hai kỹ thuật | Ánh xạ ID → dạng; biến thể mô tả dùng trong thí nghiệm |
-| 3 | Đặc tả EP+BVA và random | B, miền uniform, cách chọn lớp/biên, lịch seed, quy tắc budget/reset/retry/timeout và oracle |
-| 4 | Triển khai hai generator/harness, dựng dịch vụ và pilot dự kiến 5 yêu cầu trên cả 3 dịch vụ | Log chạy, kiểm pass bản gốc/fail mutant, runtime và lỗi thực tế; điều chỉnh thiết kế trước chạy chính |
-| 5 | Khóa kế hoạch phân tích sau pilot, trước chạy chính | Đơn vị phân tích, kiểm định phù hợp, ties/zeros/phụ thuộc, alpha/Holm, effect size, CI và θ |
-
-**Lưu ý:** 900 = 45×2×10 là số lượt kỹ thuật–yêu cầu cho **một điều kiện mô tả**, chưa phải số HTTP executions. Nếu chạy cả precise/vague phải tính lại khối lượng. Không cộng kills qua các lượt thành số mutant riêng biệt.
-
-## 4. Cần chốt sau buổi review
-
-- [ ] Mỗi mục còn mở có người phụ trách và hạn hoàn thành.
-- [ ] Mỗi mục đánh dấu xong có nguồn, quyết định hoặc log kiểm chứng đi kèm.
-- [ ] Cập nhật quyết định vào rq-validation và nhật ký; giữ rõ phần chưa xác minh.
+**Nhóm cần tự hoàn thiện:** danh sách 45 ID/mutant, đặc tả hai kỹ thuật và chính sách chạy, máy/người phụ trách, pilot và dự toán có ≥3 ngày dự phòng. Không dùng việc chưa chạy toàn bộ thực nghiệm làm tiêu chí duy nhất để kết luận RBL-2 chưa xong.

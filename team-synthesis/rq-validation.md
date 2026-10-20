@@ -1,188 +1,150 @@
-# Kiểm chứng RQ — FA26-EXT-12 (nhóm 1 · SaoCungDuoc)
+# Kiểm chứng RQ — FA26-EXT-12 · SaoCungDuoc
 
-*Cập nhật đối chiếu: 20/10/2026 (Asia/Saigon). N = 42 là số paper trong bảng gộp hiện tại; các nguồn rà bổ sung được trình bày riêng, không cộng vào N.*
+**Cập nhật:** 20/10/2026. Trình bày theo mẫu nhóm của [RBL-2](RBL-2-Kiem-chung-RQ-full.md). Nguồn kiểm chứng chi tiết: [nhật ký đối chiếu](rq-validation-audit.md).
 
-**Phạm vi kiểm chứng:** tính lại ma trận P/I/C/O, đối chiếu 5 file cá nhân, đọc các mục PDF được dẫn ở dưới và kiểm nguồn công khai của Guo/RESTestBench. Đây không phải lần screening lại toàn văn cả 42 bài hoặc kết quả chạy benchmark. “Theo rubric” khác với “khớp đầy đủ RQ”; quyết định thiết kế khác với bằng chứng thực nghiệm.
+## 1. RQ (nguyên văn trên thẻ) + PICO
 
-## 0. Bảng đối chiếu cá nhân
+**RQ đang lưu trong hồ sơ nhóm:** Trên 45 yêu cầu của RESTestBench, phân hoạch tương đương kết hợp phân tích giá trị biên, so với sinh dữ liệu ngẫu nhiên đồng đều cùng ngân sách, khác nhau thế nào về số mutant riêng biệt bị phát hiện theo từng dạng yêu cầu, khi một mutant chỉ được tính nếu test vượt qua bản gốc nhưng thất bại trên mutant theo oracle của benchmark?
 
-| Thành viên | File nguồn | Paper chính | Nhãn trong nguồn cá nhân | Điểm theo rubric nhóm |
-|---|---|---|---|---|
-| Lâm | [rq-check](../lam/SLR/rq-check.md) | 8 (#6, #10–#16) | `new` trong phạm vi đã xét | 8 bài 0/4 |
-| Khôi | [rq-check](../khoi/SLR/rq-check.md) | 8 (#23–#30) | `new` trong phạm vi đã xét | 8 bài 0/4 |
-| Tùng | [rq-check §1.2](../tung/SLR/rq-check.md) | 8 (#1–#5, #7–#9), thêm 4 nguồn tham chiếu | Chưa xác thực `extension` | **4 bài 1/4:** K52/P53, K90, K34, K102; **4 bài 0/4** |
-| T.Duy | [rq-check](../t.duy/SLR/rq-check.md) | 10 (#31–#40) | `new` trong phạm vi đã xét | TD-0002: 2/4; TD-0015: 1/4; 8 bài 0/4 |
-| K.Duy | [rq-check §2.1–2.3](../k.duy/SLR/rq-check.md) | 8 (#17–#22, #41–#42) | `new` trong phạm vi đã xét | **K49: 1/4; 7 bài 0/4** |
-
-Tổng: **42 paper = 35 bài 0/4 + 6 bài 1/4 + 1 bài 2/4**. Số thứ tự # theo [bảng gộp](evidence-table-merged.md), không phải thứ tự trong [ma trận](rq-evidence-map.md). Nhãn cá nhân được giữ đúng phạm vi nguồn, không dùng như phiếu biểu quyết tính mới.
-
-## 1. RQ và thiết kế P/I/C/O/S
-
-**RQ đang lưu trong repo:** Trên 45 yêu cầu của RESTestBench, phân hoạch tương đương kết hợp phân tích giá trị biên, so với sinh dữ liệu ngẫu nhiên đồng đều cùng ngân sách, khác nhau thế nào về số mutant riêng biệt bị phát hiện theo từng dạng yêu cầu, khi một mutant chỉ được tính nếu test vượt qua bản gốc nhưng thất bại trên mutant theo oracle của benchmark?
-
-- **P — đã thống nhất phương án ngày 20/10/2026:** 45 yêu cầu riêng biệt: **16 FastAPI + 15 NestJS RealWorld + 14 TodoApp**. Thay cho quy tắc cũ 15/dịch vụ; chưa có danh sách 45 ID hoặc snapshot benchmark được khóa.
-- **I:** EP+BVA kết hợp, chọn dữ liệu request từ yêu cầu và schema API; giữ cùng thông tin đầu vào và oracle giữa hai nhánh.
-- **C:** uniform random cùng số request cho từng yêu cầu; miền lấy mẫu và B cụ thể còn phải khóa theo §1.2.
-- **O:** số mutant riêng biệt pass bản gốc/fail mutant theo oracle requirements-based. Lưu khóa `(service, requirement_id, mutant_index)` và đối chiếu định danh mutant trong artifact; không tự coi index cục bộ là ID toàn benchmark. Một mutant bị phát hiện nhiều lần trong cùng lượt chỉ đếm một lần; không cộng số kill của 10 lượt thành số mutant riêng biệt.
-- **S — kế hoạch, chưa thực hiện:** 10 lượt/kỹ thuật/yêu cầu; lịch seed tái lập được; Wilcoxon signed-rank hai phía và Holm là phương án phân tích có điều kiện, chưa phải kiểm định đã xác nhận phù hợp dữ liệu.
-
-**Trạng thái thẻ W6/ý kiến GV:** bản nháp cũ ghi nhãn thẻ là `extension`, nhưng các rq-check cá nhân mô tả trạng thái thẻ khác nhau. Lần đối chiếu này chưa có bản thẻ hoặc phản hồi GV gốc để xác minh. Không suy nhãn từ `EXT` trong mã đề tài và không khẳng định thẻ đã được cập nhật. Cần ghi nhận thay đổi P khi đối chiếu với GV/thẻ chính thức.
-
-### 1.1. Quy tắc lấy mẫu cần áp dụng
-
-1. Khóa commit RESTestBench, đếm file requirement/mutant thực tế và lưu manifest. [README Dataset](https://github.com/casablancahotelsoftware/RESTestBench#dataset) ghi 63/26/14 = 103; [paper Table 3](https://arxiv.org/html/2604.25862v1#S3.T3) ghi 63/29/14 = 106. Chưa giải thích được đầy đủ chênh lệch RealWorld; không trộn mẫu số từ hai phiên bản.
-2. Định nghĩa dạng yêu cầu từ requirement/schema trước khi xem kết quả hai kỹ thuật. Lập ánh xạ ID → dạng và quy tắc xử lý yêu cầu có nhiều dạng. Danh mục cụ thể chưa được kiểm kê, nên chưa gán hạn ngạch hoặc khẳng định đủ mẫu mỗi dạng.
-3. Trong FastAPI/RealWorld, lấy mẫu không hoàn lại, phân tầng theo dạng với phân bổ gần tỷ lệ của từng dịch vụ; lưu quy tắc làm tròn, thuật toán, thứ tự ID và seed. TodoApp lấy cả 14 nếu đáp ứng tiêu chí dữ liệu/chạy được đã công bố. Nếu không đủ yêu cầu hợp lệ, báo lệch kế hoạch thay vì tự thêm/trùng mẫu.
-4. Cố định cùng 45 yêu cầu và tập mutant tương ứng cho cả hai kỹ thuật trong mọi lượt. Không chọn lại mẫu vì kết quả bất lợi. Báo cáo theo dịch vụ/dạng; không coi phân bổ 16–15–14 là mẫu tỷ lệ đại diện toàn dataset.
-
-### 1.2. Các điều kiện phải khóa trước lần chạy chính
-
-| Nội dung | Quy tắc / trạng thái hiện tại |
+| Yếu tố | Nội dung |
 |---|---|
-| Request budget B | **Chưa chốt số.** Pilot dùng để chọn B khả thi, sau đó cố định trước chạy chính; quy định request chuẩn bị trạng thái, xác thực, retry và replay tính vào đâu. Hai nhánh phải theo cùng quy tắc. |
-| Uniform random | **Chưa chốt miền.** Công bố giới hạn số/độ dài, bảng ký tự, enum, null/optional và cách ghép nhiều tham số. Không dùng từ “uniform” cho miền chưa xác định; không tự cho random quota theo các phân hoạch EP nếu điều đó đổi baseline đã nêu. |
-| EP+BVA | Công bố cách lập lớp, chọn đại diện, chọn biên và xử lý trường hợp số test thiết kế khác B; cùng requirement/schema/oracle với random. Chưa có generator được xác minh chạy. |
-| Phiên bản mô tả yêu cầu | Benchmark có precise/vague; **chưa chốt biến thể dùng cho thí nghiệm**. Chọn và giữ cùng biến thể cho hai kỹ thuật. Nếu chạy cả hai, tách thành hai điều kiện; không đếm thành 90 requirement riêng biệt và phải tính lại khối lượng. |
-| Oracle và lỗi chạy | Kiểm tĩnh evaluator xác nhận điều kiện pass bản gốc mới tính kill; chưa chứng minh harness của nhóm hoạt động. Phải phân biệt lỗi hạ tầng/timeout với assertion phát hiện mutant, công bố chính sách trước chạy. |
-| Seed | Lưu lịch 10 seed khác nhau theo lượt, tái lập được; seed lấy mẫu tách khỏi seed sinh input. Nếu EP+BVA tất định, nói rõ các lượt có thể trùng; không gọi chúng là 10 mẫu độc lập. |
-| Đơn vị phân tích | **Đề xuất:** với mỗi requirement và kỹ thuật, lấy trung bình số unique kills của 10 lượt; ghép cặp theo cùng requirement, không coi 45×10 là 450 requirement độc lập. Lưu cả phân bố từng lượt. |
-| Kiểm định / CI | Wilcoxon chỉ dùng sau khi xem xét tính ghép cặp, giả định của phân phối chênh lệch và phụ thuộc trong cùng dịch vụ/endpoint. Chốt xử lý ties/zeros, phương pháp p-value, effect size, cách tính CI 95%, alpha và họ kiểm định Holm trước chạy chính. Với nhóm nhỏ hoặc giả định không bảo vệ được, chỉ báo cáo mô tả hoặc khóa phương án khác trước chạy; không khẳng định có power đủ. |
-| Ngưỡng thực tiễn θ | Chưa có con số/nguồn thống nhất. Tách khỏi H0 và khóa trước chạy chính; không tự chọn θ theo kết quả thuận lợi. |
+| **P** | 45 yêu cầu RESTestBench; phương án phân bổ hiện tại: **16 FastAPI + 15 NestJS RealWorld + 14 TodoApp**, thay cho 15 yêu cầu/dịch vụ. Chưa khóa commit và danh sách ID. |
+| **I** | Phân hoạch tương đương kết hợp phân tích giá trị biên (**EP+BVA**), sinh dữ liệu request từ yêu cầu và schema. |
+| **C** | Sinh dữ liệu ngẫu nhiên đồng đều (**uniform random**), cùng ngân sách request với I. Miền lấy mẫu và ngân sách B chưa chốt. |
+| **O** | Số mutant riêng biệt bị phát hiện theo từng dạng yêu cầu; test phải pass bản gốc và fail mutant theo oracle benchmark. |
 
-Nguồn kiểm oracle: [RESTestBench evaluator, `evaluate_test`](https://github.com/casablancahotelsoftware/RESTestBench/blob/master/src/evaluator.py). Giới hạn Wilcoxon/ties/zeros: [SciPy 1.17, `wilcoxon`](https://docs.scipy.org/doc/scipy-1.17.0/reference/generated/scipy.stats.wilcoxon.html). Các quy tắc đề xuất trên là thiết kế của nhóm, không phải kết quả đã chạy hoặc nguyên văn thẻ W6.
+**Điều kiện dùng chung:** cùng yêu cầu, schema, assertions nghiệp vụ và quy tắc tính budget cho hai kỹ thuật. Precise/vague, cách phân loại yêu cầu và cách xử lý reset/retry/timeout còn cần xác định. Kế hoạch hiện có là 10 lượt/kỹ thuật/yêu cầu; đây chưa phải kết quả thực nghiệm.
 
-## 2. Bằng chứng làm nền (N = 42)
+**Nội dung cần xác nhận trên thẻ:** phân bổ P đã đổi thành 16–15–14; chưa ghi nhận ngày thông báo thay đổi này cho GV. Câu RQ trên được giữ theo hồ sơ hiện có, chưa tự coi là bản thẻ đã cập nhật.
 
-Điểm bên dưới tính lại từ **42 hàng trong §3 của rq-evidence-map**, giữ rubric hiện có để đối chiếu; không đổi điểm nguồn chỉ để khớp nhãn mong muốn.
+## 2. Bằng chứng làm nền (N = 42 paper)
 
-| Yếu tố | ✓ theo rubric | ◐ gần | · khác | Giới hạn |
+**Bước 1 — kiểm evidence table:** người phụ trách xác nhận các thành viên đã kiểm các cổng P trước khi gộp. Bảng nhóm có **42 paper ≥12**; 42/42 hàng có Tool/LLM, kết quả số và hạn chế; metric được ghi cụ thể. P1 là ngưỡng của bảng nhóm, không phải chỉ tiêu 12 paper/người.
+
+Tổng hợp từ [evidence-table-merged](evidence-table-merged.md) và [rq-evidence-map](rq-evidence-map.md):
+
+| Yếu tố | ✓ | ◐ | Khác | Nhận xét chính |
 |---|---:|---:|---:|---|
-| P | 0 | 28 | 14 | Ma trận hiện tại không có bài dùng RESTestBench |
-| I | 2 | 21 | 19 | TD-0002: prompt có boundary/equivalence classes; TD-0015: module G sinh test bằng EP/BVA |
-| C | 5 | 25 | 12 | K52/P53, K90, K34, K102, K49; rubric chấp nhận cùng số test/call hoặc thời gian, chưa xác nhận uniform cùng request budget |
-| O | 1 | 32 | 9 | TD-0002 có mutation score, chưa chứng minh cùng cách đếm/oracle/phân tầng của RQ |
+| P | 0 | 28 | 14 | Trong tập 42 chưa có paper dùng đúng RESTestBench; paper benchmark được xét bổ sung ở §3. |
+| I | 2 | 21 | 19 | TD-0002 có EP/BVA trong prompt; TD-0015 có module G sinh lớp tương đương/giá trị biên. |
+| C | 5 | 25 | 12 | K52/P53, K90, K34, K102, K49 đạt rubric rộng; chưa xác nhận cùng uniform input distribution và request budget như RQ. |
+| O | 1 | 32 | 9 | TD-0002 đo mutation score; chưa tương đương đầy đủ số unique kills theo dạng yêu cầu/oracle của RQ. |
 
-**Tổng điểm:** 35 bài 0 ✓, 6 bài 1 ✓, 1 bài 2 ✓; **0/42 bài ≥3 ✓**. Có 8 ô ✓ trên toàn ma trận (2 I + 5 C + 1 O).
+**Phân bố điểm:** 35 paper đạt 0/4, 6 paper đạt 1/4, 1 paper đạt 2/4; không paper nào đạt ≥3/4 trong tập 42.
 
-**Không đồng nhất rubric với RQ:** I chấp nhận EP và/hoặc BVA, C chấp nhận cả cùng thời gian, O chấp nhận mutation score. RQ yêu cầu EP+BVA kết hợp, uniform random cùng request budget và unique kills theo oracle/dạng yêu cầu. Điểm ✓ chưa xác nhận đầy đủ các điều kiện đó.
+**Quy ước:** ✓ là đạt rubric đối chiếu hiện có, không bảo đảm khớp đầy đủ RQ. Rubric I chấp nhận EP và/hoặc BVA; C chấp nhận cùng số test/lời gọi/thời gian; O chấp nhận mutation score. Các khác biệt này phải được giữ rõ khi kết luận tính mới.
 
-**Về số lượng tài liệu:** N = 42 vượt ngưỡng 12 đang dùng trong bản nháp; việc này không tự chứng minh độ phủ tìm kiếm/tính mới và không phải căn cứ miễn L1/L2/L3. [rq-evidence-map §4](rq-evidence-map.md) vẫn ghi cần săn tìm có mục tiêu; chưa có hướng dẫn GV gốc cho phép bỏ bước này. N cũng chưa được tái xác nhận bằng một vòng screening IC/EC mới trong lần sửa này.
+Nguồn cá nhân đã được đối chiếu: [Lâm](../lam/SLR/rq-check.md), [Khôi](../khoi/SLR/rq-check.md), [Tùng](../tung/SLR/rq-check.md), [T.Duy](../t.duy/SLR/rq-check.md), [K.Duy](../k.duy/SLR/rq-check.md). Phạm vi và sai lệch chuyển nội dung được lưu trong [bảng đối chiếu 42 dòng](rq-validation-source-check.csv); không thay cho tái screening toàn bộ IC/EC. Nguồn bổ sung không tự cộng vào N/PRISMA. Quy trình L1–L3 do thiếu số lượng không áp dụng vì N≥12.
 
-## 3. Phản chứng và nhãn tính mới
+## 3. Phản chứng tổng hợp mọi nguồn
 
-### 3.1. Trong 42 paper
+### 3.1. Nhãn tính mới và kết luận phản chứng
 
-- Cao nhất theo rubric: **TD-0002 2/4 (I, O)**; 6 dự án .NET, không có nhánh random cùng budget. Đối chiếu [PDF](../Paper-source/39-TD-0002.pdf): §3/PDF4 (prompt), §4/PDF6–7 (dataset/Stryker.NET), Table 3/PDF8 (mutation score 40,8%).
-- Nhóm 1/4: K52/P53, K90, K34, K102, K49 (C), TD-0015 (I). [TD-0015 §3.2/PDF6](../Paper-source/40-TD-0015.pdf) thực sự có script Python tạo lớp tương đương/biên; không mô tả nó chỉ là prompt hoặc khẳng định chưa phải generator.
-- **Kết luận giới hạn:** chưa có ứng viên ≥3/4 trong tập 42 theo rubric hiện tại. Các nguồn cá nhân dùng nhãn `new` trong phạm vi đã xét; điều đó không xác nhận nhãn cho toàn bộ tài liệu.
+**Nhãn nhóm: `extension`**, đã được GV bổ sung theo xác nhận của người phụ trách ngày 20/10/2026. Các nhãn cá nhân phản ánh phạm vi và thời điểm đối chiếu riêng.
 
-### 3.2. Nguồn bổ sung ngoài 42
+- Trong tập 42, **TD-0002 đạt cao nhất 2/4**. Paper có EP/BVA và mutation score nhưng không có đối chứng random như RQ. TD-0015 có generator EP+BVA bằng Python nhưng không đo mutant.
+- Ngoài tập 42, **Guo 2024 đạt 3/4 theo rubric rộng**; những khác biệt phương pháp được trình bày tại §3.3.
+- Trong phạm vi đã đối chiếu, chưa xác minh được paper khớp đủ 4/4 điều kiện RQ. Kết luận này giới hạn trong tài liệu đã tìm, không khẳng định tính mới tuyệt đối.
 
-[Khôi §5](../khoi/SLR/rq-check.md) ghi ngày rà **18/10/2026**; 04–06/2026 là mốc bài, không phải ngày tìm kiếm. Bộ lọc 2025–2026 cũng không tự bảo đảm cửa sổ đúng 12 tháng (20/10/2025–20/10/2026).
+RQ kế thừa benchmark/oracle RESTestBench và bổ sung phép so EP+BVA–uniform random. Nhãn `extension` đã được xác nhận; phần biện minh đóng góp vẫn cần phân biệt với điểm PICO rộng và bằng chứng gap ở §5.
 
-| Nguồn | Kết quả đối chiếu và mức kiểm chứng |
-|---|---|
-| [RESTestBench](https://arxiv.org/html/2604.25862v1) | Theo rubric: P/O, 2/4; benchmark và metric làm nền, không có phép so EP+BVA–random của nhóm. Table 3: 106 yêu cầu/228 mutations theo paper; §6 nêu giới hạn 3 dịch vụ và 3 repetitions. Đây không phải số đếm đã xác nhận cho artifact nhóm sẽ chạy. |
-| Req2REST-Guard | Khôi ghi 2/4 (P/O), nhưng cũng ghi tên dịch vụ không khớp RESTestBench và Table I mâu thuẫn văn bản. Lần sửa này chưa có full text nguồn trong repo để kiểm độc lập; **P và điểm 2/4 chỉ là ghi nhận từ rq-check, chưa xác nhận**, không dùng để khẳng định đã có một nghiên cứu khác dùng đúng dataset. |
-| [MASTOR](https://arxiv.org/abs/2606.10465) | Trang tác giả xác nhận hướng sinh oracle. Khôi chấm O, 1/4; điểm chi tiết kế thừa nguồn cá nhân, chưa tái chấm toàn văn trong lần sửa này. |
-| MioHint, RESTOR, R2R-04 amplification | [Tùng §2](../tung/SLR/rq-check.md) chấm 0/4 theo rubric. Đây là kết quả nguồn cá nhân, không phải ba phép tái lập đã thực hiện; chưa thấy bằng chứng về phép so input của RQ trong các đối chiếu đó. |
+### 3.2. Rà 2–3 nghiên cứu mạnh trong 12 tháng gần nhất
 
-Không dùng bảng này để khẳng định đã rà hết nghiên cứu mới nhất hoặc xác nhận tính mới tuyệt đối. Guo được xét riêng ở §3.3, nên câu “không paper nào ≥3/4” chỉ áp dụng cho tập 42 ở §3.1.
+**Cửa sổ:** 20/10/2025–20/10/2026; ưu tiên cùng bài toán/metric, rồi venue/quy mô, sau đó độ mới. Kế thừa lượt rà 18/10, kiểm lại nguồn ngày 20/10. Truy vấn, ngày tìm và lý do chọn/loại: [nhật ký tìm kiếm](rq-validation-audit.md#3-tìm-kiếm-bổ-sung-ngày-20102026).
 
-### 3.3. Guo 2024: gần theo rubric, khác khi đối chiếu đầy đủ RQ
-
-[Guo, Okamura & Dohi (2024), *Optimal test case generation for boundary value analysis*, Software Quality Journal 32, 543–566](https://link.springer.com/article/10.1007/s11219-023-09659-9), DOI `10.1007/s11219-023-09659-9`.
-
-| Yếu tố | Theo toàn văn | Điểm rubric / giới hạn so với RQ |
+| Paper và lý do chọn | P/I/C/O theo rubric | Hạn chế trực tiếp; phần RQ chưa được đánh giá |
 |---|---|---|
-| P | 5 chương trình non-REST (§5.4) | ·; khác dataset |
-| I | BCD/BVA; phân hoạch và biên lấy từ phân tích mã (§5.4–5.5) | ✓ rộng; khác generator black-box từ requirement/schema |
-| C | RT và bộ tối ưu cùng cỡ test; RT sinh riêng từng phân hoạch (§5.2, §5.5) | ✓ rộng; chưa chứng minh uniform trên toàn miền. Uniform ở §5.5 nói về proposal khi tối ưu |
-| O | Kill rates; mutant được tính khi đường thực thi khác bản đúng (§5.1; kết quả §5.6) | ✓ rộng; khác oracle requirements-based pass/fail |
+| **RESTestBench**, EASE 2026, arXiv v1 28/04/2026; đúng benchmark và metric nền. [PDF](../tung/SLR/update-paper/R2R-01-RESTestBench-2026.pdf), §3–4/PDF3–8 | ✓ / · / · / ✓ — **2/4** | §6/PDF9: “Our benchmark includes only three services”; “Each experiment was executed only three times”. Thử LLM single-step/refinement, chưa có phép so EP+BVA–uniform random cùng request budget theo dạng yêu cầu. |
+| **MioHint**, ICSE 2026 Research, bản conference 04/2026; thực nghiệm nhiều SUT. [PDF](../tung/SLR/update-paper/R2R-02-MioHint-2026.pdf), §3–5/PDF5–10 | ◐ / · / ◐ / · — **0/4** | §5/PDF10: “fuzzers best at achieving coverage, may not be best at finding bugs”. White-box MIO/LLM sửa request; mutation hit rate không phải source-mutant kill, không thực hiện phép so của RQ. |
+| **FDRRestTest/K100**, ESEM 2026, công bố 05/10/2026; sát black-box REST testing, có fixed-request comparison và nhiều baseline. [PDF](../Paper-source/32-K100.pdf), §4–6/PDF8–18 | ◐ / · / ◐ / ◐ — **0/4** | PDF17: “The benchmark excludes enterprise-level APIs”. Đo logical-oracle findings/FRE, không phải unique source mutants; không cô lập phép so EP+BVA–uniform random. Riêng equal-request budget đã có nghiên cứu thực hiện. |
 
-**Kết luận:** Guo là ứng viên **3/4 theo rubric rộng**, có giá trị đối chiếu. Không được viết “chỉ khác P” hoặc tự hạ thành 2/4 vì chưa xác nhận uniform: rubric C hiện tại không đòi điều kiện đó, và 5 bài C✓ trong N=42 cũng đang dùng cùng quy tắc rộng.
+K100 đã nằm trong tập 42, không tính thêm một paper. LlamaRestTest (06/2025) nằm ngoài cửa sổ, chỉ dùng làm nền; MioHint được xét theo bản conference, phân biệt với preprint đầu 04/2025. Req2REST-Guard chưa xác minh được P vì tên dịch vụ không khớp benchmark; MASTOR có mutation score/killed counts nhưng nghiên cứu sinh oracle. Các nguồn này không chứng minh phép so input của RQ đã được thực hiện; chi tiết ở nhật ký đối chiếu.
 
-**Nhãn làm việc: `extension` theo rubric rộng có ứng viên 3/4; chưa xác thực nhãn chính thức trên thẻ/GV.** Không đổi tự động sang `new` từ việc C chưa khớp hoàn toàn. Nếu sửa rubric cho sát RQ, phải chấm lại nhất quán toàn bộ tập liên quan và giải thích nhãn sau đó. Không dùng nhãn thẻ chưa xác minh làm bằng chứng cho điểm paper.
+### 3.3. Paper gần nhất và bảng căn hàng
 
-## 4. Khả thi: trạng thái có bằng chứng
+**Paper gần nhất theo rubric rộng trong phạm vi đã đối chiếu:** Guo, Okamura & Dohi (2024), *Optimal test case generation for boundary value analysis*, [DOI 10.1007/s11219-023-09659-9](https://link.springer.com/article/10.1007/s11219-023-09659-9), **3/4 (I/C/O)**. Guo là nguồn phương pháp ngoài cửa sổ rà mới; RESTestBench là nguồn benchmark/oracle được kế thừa.
 
-| Hạng mục | Đã có căn cứ | Chưa xác nhận |
-|---|---|---|
-| Dataset | README công bố đủ số lượng cho phân bổ 16–15–14 | Commit, 45 ID, tiêu chí hợp lệ và tổng mutant của mẫu |
-| API/tool | Repo có hướng dẫn Docker và tool adapter Python | Build/chạy 3 dịch vụ, golden test và adapter của nhóm |
-| Generator/oracle | Có evaluator upstream; định nghĩa I/C đã nêu | Chưa có bằng chứng 2 generator EP+BVA/random của nhóm chạy đúng |
-| Khối lượng | 45×2×10 = **900 lượt kỹ thuật–yêu cầu cho một điều kiện precise hoặc vague** | B, HTTP executions, replay/reset/retry, số mutant thật, số điều kiện và runtime |
-| Nguồn lực/thời gian | Chưa có số đo pilot trong repo | Không xác nhận RAM 16 GB đủ hoặc hoàn thành 1–2 ngày |
+| Yếu tố | Paper gần nhất: Guo 2024 | RQ nhóm | Khác ở đâu, căn cứ (bằng chứng gap / lý do đổi theo) |
+|---|---|---|---|
+| P | 5 chương trình non-REST (§5.4) | 45 yêu cầu RESTestBench | Chuyển sang kiểm thử REST theo yêu cầu; chưa giải quyết hạn chế đa dạng dịch vụ. |
+| I | Tối ưu BCD, lấy biên từ phân tích mã (§5.4–5.5) | EP+BVA từ yêu cầu/schema, không AI | Khác cách xây lớp/biên. Chưa có limitation tác giả nêu đúng GAP-T của nhóm. |
+| C | Random theo phân hoạch, cùng cỡ test (§5.2/5.5) | Uniform random trên miền xác định, cùng request budget | Chưa đồng nhất baseline; miền và B của nhóm chưa chốt. |
+| O | Kill rate theo khác biệt đường thực thi (§5.1) | Unique kills theo pass bản gốc/fail mutant và dạng yêu cầu | Oracle và cách tổng hợp khác; chưa thể ghi “=” hoặc coi chỉ đổi P. |
 
-Bỏ ước lượng **~97 mutant** làm căn cứ tài nguyên: đó là phép nội suy 228/106×45 từ toàn benchmark theo paper, không phản ánh phân bổ 16–15–14 hoặc số mutant thật của mẫu. Giữ 900 như số lượt kế hoạch, không gọi là số HTTP executions. Không đánh dấu khả thi ✅ khi chưa chạy.
+**Điểm cần làm rõ:** 3/4 theo rubric rộng không chứng minh chỉ khác một yếu tố đầy đủ của RQ. Bằng chứng limitation cho GAP-T và lý do những yếu tố còn lại thay đổi chưa đủ để chốt bảng căn hàng theo yêu cầu của cô.
 
-**Pilot dự kiến:** 5 yêu cầu có mặt cả 3 dịch vụ, chọn trước khi so kết quả; kiểm setup, oracle, ngân sách, reset và runtime. Đây là đề xuất thử kỹ thuật, chưa thực hiện và chưa chứng minh power thống kê. Phải ghi rõ nếu dữ liệu pilot dùng để điều chỉnh thiết kế; không trộn vào kết quả xác nhận mà không công bố.
+## 4. Khả thi của từng gap đang cân nhắc (Bước 3)
 
-## 5. Gap và lợi ích có thể bảo vệ
+Đánh giá **A — GAP-T + RQ đang đăng ký**. Hướng GAP-M được đặt cạnh A tại §5.3 nhưng chưa có RQ thay thế đủ căn cứ để chấm như một cặp thực nghiệm. Các số kế hoạch bên dưới không phải số đo; chưa có kết luận hai hướng khả thi ngang nhau.
 
-### 5.1. GAP-T — nhận định của nhóm, không phải hạn chế tác giả tự nêu
+| Tiêu chí | A — GAP-T: số liệu/căn cứ hiện có | Chấm | Việc cần xử lý |
+|---|---|---|---|
+| Dataset | Public; kế hoạch **45=16+15+14**. README ghi 103, paper ghi 106 yêu cầu; chưa khóa 45 ID/mutant tương ứng. | ⚠️ | Chốt phiên bản, tiêu chí hợp lệ, ID/seed và dạng yêu cầu. |
+| API/Tool | Dự kiến **0 lời gọi API LLM trả phí**, **3 dịch vụ cục bộ**; cần Docker, Python và Git. | ⚠️ | Xác nhận môi trường máy nhóm và chạy golden tests trên cả 3 dịch vụ. |
+| Tính toán | **900 lượt kỹ thuật–yêu cầu/1 điều kiện**; chưa có số đo RAM/runtime của thiết kế. | ⚠️ | Pilot đo tài nguyên; ưu tiên chạy tuần tự trước khi ước lượng toàn bộ. |
+| Ground truth | Có golden tests và mutant/oracle; dự kiến **0 giờ gán nhãn ground truth mới**. | ✅ về nguồn sẵn có | Kiểm oracle, assertions dùng chung và định danh mutant. |
+| Code base | **1 framework upstream**, **2 generator cần tích hợp**; chưa có bằng chứng generator nhóm chạy đúng. | ⚠️ | Kiểm sinh input, budget, pass-valid/fail-mutant và chính sách lỗi chạy. |
+| Kỹ năng | **5 thành viên**; chưa có log xác nhận tích hợp được hai generator. | ⚠️ | Chốt người phụ trách/giờ công; pilot dự kiến **5 yêu cầu trên đủ 3 dịch vụ**. |
+| Thời gian | **45×2×10=900 lượt**; chưa chốt B, runtime và hạn triển khai cụ thể. | ⚠️ | Dự toán từ pilot; bố trí **≥3 ngày dự phòng** hoặc đề xuất downscope. |
 
-Câu “chưa ai thử EP+BVA” trong bản nháp cũ là giả thuyết tìm kiếm, không phải kết luận được chứng minh. Ma trận có **2 bài I✓ và 40 bài không I✓**; không suy từ đó thành “40 tác giả nêu thiếu EP+BVA” hoặc “40 bài hoàn toàn không có EP/BVA”.
+**Đếm A: 0 ❌ / 6 ⚠️ / 1 ✅ → rủi ro cao.** Số lượng cảnh báo yêu cầu kế hoạch xử lý trước proposal; chưa đủ căn cứ xác nhận khả thi. Với hướng B, cần chốt RQ/PICO trước khi lập cột khả thi riêng nếu nhóm tiếp tục cân nhắc.
 
-- TD-0002 có EP/BVA trong prompt; TD-0015 có module G tạo test bằng EP/BVA.
-- Trong đối chiếu 42 bài hiện tại, **chưa tìm thấy phép so kết hợp EP+BVA với uniform random cùng request budget trên RESTestBench**, đo unique kills theo dạng yêu cầu và oracle đã định nghĩa.
-- Đây là **khoảng trống quan sát trong phạm vi đối chiếu**, còn phụ thuộc độ phủ tìm kiếm và kiểm chứng phương pháp; không gọi là gap mạnh author-stated.
+**Kế hoạch xử lý:** khóa dữ liệu và đặc tả generator → kiểm setup/oracle → pilot → dự toán tài nguyên/thời gian. Trước hết xét một điều kiện precise hoặc vague với cùng thông tin cho hai kỹ thuật. Nếu vẫn vượt nguồn lực, trình phương án giảm mẫu/số lượt hoặc thu hẹp dạng yêu cầu cho GV, kèm hệ quả phương pháp; đây chưa phải thay đổi được áp dụng.
 
-### 5.2. GAP-D — các hạn chế trực tiếp đã truy vết
+900 là số lượt kỹ thuật–yêu cầu cho một điều kiện, không phải số HTTP executions. Replay trên mutant, setup/reset/retry phải được tính riêng. Nguồn artifact: [README benchmark](https://github.com/casablancahotelsoftware/RESTestBench#setup), [evaluator](https://github.com/casablancahotelsoftware/RESTestBench/blob/master/src/evaluator.py).
 
-Bản cũ ghi “11 nhóm, chỉ K89/K32 có quote” không còn phản ánh đủ nguồn hiện có. Lần sửa này đối chiếu được các đoạn sau (diễn giải, không phải trích nguyên văn):
+## 5. Gap mà RQ lấp (kết quả Bước 2)
 
-| Paper đại diện | Hạn chế tác giả nêu | Vị trí đã đọc trong PDF repo |
-|---|---|---|
-| [K46](../Paper-source/17-K46.pdf) | Chỉ 4 REST APIs; thực nghiệm system-level tốn thời gian | Threats to Validity, External validity, PDF10 |
-| [K32](../Paper-source/26-K32.pdf) | Không suy kết quả cho REST API bất kỳ; cần case studies mới | §V.E, External validity, PDF9 |
-| [P12/K81/K55](../Paper-source/03-P12-K81-K55.pdf) | Benchmark 20 services có thể không khái quát | §4.6, PDF10 |
-| [K66](../Paper-source/10-K66.pdf) | Chỉ đánh giá 11 REST APIs; có thể khác hiệu năng trên API/miền ứng dụng khác; xác thực/quota cản trở đánh giá rộng hơn | §5, External threats to validity, PDF10 |
-| [TD-0015](../Paper-source/40-TD-0015.pdf) | 5 endpoints chỉ là quy mô tối thiểu; chưa thử hệ 50+ endpoints | PDF8, đoạn bàn về giới hạn thực nghiệm trước §3.4 |
-| [K02](../Paper-source/41-K02.pdf) | Một ứng dụng PetStore; khó suy sang API có đặc điểm khác | §6.3, PDF14 |
-| [K89](../Paper-source/30-K89.pdf) | Chỉ hai targets; chưa repeated randomized trials/statistical testing | §5.4, PDF27 |
-| [K93](../Paper-source/31-K93.pdf) | Ít dịch vụ, lựa chọn dịch vụ ảnh hưởng khả năng khái quát | §7.1, PDF21 |
-| [K166](../Paper-source/35-K166.pdf) | Năm subject APIs có thể chưa khái quát tiếp | §V.B, PDF7 |
+### 5.1. Gap RQ ban đầu và kết quả đối chiếu
 
-Đây là **9 paper có đoạn trực tiếp đã đọc**, không phải 9 nhóm tác giả độc lập; có thể chồng lấn tác giả/lab. Chưa hoàn tất quy tắc gộp nhóm nên không chốt con số nhóm độc lập hoặc gọi gap “mạnh” chỉ bằng số đếm. K66 được bổ sung ở lượt double-check thứ hai ngày 20/10/2026.
+**Loại: GAP-T.** Nguyên văn từ [context gap ban đầu](gap-ban-dau.txt):
 
-Danh sách cũ còn cụm Karlsson K37/K67: chưa xác nhận đủ phát biểu trực tiếp cùng hạn chế “ít SUT” trong lần đối chiếu này; không cộng vào số trên. K67/PDF34 nói 8 SUT và bàn external validity, chưa đủ để diễn giải thành tác giả tự thừa nhận mẫu nhỏ. **K33** là đánh giá portal/IPA 14 người, không dùng 14 người làm cỡ mẫu API/SUT.
+> Chưa có nghiên cứu nào so sánh trực tiếp EP+BVA với sinh dữ liệu ngẫu nhiên đồng đều dưới cùng ngân sách request trong kiểm thử REST API dựa trên yêu cầu.
 
-**Quan hệ với RQ:** 45 yêu cầu vẫn thuộc 3 dịch vụ; thiết kế này **không giải quyết GAP-D** và không kiểm định khả năng khái quát sang dịch vụ mới. GAP-D là giới hạn/tham chiếu phụ, không phải đóng góp đã lấp.
+**Ghi nhận bổ sung ngày 20/10/2026, sau tổng hợp paper**, không phải bản ghi đã có trước khi đếm. Giữ nguyên câu giả thuyết; không dùng câu này như kết luận tuyệt đối trong proposal.
 
-### 5.3. GAP-M — bằng chứng trực tiếp và nhận định phải tách riêng
+**Đối chiếu theo bốn trường hợp của cô:** hiện chưa xác nhận dòng limitation tác giả nào khớp đầy đủ câu trên → **“chưa có paper nêu, là giả định của nhóm”**. Không tự xếp thành gap yếu/mạnh theo số bài không có I✓. Trình tự ghi trước khi đếm chưa được đáp ứng và không thể sửa hồi tố.
 
-[K49, §4.5.1/PDF17](../Paper-source/18-K49.pdf) nêu tác giả chưa biết công cụ mutation testing hướng system testing và khó khăn khi test/SUT khác ngôn ngữ. Đây là nhận định tại thời điểm bài đó, không phải chứng minh hiện nay không có tool.
+### 5.2. Bảng hạn chế, kiểm đã giải quyết và độ mạnh
 
-TD-0002 có mutation score (Table 3/PDF8); việc chưa báo cáo cùng cách đếm unique kills/theo dạng yêu cầu là nhận định khi đối chiếu với RQ. Không gộp K07/K21/K02/bBOXRT/K33 thành “6 tác giả cùng nêu hạn chế metric” khi chưa có phát biểu trực tiếp tương ứng. **GAP-M chỉ giữ như động cơ chọn phép đo, chưa xác nhận gap mạnh hoặc mới trên toàn tài liệu.**
+Mẫu số **N_L=42** là số paper có dữ liệu ở cột hạn chế của bảng gộp. Tử số chỉ tính phát biểu trực tiếp đã kiểm; paper có tác giả trùng được gộp theo [sổ quote và quy tắc đếm](rq-validation-audit.md#4-sổ-bằng-chứng-gap-d-và-quy-tắc-đếm). Số đếm là mức tối thiểu đã xác minh.
 
-### 5.4. Paper gần để trình bày và phạm vi đóng góp
+| Hạn chế | Paper nêu | Paper đã giải quyết | Còn lại | Mạnh/yếu | Loại |
+|---|---|---|---|---|---|
+| Thiếu phép so EP+BVA–uniform random cùng request budget trong kiểm thử REST theo yêu cầu | Chưa xác nhận phát biểu trực tiếp tương ứng; đây là giả thuyết ban đầu | Chưa xác minh paper làm đúng phép so; Guo khác bài toán/oracle, TD-0002/TD-0015 thiếu C/O tương ứng | 0 phát biểu được xác nhận/42 | Chưa có dòng khớp; giả định của nhóm | GAP-T |
+| Giới hạn số lượng/phạm vi dịch vụ làm hạn chế khái quát | Tối thiểu **18/42 paper, 10 cụm**: K46/K76/K166; P12/P17/K32/K167/K168/K191; K66/K101; K37; K89; K93; TD-0015; K02; TD-0002; K100 | K191 giảm nhẹ hạn chế bằng thực nghiệm công nghiệp nhưng vẫn một tổ chức. Đổi tool/metric không đủ để gạch hạn chế của paper khác | Chủ đề hạn chế còn ở ≥10 cụm | Lặp lại mạnh theo đếm; chưa mặc nhiên là một gap cụ thể thống nhất | GAP-D |
+| Chưa đánh giá bằng mutation trong phép so 10 công cụ của P12 | **P12/K81/K55**, §6/PDF11: “using mutation to further evaluate the tools’ fault-detection ability” | RESTestBench đánh giá LLM, chưa chứng minh đánh giá lại đúng tập công cụ P12 với metric đó | **1/42 paper, 1 cụm** đã xác minh | Yếu | GAP-M |
+| ~~Chưa có đánh giá mutation cấp hệ thống cho REST API nói chung~~ | Khái quát hóa của người tổng hợp; không phải limitation chung đã được xác nhận | RESTestBench có requirements-based mutation; TD-0002 có mutation score | Không giữ phát biểu khái quát | Bị phản chứng; không tính thành gap mạnh | GAP-M |
 
-Dùng **Guo ở §3.3** để trình bày quan hệ BVA–random–mutation, kèm khác biệt phương pháp/oracle; dùng **RESTestBench ở §3.2** để trình bày nguồn benchmark/oracle. Không gọi Guo là paper gần nhất tuyệt đối khi chưa có xếp hạng tìm kiếm đầy đủ. Đóng góp dự kiến là phép so input EP+BVA–uniform random cùng ngân sách trên mẫu đã định, không phải kết quả chứng minh kỹ thuật nào tốt hơn hoặc giải quyết hạn chế ít SUT.
+K49 (§4.5.1/PDF17) bàn thiếu mutation tool cấp system tại thời điểm bài viết; không cộng với P12 như hai tác giả nêu cùng một hạn chế. Tương tự, số yêu cầu hoặc số người tham gia không được dùng thay số dịch vụ khi đếm GAP-D.
 
-### 5.5. Lợi ích và cách diễn giải kết quả
+**Phát biểu GAP-D ở mức bằng chứng hiện có:** trong 42 paper có dữ liệu hạn chế, tối thiểu 18 paper thuộc 10 cụm tác giả nêu giới hạn khái quát do số lượng/phạm vi dịch vụ thực nghiệm; tên, quote và vị trí có trong sổ bằng chứng. Chưa đủ căn cứ kết luận các nghiên cứu khác đã giải quyết đầy đủ hạn chế của từng phương pháp với cùng bài toán/metric. Đây là chủ đề hạn chế lặp lại; cần cụ thể hóa P nếu phát triển thành RQ khác. RQ hiện tại vẫn chỉ có 3 dịch vụ nên không nhận là đã lấp GAP-D.
 
-Người dùng kết quả là kỹ sư kiểm thử REST API và nhóm nghiên cứu benchmark; họ có thể cân nhắc kỹ thuật theo dạng yêu cầu **trong phạm vi mẫu và ngân sách đã chạy**.
+### 5.3. Đối chiếu gap và RQ theo mẫu
 
-- **H0 không bị bác bỏ:** chưa đủ bằng chứng về khác biệt theo phép kiểm định; không kết luận tương đương, random tốt bằng EP+BVA hoặc EP+BVA không có lợi ích. Xem CI/độ lớn hiệu ứng và giới hạn thiết kế.
-- **H0 bị bác bỏ, EP+BVA có kết quả tốt hơn:** chỉ cân nhắc ưu tiên sau khi xét chiều, độ lớn hiệu ứng, CI, ngưỡng thực tiễn và hiệu chỉnh so sánh.
-- **H0 bị bác bỏ, EP+BVA có kết quả kém hơn:** báo cáo lợi thế của random trong phạm vi đó; không tự ưu tiên EP+BVA.
-- **Kết quả chưa kết luận:** báo cáo bất định/giới hạn. Không tự tăng số lượt đến khi p có ý nghĩa; mọi nghiên cứu bổ sung phải có kế hoạch và báo cáo riêng.
-- **GAP-D:** p-value của phép so hai kỹ thuật không xác nhận tính đại diện của dataset hoặc RESTestBench là “benchmark chuẩn”. Muốn xét khái quát cần thêm dịch vụ và thiết kế đánh giá tương ứng.
+| Gap | Phát biểu gap | RQ lấp gap | Khác RQ ban đầu |
+|---|---|---|---|
+| **A — GAP-T**, giả định ban đầu | Trong 42 paper và các nguồn bổ sung đã đối chiếu, nhóm chưa xác minh được phép so EP+BVA–uniform random cùng request budget cho REST API dựa trên yêu cầu. Chưa xác nhận limitation tác giả tương ứng; đây là giả định trong phạm vi đã tìm. | **RQ hiện tại (§1):** trên 45 yêu cầu RESTestBench, EP+BVA khác uniform random cùng budget thế nào về số mutant riêng biệt theo dạng yêu cầu, với điều kiện pass bản gốc/fail mutant theo oracle benchmark? | **Không đổi RQ**; phân bổ mẫu P đã điều chỉnh thành 16–15–14 và cần xác nhận với GV. |
+| **B — GAP-M**, bằng chứng hiện tại còn yếu | Trong 42 paper, P12/K81/K55 nêu chưa dùng mutation để đánh giá tiếp khả năng phát hiện lỗi của các công cụ trong nghiên cứu; chưa xác minh paper khác đánh giá lại đúng phạm vi đó. | **Chưa chốt RQ thay thế đủ căn cứ.** Hạn chế của phép so 10 công cụ P12 chưa chứng minh thiếu O cho phép so EP+BVA–random hiện tại. Cần xác định phạm vi trước khi viết RQ nháp; hướng dẫn không bắt buộc gap yếu có RQ riêng. | **Chưa xác định.** Nếu kế thừa thiết kế P12, P/I/C đều có thể khác RQ hiện tại; chưa thể coi là chỉ đổi O. |
 
-Cơ sở diễn giải: [ASA, nguyên tắc về p-values](https://www.amstat.org/asa/files/pdfs/P-ValueStatement.pdf); ý nghĩa thống kê không đo độ lớn hay tầm quan trọng của hiệu ứng.
+Bảng này thể hiện hai hướng để trao đổi, không xác nhận cả hai là gap mạnh hoặc đã có hai RQ khả thi. Với GAP-D, chưa có phương án mở rộng dịch vụ được đặc tả thành cặp gap–RQ để so chọn.
 
-## 6. Quyết định và việc còn mở
+### 5.4. Vì sao gap còn trống
 
-- **Giữ câu RQ 45 yêu cầu và I/C/O; đã đổi quy tắc chọn P** từ 15/dịch vụ sang **16 FastAPI + 15 RealWorld + 14 TodoApp**, theo thống nhất 20/10/2026. Không viết “mọi thay đổi: không có”. Ghi nhật ký và đối chiếu thẻ/GV; chưa xác nhận đã thông báo.
-- **Nhãn làm việc:** `extension` **theo rubric rộng**, với Guo 3/4; **nhãn chính thức chưa xác minh**. Không dùng đồng nhất “3/4 rộng” với “chỉ đổi P, I/C/O giống hệt”.
-- **Gap chính:** GAP-T là nhận định quan sát của nhóm trong phạm vi nguồn đã đối chiếu. **GAP-D:** giới hạn chưa được RQ giải quyết; có 9 paper trực tiếp đã truy vết, chưa chốt số nhóm độc lập. **GAP-M:** động cơ phép đo, bằng chứng trực tiếp chủ yếu từ K49.
-- **Chưa hoàn tất:** commit/danh sách 45 ID, tổng mutant thật, phân loại yêu cầu, B/miền uniform, hai generator, pilot/runtime, kế hoạch suy luận/CI/θ và đối chiếu thẻ/GV. Các việc này chưa có dữ liệu hoặc quyết định đủ để đánh dấu hoàn thành.
+**GAP-T:** nguyên nhân chưa được xác nhận. RESTestBench mới công bố năm 2026 cung cấp hạ tầng phù hợp, nhưng chưa có bằng chứng đây là lý do thiếu phép so. Lượt dò kết quả âm của T.Duy ngày 18/10 và kiểm có mục tiêu ngày 20/10 chưa thấy kết quả âm trực tiếp trong phạm vi đã tìm; không suy thành chưa ai thử.
 
-## 7. Dấu vết đối chiếu ngày 20/10/2026
+**GAP-M của P12:** paper nêu hướng đánh giá tiếp bằng mutation nhưng chưa xác nhận nguyên nhân chưa thực hiện. Nhận định thiếu tool của K49 chỉ là bối cảnh tham khảo. **GAP-D:** một số nguồn nêu chi phí thực nghiệm hệ thống, quota và khả năng triển khai; không suy mọi paper có cùng nguyên nhân.
 
-- Tính lại đúng 42 hàng ma trận: P 0/28/14; I 2/21/19; C 5/25/12; O 1/32/9 (thứ tự ✓/◐/·). Tổng điểm và bảng cá nhân đối chiếu theo mã paper.
-- Đọc các mục PDF cụ thể được dẫn ở §3.1, §5.2–5.3; không tuyên bố tái screening toàn văn 42 bài. Các nguồn bổ sung kế thừa rq-check được ghi rõ mức kiểm chứng ở §3.2.
-- Đối chiếu Guo toàn văn web (§5.2, §5.4–5.6); RESTestBench paper Table 3/§3/§6, README và evaluator; SciPy 1.17 và ASA cho giới hạn thống kê. Chưa khóa commit artifact, chưa chạy Docker/benchmark hoặc tạo số đo thực nghiệm.
-- Bản này thay các kết luận không đủ căn cứ trong draft v3; các file cá nhân giữ nguyên như nguồn lịch sử. Nội dung thiết kế hiện hành lấy theo §1/§6, không dùng các câu 15/dịch vụ cũ trong nguồn cá nhân để chạy mẫu mới.
-- **Double-check lần hai, cùng ngày:** xác nhận bảng gộp có 42 mã khác nhau, thứ tự #1–#42; bổ sung K66/§5/PDF10 cho GAP-D (9 paper, chưa đếm nhóm độc lập); sửa locator K49 thành §4.5.1/PDF17 và mô tả locator TD-0015 chính xác theo PDF8. Bổ sung điều kiện precise/vague và giới hạn của phép tính 900 lượt. Không thay N, điểm ma trận, mẫu P hoặc nhãn làm việc.
+### 5.5. Lợi ích của cặp GAP-T + RQ hiện tại
+
+Nhóm muốn biết chênh lệch khả năng phát hiện mutant giữa EP+BVA và uniform random dưới cùng budget để giúp kỹ sư kiểm thử lựa chọn cách sinh input theo dạng yêu cầu; hiện chưa có kết quả đối chiếu phù hợp trong phạm vi tài liệu đã kiểm. Nếu EP+BVA có lợi thế thực tiễn thì cân nhắc ưu tiên EP+BVA; nếu random có lợi thế thì cân nhắc random; nếu chưa đủ bằng chứng khác biệt thì báo cáo bất định, không kết luận hai kỹ thuật tương đương. Lợi ích giới hạn trong mẫu, oracle và ngân sách đã đánh giá.
+
+## 6. Quyết định: giữ RQ / đổi I hoặc C
+
+**RQ đang giữ:** RQ tại §1; nhãn **`extension`** đã được GV bổ sung theo xác nhận của người phụ trách. GAP-T hiện là giả định cần tiếp tục biện minh; GAP-M chưa có RQ thay thế đủ căn cứ. Bảng §5.3 là cơ sở trao đổi trước khi chốt lựa chọn cuối cùng, không tự đổi RQ hoặc H0/H1.
+
+**Thay đổi P:** phương án 16–15–14 đã được ghi trong hồ sơ nhóm; **chưa xác nhận ngày báo GV**. Chênh lệch README 103/paper 106 cần được xử lý bằng phiên bản benchmark và kiểm kê mẫu thực tế.
+
+**Trạng thái RBL-2:** Bước 1 đã xác nhận; Bước 2 có bảng đối chiếu/gap/RQ nhưng còn vấn đề căn cứ GAP-T, bảng căn hàng và thời điểm ghi gap; Bước 3 có bảng rà khả thi và kế hoạch xử lý, chưa đủ số liệu để chốt. Không yêu cầu chạy toàn bộ thực nghiệm để hoàn tất RBL-2.
+
+**Việc cần chốt trước triển khai:** xác nhận gap/RQ và điều chỉnh P với GV; khóa dữ liệu, B/miền random, oracle và dạng yêu cầu; xác nhận máy/nhân lực/thời gian, kiểm hai generator và pilot. Kế hoạch phân tích thống kê được hoàn thiện trước chạy chính. Danh sách ngắn các vấn đề cần cô hỗ trợ: [rq-validation-status.md](rq-validation-status.md).
