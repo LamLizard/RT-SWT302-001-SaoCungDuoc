@@ -1,0 +1,778 @@
+
+
+===== GV-13 PDF PAGE 1 =====
+
+ DUALMINE: Static-Dynamic REST API Constraint
+                              Discovery with Dual Validation
+
+                      Tu Nguyen                                         Huy Nguyen                            Juan Carlos Alonso Valenzuela
+         University of Science, VNU-HCM                     University of Science, VNU-HCM                           Universidad de Sevilla
+             Ho Chi Minh City, Vietnam                         Ho Chi Minh City, Vietnam                                  Seville, Spain
+         23C15017@student.hcmus.edu.vn                      22127154@student.hcmus.edu.vn                              javalenzuela@us.es
+
+          Thanh Nguyen                               Tien N. Nguyen                                         Vu Nguyen*
+University of Science, VNU-HCM                University of Texas at Dallas            University of Science, VNU-HCM; Katalon LLC.
+   Ho Chi Minh City, Vietnam                      Richardson, TX, USA                              Ho Chi Minh City, Vietnam
+22127389@student.hcmus.edu.vn                  tien.n.nguyen@utdallas.edu                              nvu@fit.hcmus.edu.vn
+
+
+
+
+  Abstract—REST API constraints capture semantic properties                  may not reflect the actual behavior of the implemented service.
+of  API  responses  and  are  essential  for  automated  test  oracle        In contrast, dynamic approaches (e.g., AGORA/AGORA+ [3],
+generation,  but  they  are  difficult  to  discover  reliably.  Static      [4])  discover  constraints  from  execution  observations.  Al-
+approaches infer constraints from API specifications and doc-                though they capture real system behaviors, they are inherently
+umentation,  but  their  results  may  be  affected  by  incomplete,         dependent on execution coverage and often generate coinci-
+ambiguous, or outdated specifications. Dynamic approaches mine
+invariants  from  execution  traces,  but  their  results  depend  on        dental invariants that hold only for the observed executions.
+execution coverage and may include coincidental properties that                 The limitations of static and dynamic constraint discovery
+hold  only  for  the  observed  executions.  This  paper  presents           approaches  are  largely  complementary,  suggesting  a  strong
+DUALMINE,  a  hybrid  framework  for  REST  API  constraint                  opportunityforintegration.StaticapproachescanleverageAPI
+discovery  that  integrates  specification-based  constraint  mining         specifications, descriptions, and schemas to infer semantically
+with runtime invariant mining. It first extracts candidate con-
+straints from OpenAPI specifications using an LLM-based static               meaningful constraints, including those associated with rarely
+miner and from request-response traces using dynamic invariant               exercised behaviors. Consequently, they can compensate for
+mining. It then performs asymmetric dual validation: runtime                 the limited execution coverage of dynamic techniques. How-
+evidence is used to validate or refute specification-derived con-            ever, because specifications may be incomplete, ambiguous, or
+straints, while specification-aware LLM reasoning is used to filter          outdated, static methods may infer constraints that do not ac-
+implausible log-derived invariants without discarding plausible
+undocumented  behaviors.  Finally,  it  applies  counterexample-             curately reflect the implemented service. Dynamic approaches
+guided  refinement  by  performing  targeted  API  executions  to            address this weakness by deriving constraints from actual API
+resolve  uncertain,  overlapping,  or  conflicting  constraints.  We         executions,therebyprovidingevidenceofrealsystembehavior
+evaluate DUALMINE on39real-worldRESTAPIsandcompareit                         and helping validate or refute statically inferred constraints.
+against state-of-the-art static-only, dynamic-only, and constraint           At the same time, dynamic methods are susceptible to gener-
+discovery  approaches.  The  results  show  that  it  improves  the
+quality of discovered constraints by reducing unsupported con-               ating coincidental invariants due to insufficient coverage or
+straints, retaining complementary constraints missed by individ-             biased  observations.  The  semantic  knowledge  extracted  by
+ual approaches, which helps detect 48 real REST API faults.                  static analysis can help identify and eliminate such spurious
+                         I.  INTRODUCTION                                    constraints while also guiding exploration toward uncovered
+  REST API test oracles (i.e., constraints) play a crucial role              behaviors. Therefore, the strengths of each approach naturally
+in automated testing as they capture semantic relations among                mitigate the weaknesses of the other: static analysis provides
+APIinputsandoutputsthatcannotbeexpressedsolelythrough                        semantic completeness and generalization, whereas dynamic
+responseschemasorstatuscodes.Thus,accuratelydiscovering                      analysis provides behavioral validation and implementation-
+API constraints is crucial for verifying the logical correctness             level accuracy. Integrating these complementary sources of
+of API behaviors. Existing approaches to REST API constraint                 evidence offers the potential to discover API constraints that
+discovery  typically  rely  on  a  single  source  of  information.          are both semantically meaningful and empirically valid.
+Static approaches (e.g., SATORI [1] and RBCTest [2]) infer                      These complementary strengths and weaknesses motivate
+constraints from API specifications and schemas. While they                  DUALMINE,  a  hybrid  approach  that  integrates  static  and
+can exploit rich information documented by API developers,                   dynamic evidence. DUALMINE first extracts candidate con-
+their  effectiveness  is  limited  by  incomplete,  ambiguous,  or           straints from API specifications and execution logs through
+outdated specifications. As a result, many inferred constraints              static   and   dynamic   mining,   respectively.   However,   sim-
+                                                                             ply  unioning  specification-derived  constraints  and  runtime-
+  *Corresponding author.                                                     derivedinvariantsisinsufficient:thetwosourcesmayproduce
+
+
+
+                                                                           1
+
+===== GV-13 PDF PAGE 2 =====
+
+duplicates,  partially  overlapping  constraints,  or  conflicting            semantic constraints, while dynamic approaches may fail to
+hypotheses, and each source may also produce constraints that                 infer them when insufficient runtime evidence is available.
+cannot be confirmed from the other. Therefore, DUALMINE                          However,neithersourceisreliablebyitself.Aspecification-
+applies a dual-validation process in which execution evidence                 derived format constraint may be outdated if the implemen-
+is  used  to  validate  specification-derived  constraints,  while            tation returns a different URL variant, while a dynamically
+LLM  reasoning  is  used  to  identify  and  filter  semantically             mined constraint may be coincidental if all observed reposi-
+implausible runtime invariants. To improve reliability, it in-                tories are from the same namespace. Thus, a framework must
+troduces a counterexample-guided refinement   [5], to gener-                  not only combine constraints from the two sources, but also
+ate new API executions that challenge uncertain constraints                   validate them against complementary evidence and generate
+and refine the discovered constraint set. By integrating com-                 extra executions when the available evidence is insufficient.
+plementary  sources  of  knowledge  and  validation  evidence,                                            III.  KEY IDEAS
+DUALMINE reduces false positives while improving the com-
+pleteness of discovered constraints over the baselines.                          We design our solution with the following key ideas.
+  In brief, this paper makes the following contributions:                        Key  Idea  1:  A  hybrid  static-dynamic  framework  for
+  1. DUALMINE: a hybrid framework integrating LLM-based                       REST  API  constraint  discovery.  The  above  observations
+static and dynamic constraint mining for API testing.                         motivate a hybrid constraint mining solution that combines
+  2. A dual-validation and counterexample-guided refinement                   specification-based and runtime-based approaches to achieve
+mechanism that combines execution evidence and LLM-based                      the best of both worlds for more comprehensive constraint
+semantic reasoning to improve constraint reliability.                         extraction.  We  propose  DUALMINE,  a  hybrid  framework
+  3. An empirical evaluation to compare DUALMINE against                      that  combines  specification-derived  constraints  and  runtime
+the state-of-the-art static and dynamic baselines. Importantly,               invariants to improve the discovery of REST API constraints.
+DUALMINE revealed 48 bugs in real-world REST APIs.                            The static component leverages API specifications and LLM
+  4. A publicly available replication package and DUALMINE                    reasoning to infer candidate constraints, while the dynamic
+tool including the source code and the data [6].                              component mines invariants from execution logs to capture
+                                                                              runtime  behaviors  that  are  not  explicitly  documented.  By
+                           II.  MOTIVATION                                    integrating two complementary sources, we expect to achieve
+                                                                              higher  discovery  accuracy  than  relying  on  either  static  or
+  We  use  GitLab’s  API  to  illustrate  the  challenges  of                 dynamic analysis individually.
+constraint   mining   in   REST   API   testing.   Consider   the                Key  Idea  2:  A  dual-validation  framework  combining
+ssh_url_to_repo   field   returned   by   the   GitLab   project              execution  evidence  and  LLM  reasoning.  We  introduce  a
+creation   endpoint.   RBCTest   [2],   a   LLM-based   static                dual-validation framework that leverages complementary val-
+mining   approach   extracts   specification-driven   constraints             idation strategies for constraints derived from two different
+such  as  isRegex(return.ssh_url_to_repo,  ‘git@.∗’)  and                     sources.  For  the  specification-derived  constraints,  execution
+contains(return.ssh_url_to_repo,  ‘.git’),capturingfor-                       logs are used as runtime evidence to verify their consistency
+matting rules like the SSH prefix and required suffix.                        with  observed  API  behaviors.  For  the  dynamically  mined
+  In  contrast,  dynamic  mining  can  uncover  deep  semantic                invariants, LLM reasoning is employed to identify and filter
+relationships  across  fields.  For  example,  AGORA+  [4]  re-               spurious constraints that arise from coincidental patterns in
+veals  that  return.path_with_namespace  is  a  substring  of                 execution  traces.  For  example,  in  the  GitLab  Branch  API,
+return.ssh_url_to_repo, reflecting how the repository path                    a static approach may infer from the specification that the
+is embedded within the SSH URL. This dependency is not                        returned ssh_url_to_repo field must start with the SSH prefix
+stated in the specification and can only be observed through                  git@  and  end  with  the  suffix  .git.  DUALMINE  validates
+actual API executions. In brief, while static mining captures                 such constraints against actual API responses to confirm that
+format- and pattern-based constraints, dynamic mining is able                 they hold in the implemented service. Conversely, a dynamic
+to reveal richer inter-field dependencies that are valuable for               approach  may  infer  that  a  field  always  takes  a  particular
+generating valid test inputs and detecting API inconsistencies.               constant  value  because  all  observed  executions  happen  to
+  This example highlights the complementary strengths and                     come from the same project or user. In this case, LLM-based
+weaknesses of existing approaches. Static techniques such as                  semantic reasoning can recognize that the invariant is likely
+SATORI [1] and RBCTest can effectively extract constraints                    coincidental rather than a true API constraint and filter it out.
+explicitly documented in API specifications, including type,                  With  the  dual-validation  via  the  combination  of  execution-
+format,  and  schema-related  restrictions.  However,  they  are              based and semantic-based reasoning, the framework improves
+less reliable at inferring semantic relationships among fields                the reliability and precision of discovered constraints.
+that are not specified in the API documentation. Conversely,                     Key  Idea  3:  A  counterexample-guided  refinement  for
+dynamic approaches such as AGORA+ [4] can discover such                       REST API constraints. We propose a counterexample-guided
+runtime relationships from execution traces, but their effec-                 refinement that iteratively improves the quality of discovered
+tiveness depends on the quality and coverage of the observed                  constraints. When neither existing logs nor specification se-
+executions. Consequently, static approaches may miss hidden                   mantics can resolve a constraint, DUALMINE actively gener-
+
+
+
+                                                                            2
+
+===== GV-13 PDF PAGE 3 =====
+
+                                Fig. 1.  DUALMINE: Static-Dynamic REST API Constraint Discovery with Dual Validation
+
+
+ates targeted executions to distinguish competing hypotheses.                  reasoning  and  execution-log  analysis  while  mitigating  their
+Specifically, when a candidate constraint cannot be confidently                individual limitations via validation and iterative refinement.
+validated,  the  framework  generates  API  requests  aimed  at                   To do so, the framework applies a dual-validation strategy
+producing counterexamples to expose unexplored behaviors                       to improve constraint quality. Specification-derived constraints
+and gather additional execution evidence. The newly observed                   are checked against execution logs using EXECVALIDATOR,
+executions  are  then  used  to  validate,  refine,  or  discard  the          whichclassifiesthemassupported,contradicted,orunresolved
+candidate constraints. For example, suppose dynamic mining                     based on available runtime evidence. Thus, log-derived invari-
+infers that return.path_with_namespace must always be a                        ants  are  validated  through  LLMVALIDATOR,  which  rejects
+substring of return.ssh_url_to_repo. If this relationship is                   semantically implausible log-derived invariants while retaining
+observed only for a small number of projects, DUALMINE                         plausible undocumented behaviors for further refinement.
+actively generates additional project-creation or branch-query                    Finally, in the constraint aggregation phase, the validated
+requests with different project names, namespaces, and visibil-                constraints are classified into unique, equivalent, and conflict-
+ity settings. If the relationship continues to hold across these               ing  hypothesis  sets.  Two  constraints  are  equivalent  if  they
+new executions, the framework gains stronger evidence for                      refer to the same API field and impose logically identical or
+accepting the constraint. If a generated execution violates the                mutually subsuming predicates. They conflict if they refer to
+relation, the candidate constraint can be weakened, specialized                the same field or relation but cannot hold simultaneously, or
+to a particular condition, or discarded. Through this iterative                if one is violated by evidence supporting the other. Unique
+feedback process, we could reduce false positives while im-                    constraints are retained directly, while equivalent constraints
+proving precision of constraint discovery.                                     are consolidated by selecting a representative constraint. The
+                 IV.  DUALMINE ARCHITECTURE                                    most  executable  and  specification-aligned  form  from  each
+A. Overview                                                                    equivalent group is selected. For each non-equivalent hypoth-
+                                                                               esis set, our framework generate targeted counterexamples,
+   Figure 1 illustrates the overall architecture of the proposed               executes them against the target API, and resolves the com-
+framework.  The  framework  aims  to  automatically  discover,                 peting hypotheses based on the new observations. The result-
+validate,  and  refine  behavioral  API  constraints  by  integrat-            ing set contains validated, non-redundant, and representative
+ing information from statically mined API specifications and                   API constraints.
+actual runtime executions. The architecture consists of three                  B. Hybrid Constraint Discovery
+major phases: 1)  Hybrid  Constraint  Discovery,  2)  Dual-
+Validation Framework, and 3) Constraint Aggregation.                              The first phase generates candidate constraints from both
+   In  the  hybrid  constraint  discovery  phase,  it  generates               static and dynamic sources. Internally, DUALMINE represents
+candidate constraints from two complementary sources: spec-                    each candidate constraint as c = ⟨o,X,Y,ϕ,src,E⟩, where
+ifications and API executions. Our novelty lies in the valida-                 o is the API operation, X  is the set of request parameters,
+tion and aggregation process: instead of simply combining                      Y  is  the  set  of  response  fields, ϕ  is  the  predicate, src ∈
+the results, the candidate constraints are normalized, cross-                  {static,dynamic} denotes the source, and E stores supporting
+validated, compared, and refined using additional evidence.                    evidence  such  as  specification  text  or  observed  executions.
+The  design  combines  the  strengths  of  specification-driven                The  predicate ϕ  is  represented  in  a  normalized  executable
+
+
+
+                                                                             3
+
+===== GV-13 PDF PAGE 4 =====
+
+form such as a comparison, membership constraint, format                       testing  tools,  or  executions  generated  during  DUALMINE’s
+predicate, substring relation, or input-output dependency.                     refinement loop. Each log entry records the HTTP request,
+   1) Static Miner:  In our hybrid framework, we build upon                    concrete  parameter  values,  response  status,  and  response
+RBCTest [2] as the static constraint miner to extract candi-                   body. LLMs may hallucinate constraints based on generalized
+date response-body constraints from OpenAPI specifications.                    knowledge [7], while dynamic mining tools often overfit to
+RBCTestisanLLM-basedstaticapproachthatanalyzesopera-                           the limited data available in execution logs. To address these
+tion descriptions, request parameters, response schemas, prop-                 complementary weaknesses, our framework employs a dual-
+erty descriptions, data types, formats, and examples to infer                  validation mechanism. This phase cross-checks the outputs of
+logical constraints that can serve as API test oracles after vali-             each discovery method against the foundational data of the
+dation and refinement. Specifically, it mines two main types of                other: specification-derived constraints are evaluated empiri-
+constraints: request-response constraints, which capture how                   cally against execution logs, and log-derived constraints are
+input  parameters  restrict  or  determine  response  properties,              evaluated semantically against the specification. The union of
+and response-property constraints, which capture value ranges,                 these refined sets forms the validated constraint poolCv.
+formats,  enumerations,  and  semantic  rules  within  response                   1) Validation   of   Specification-Derived   Constraints:
+bodies.  In  our  approach,  these  RBCTest-mined  constraints                 Specification-derived constraints (Cs) extracted via the LLM
+form the static candidate set. They provide semantically mean-                 frequently contain hallucinations, over-approximations, or un-
+ingful constraints that may not be observable from limited                     supported behavioral assumptions that diverge from the actual
+executions, especially for rarely exercised fields or behaviors.               implementation of the API. To mitigate this issue, our exe-
+For example, from the schema of a GitLab repository field,                     cution validator acts as an empirical filter by evaluating each
+the static miner may infer that return.ssh_url_to_repo must                    candidate constraint against API execution logs (L). A spec-
+start with git@ and end with .git. DUALMINE normalizes                         derived constraint is classified as supported, contradicted, or
+each RBCTest-mined constraint into a common predicate rep-                     unresolved. A constraint is supported if all relevant executions
+resentation that records the target operation, involved request                satisfy  it,  contradicted  if  at  least  one  successful  execution
+parameters, response fields, predicate expression, and static                  violates it, and unresolved if the logs do not contain sufficient
+evidence from the OpenAPI specification.                                       coverage for the involved parameters or response fields.
+   2) Dynamic Miner:  We use AGORA+ [4] as the dynamic                            Specifically,thevalidationengineparsestherecordedHTTP
+constraintminertoextractcandidateconstraintsfromobserved                       requests and responses in L to extract the concrete runtime
+API executions. AGORA+ is a black-box oracle-generation                        values of the parameters involved in each proposed constraint.
+approach that learns likely invariants from API requests and                   Only successful executions whose responses contain all fields
+their corresponding responses. Given an OpenAPI specifica-                     referenced  by  the  constraint  are  considered  relevant.  Exe-
+tion together with a set of request-response traces, AGORA+                    cutions  with  error  status  codes,  missing  optional  fields,  or
+uses its Beet front-end to translate API inputs and outputs into               incompatible  response  schemas  are  handled  separately  and
+Daikon-compatibledeclarationandtracefiles,andthenapplies                       do  not  automatically  falsify  the  constraint.  The  constraint
+a customized version of Daikon to mine invariants over re-                     is then evaluated as a boolean predicate over these runtime
+quest parameters and response fields. These invariants capture                 values.  If  a  constraint  consistently  evaluates  to  true  across
+runtime-observed properties such as numerical bounds, array-                   all relevant, successful executions, it is considered empirically
+size relationships, string formats, specific values, and inter-                soundandisretained.Conversely,ifruntimeevidenceprovides
+field relations. From observed request-response traces, the dy-                adirectcontradiction—suchasasuccessful‘200OK‘response
+namic miner may infer that return.path_with_namespace is                       that violates an LLM-proposed dependency—the constraint is
+a substring of return.ssh_url_to_repo. DUALMINE normal-                        discarded as spurious. This empirical validation step filters
+izes each AGORA+-mined invariant into the same constraint                      constraints contradicted by observed executions and records
+representation, while preserving its runtime support, including                the degree of runtime support for the remaining constraints.
+the number of executions in which the invariant was observed                      2)  Validation  of  Log-Derived  Constraints:   Conversely,
+and the fields involved in the invariant. Constraints that cannot              invariants mined dynamically from execution logs (Cd) often
+be mapped to an executable predicate are retained as unre-                     capture  spurious  statistical  correlations  rather  than  genuine
+solved semantic constraints and are considered only during                     API  rules.  This  overfitting  occurs  primarily  due  to  limited
+LLM validation, not during execution-based falsification.                      execution coverage inL, where coincidental relationships in a
+C. Dual-Validation Framework                                                   small data sample are mistakenly generalized into rigid rules.
+                                                                               For example, from a limited set of GitLab project responses,
+   The key design principle is asymmetric validation: runtime                  an invariant miner might infer an arithmetic constraint such
+evidence is used to falsify specification-derived hypotheses,                  as  input.id_after ≥  size(return[]),  simply  because  the
+while  specification  semantics  is  used  to  reject  dynamically             numerical values of the id_after parameter happened to be
+mined  coincidences.  In  Phase  2,  the  candidate  constraints               largerthanthearraysizeofthereturnedprojectsinthespecific
+mined from the specification (Cs) and the execution logs (Cd)                  log traces. However, the id_after parameter is fundamentally
+are inherently susceptible to distinct types of inaccuracies. The              a pagination cursor and is not semantically related to bounding
+execution logs may come from existing API test suites, API                     the number of returned items.
+
+
+
+                                                                            4
+
+===== GV-13 PDF PAGE 5 =====
+
+   To systematically eliminate such false positives, our LLM-                  extract a constraint in text (e.g., “age must be non-negative”),
+based validator leverages the LLM’s natural language reason-                   while the dynamic miner infers a concrete arithmetic invariant
+ing  capabilities  to  evaluate  each  dynamic  invariant  against             (e.g., input.age ≥  0). Retaining both definitions creates se-
+the OpenAPI specification (S). The LLM validator does not                      mantic redundancy and introduces unnecessary computational
+require every dynamic invariant to be explicitly stated in the                 overhead in testing tasks. DUALMINE treats two constraints
+specification. Instead, it evaluates if the invariant is seman-                as equivalent when they refer to the same operation and target
+tically  plausible  given  the  endpoint  description,  parameter              field and impose the same predicate after normalizing syntax,
+meanings, response schema, and domain context. Invariants                      comparison direction, constants, and field aliases.
+that contradict the specification or lack any plausible semantic                  To resolve this issue, DUALMINE invokes SELECTREPRE-
+connection  are  rejected,  while  plausible  but  undocumented                SENTATIVE(Ce) to select one representative constraint from
+invariants are retained for further refinement.                                each equivalent group. In our implementation, SELECTREP-
+   For each invariant inCd, we construct a verification prompt                 RESENTATIVE prioritizes the constraint form that is most ex-
+containing the inferred rule alongside its corresponding API                   ecutable, precise, and traceable to evidence. When two equiv-
+documentation, including parameter descriptions, endpoint se-                  alent forms are equally precise, we prefer the specification-
+mantics, and response schemas. The LLM is tasked with de-                      aligned  form  to  preserve  compatibility  with  the  OpenAPI
+ciding whether the constraint represents a logical, semantically               schema. These chosen representatives, along with the unique
+sound rule or merely an accidental artifact of the data. In-                   constraints Cu, are then seeded directly into the final setC∗.
+variants that contradict the specification or lack any plausible                  ◦ Non-equivalent Hypotheses (H): Sets of constraints that
+semantic connection to the endpoint behavior are discarded.                    exhibit source discrepancies or mutually exclusive behavioral
+By anchoring dynamic invariants in the text semantics of the                   assertions. For automated resolution, these hypotheses are sub-
+documentation, this eliminates overfitting and much improves                   classified into four basic set-theoretic relationships based on
+the precision of the refined log-derived constraintsC′d.                       their parameter domains and condition boundaries: subset (one
+D. Constraint Aggregation and Refinement                                       rule is a stricter variation of another), intersection (rules over-
+   For each retained constraint inC′s∪C′d, DUALMINE records                    lap only under specific conditions),independence (rules assert
+a support score capturing the number of relevant executions,                   entirely incompatible behaviors for the same parameters), and
+the number of satisfying executions, and the validation outco-                 union (rules represent competing generalizations of the same
+me: if the constraint is supported, contradicted, or unresolved.               observed behavior). These relationships are determined after
+   After  dual  validation,  DUALMINE  obtains  the  validated                 grouping constraints by operation and target fields and com-
+constraint pool Cv = C′s∪C′d, which contains specification-                    paring their normalized predicates. When logical comparison
+derived constraints and log-derived invariants that have sur-                  is not directly possible, DUALMINE asks the LLM to classify
+vived their respective validation steps. However, since histori-               the relationship using a constrained output schema. E.g., a
+cal logs (L) are passive and specifications may be incomplete,                 spec-derived constraint may say that return.status belongs
+Cv  may still contain redundant, overlapping, unresolved, or                   to{open, closed, merged},whileadynamiconeobservesonly
+partiallyincorrectconstraints.Phase3addressesthislimitation                    {open,  closed}. This forms a subset relation: the dynamic
+through  constraint  classification  and  counterexample-guided                invariant is stricter but may reflect limited execution coverage.
+refinement. This phase transitions the framework from passive                     2)  Counterexample Generation:  As in the iterative loop,
+observation to proactive exploration by categorizing candidate                 each non-equivalent hypothesis set h∈H undergoes rigorous
+constraints  and  actively  probing  the  target  API  to  detect              automated testing. For an uncertain or non-equivalent rule, we
+equivalent or non-equivalent constraints.                                      generate counter examples on (h,S). Guided by the structural
+   1) Constraint Classification:  The refinement process be-                   boundaries defined in the OpenAPI specification (S), the LLM
+gins by passing the validated constraint pool (Cv) into the                    acts as a targeted test generator.
+constraint classification procedure. This module organizes the                    Rather than generating random inputs, DUALMINE gener-
+candidate constraints into three distinct categories based on                  ates hypothesis-discriminating tests: requests whose expected
+their semantic relationships and sources:                                      outcomes would satisfy one candidate constraint while vio-
+   ◦  Unique  Constraints  (Cu):  Unique  constraints  are  the                lating another. Generated requests are required to satisfy the
+oneswithoutanequivalentornon-equivalentcounterpartinthe                        OpenAPI schema and known operation dependencies unless
+validated pool. They may originate from either source, but are                 the  hypothesis  explicitly  concerns  invalid  inputs  or  error
+retained only when their validation evidence is sufficient. In                 responses.  It  analyzes  the  semantic  differences  within  the
+our implementation, evidence is sufficient when the constraint                 hypothesis  set h  and  generates  a  suite  of  counterexample
+is not contradicted and either has runtime support above a                     test cases (T) specifically designed to challenge the contested
+threshold or is semantically accepted by the LLM validator.                    boundaries of the constraints. The goal is to generate requests
+   ◦ Equivalent Constraints (Ce): Groups of constraints that                   likely to exercise the behavioral region where the competing
+assert the exact same logical rule for a given API property,                   hypothesesmakedifferentpredictions,therebymaximizingthe
+despite being mined from different sources or expressed via                    likelihood of violating at least one of the invalid rules and
+disparate syntaxes. For example, the specification miner might                 exposing its empirical boundary.
+
+
+
+                                                                            5
+
+===== GV-13 PDF PAGE 6 =====
+
+   3) Targeted API Execution: Once the targeted test suiteT                                                     TABLE I
+is generated, the framework passes these inputs to the execu-                                    CONSTRAINT MINING RESULTS (RQ1)
+tion engine via Lnew ← EXECUTE(A,T), where A denotes                           API       #Op     AGORA+          SATORI         RBCTest       DUALMINE
+the live target API. When resolving constraints over successful                                  TP   FP P(%)   TP   FP P(%)   TP   FP P(%)    TP FP P(%)
+                                                                               Canada      4     53     2     9635     0   100 45     1     98  63   1     98
+response bodies, DUALMINE prioritizes requests expected to                     GitLab     26    460 517     47 551   72     88293   77     791,024 54     95
+produce valid 2xx responses. Requests that intentionally trig-                 GitHub      2    319   23     93153   20     88149     2     98 421   8     98
+gererrorresponsesareusedonlywhenthecandidateconstraint                         OMDb        2     15     2     9110   12     45  6     0   100   23   0   100
+                                                                               Spotify     3     95   12     89 44   12     79 32   27     55  102   2     98
+concerns error behavior or status-dependent schemas.                           Yelp        1     12   14     47 13     6     68 0     0        -20   0   100
+   Unlike historical logs that reflect nominal user behavior, this             YouTube     1     64   28     70 42   80     34 88     9     91 173   7     95
+targeted execution forces the API into boundary states and                     Total      39   1019 597     63 848 202     81 613 116     84 1827 72     96
+rarely exercised behaviors. The resulting runtime observations
+are captured in a fresh set of execution logs Lnew, which                      reasoning effort, as the underlying model. We run all the tools
+records how the API handles the synthesized cases.                             five times and report mean value.
+   4) Constraint Re-validation:  In the final step, the frame-                    Datasets:  We constructed a dataset comprising 39 REST
+workexecutesLLMResolveHypothesis(h,Lnew)toanalyzethe                           API endpoints collected from seven real-world services previ-
+newlyacquiredruntimeevidence.TheresolverreturnsasetCh                          ously used in RBCTest [2] and AGORA+[4]. The selected ser-
+of resolved constraints, which may contain an accepted origi-                  vices span diverse application domains, including open-source
+nal constraint, a weakened constraint, a specialized conditional               platforms (e.g., GitLab and GitHub), commercial APIs (e.g.,
+constraint, or no constraint if the evidence is insufficient. The              Spotify, Yelp, YouTube), and domain-specific services (e.g.,
+final constraint set is then updated asC∗←C∗∪Ch.                               Canada Holidays and OMDb). The dataset contains a mixture
+   By cross-referencing the HTTP response statuses and pay-                    of read-only (GET) and state-changing (POST) operations, to
+load structures in Lnew against the non-equivalent assertions                  evaluate our tool’s ability to infer inter-parameter constraints
+in h, the system resolves the conflict among competing hy-                     and workflow-dependent behavioral rules.
+potheses.                                                                         SetupandMetrics: Fordynamicmining,requestsaregener-
+   Under this empirical scrutiny, invalid hypotheses are falsi-                ated until at least 50 valid (non-empty) responses are collected
+fied and discarded, while valid rules are confirmed. If a hy-                  for  each  endpoint.  During  refinement,  each  non-equivalent
+pothesis requires adaptation to accommodate the new runtime                    constraint is validated with up to 30 generated counterexam-
+evidence, it is weakened or specialized. The returned setCh is                 ples. We support multiple LLMs through a unified interface.
+added to C∗; if the evidence is insufficient, Ch is empty and                     UsingofficialAPIdocumentationandreleases,wemanually
+the hypothesis remains unresolved or is discarded according to                 evaluated and reported True  Positives (TP), False  Positives
+therefinementbudget.Thissystematiclooprepeatsforallnon-                        (FP), and Precision (P). A TP is a constraint that correctly
+equivalent hypotheses in H. The culmination of this process                    characterizes API behavior. DUALMINE could further refine
+is the return of the Final Constraint Set (C∗), which comprises                TP constraints to narrow their domains (tighter ranges or ad-
+a non-redundant constraint set that is better supported by both                ditional predicates), which we refer to as Refined constraints.
+specification semantics and runtime evidence.
+                   V.  EMPIRICAL EVALUATION                                    A. Effectiveness (RQ1)
+   We conduct experiments to answer the following questions:                      1) Effectiveness  Comparison:  Table  I presents  the  con-
+                                                                               straint mining results across seven REST APIs, with TP, FP,
+   RQ1 (Effectiveness). How effective is DUALMINE in dis-                      and P values averaged over five runs. Overall, DUALMINE
+covering valid API behavioral constraints?                                     achieves a precision of 96% and consistently delivers better
+   RQ2 (Dual-Validation Capability). How effectively does                      performance  than  the  baselines  across  all  benchmarks.  On
+the  dual-validation  framework  mitigate  LLM  hallucinations                 average, it improves precision by 33, 15, and 12 percentage
+and filter out log-derived false positives?                                    points  compared  to  AGORA+,  SATORI,  and  RBCTest,  re-
+   RQ3  (Counterexample-Guided  Refinement).  To  what                         spectively. These results suggest that combining specification-
+extent  does  the  counterexample-guided  refinement  improve                  derived  constraints  with  runtime-observed  invariants  yields
+constraints?                                                                   more accurate constraints than relying on either source inde-
+   RQ4  (Cost-Effectiveness  Analysis). What are the token                     pendently. It identifies 1,827 valid constraints, outperforming
+costs associated with DUALMINE?                                                AGORA+ (1019), SATORI (848) and RBCTest (613).
+   RQ5  (Fault  Detection).  Can  DUALMINE’s  constraints                            a) Qualitative analysisoncaseswhere DUALMINE’sare
+serve as test oracles for detecting real REST API faults?                      better than the baselines:  The results highlight the comple-
+   Baselines:  We compared DUALMINE against three state-                       mentary strengths of static and dynamic mining techniques.
+of-the-art  methods.  For  static  constraint  mining,  we  chose              AGORA+ effectively captures constraints observed in execu-
+RBCTest  [2]  and  SATORI  [1],  while  AGORA+  [4]  was                       tion traces but may miss semantic relationships that rarely
+selected as the representative baseline for dynamic mining.                    appear in runtime data. In contrast, SATORI and RBCTest
+In our experiments, we used GPT-5, configured with minimal                     can infer such relationships from API specifications, but may
+
+
+
+                                                                            6
+
+===== GV-13 PDF PAGE 7 =====
+
+                                 TABLE II                                                                          TABLE III
+       TYPES OF CONSTRAINTS DETECTED BY DUALMINE (RQ1)                             RELATIONSHIP BETWEEN STATIC AND DYNAMIC CONSTRAINTS (RQ1)
+No.  Category/Test Oracles    Count   No. Category/Test Oracles       Count       Dataset        Eq.        Unique                       Non Eq.
+ 1   Value-In-Range              406  10  isBoolean                      108                            Static  Dynamic      Subset  Inter.  Indep.  Union
+ 2   isUrl                       292  11  isDateTime                       81     Canada           3     34.6            9.2     8.6      8.4           0           0
+ 3   Value-In-Set                266  12  isDate                           42     GitLab        58.2    611.6        164.6        42  183.6           3         15
+ 4   Exists                      230  13  Array  Specific  Sizes           22     GitHub        46.8    176.4          76.4     23.2  105.4           0        0.8
+ 5   Composite                   225  14  isEmail                           7     OMDb           1.2     19.8            1.2     0.6      0.6           0           0
+ 6   Template Literals           191  15  ArrayElementStringLength          4     Spotify        8.8     50.6          11.2       17    16.2           0        0.2
+ 7   I/O                         181  16  DefaultValue                      3     Yelp           2.8     11.2            1.8     1.2      3.4           0           0
+ 8   N-ary atomic                121  17  isTime                            2     YouTube          5    134.4             16      11       14           0           0
+ 9   String Specific Length      114  18  ValueNotInSet                     1     Total       125.8    1038.6        280.4     103.6  331.6           3         16
+
+
+introduce false positives when specifications are incomplete or                  (12.7%), demonstrating that DUALMINE can infer complex
+outdated. We also make three main observations:                                  logical conditions composed of multiple atomic constraints.
+   i)   By   integrating   evidence   from   both   sources,   our               Template (Regex) Literals contribute 191 constraints (10.8%),
+framework  derives  the  more  complete  constraint. For ex-                     showing that regular-expression-based patterns are also fre-
+ample, in the GitHub API, static mining infers the constraint                    quently discovered. Moreover, the I/O category includes 181
+gte(updated_at, created_at), while runtime mining reveals                        constraints  (10.2%),  indicating  that  DUALMINE  effectively
+format  constraints,  e.g.,  and(isDateTime(updated_at),is-                      captures logical relationships between input parameters and
+DateTime(created_at)). The final result from DUALMINE is                         outputfields.Theremainingcategories,includingn-aryatomic
+and(isDateTime(updated_at),  isDateTime(created_at),                             constraints, string length restrictions, type-specific predicates
+gte(updated_at,created_at)),    capturing    both    datatype                    (e.g., isBoolean, isDateTime, and isDate), array constraints,
+requirements and relationships.                                                  and  default  values,  occur  less  frequently  but  showing  that
+   ii) Runtime analysis can uncover undocumented behav-                          DUALMINE covers a broad spectrum of test oracles typically
+ioral constraints. For example, execution traces may reveal                      found in real-world REST APIs.
+isSubstring(name,  full_name),  indicating  that  a  reposi-
+tory’sshortnameconsistentlyappearswithinitsfullrepository                           2) Sources  of  Constraints:  Table  III  analyzes  the  rela-
+name, e.g., a namespace-qualified repository identifier. This                    tionship between the constraints discovered from static and
+relation may not be explicitly documented in the specification,                  dynamic mining after validation. From the average of 1,827
+but it reflects a stable runtime behavior useful for validation.                 TP and 72 FP constraints after five runs, we categorized the
+   iii)  Specification  mining  may  recover  better  than  dy-                  constraints into equivalent ones identified by both approaches
+namic  mining,  e.g.,  inferring  format  constraints  such  as                  (Eq.), constraints unique to either static or dynamic mining
+and(isURL(license.html_url),  isRegex(license.html_                              (Unique),  and  non-equivalent  constraints  including  subset,
+url,  ’ˆhttps://.*$’)). In contrast, runtime logs may con-                       intersection, independence, and union relationships.
+tain  few  non-null  license.html_url  values  or  insufficient                         a) Unique Constraints/Invariants:  The results demon-
+URL diversity, making the regex constraint difficult to validate                 strate  strong  complementarity  between  static  and  dynamic
+from  executions  alone.  By  integrating  and  cross-validating                 mining. Across all datasets, only 125.8 constraints are equiv-
+constraints  from  both  sources,  DUALMINE  preserves  com-                     alent, while 1,038.6 and 280.4 constraints are uniquely dis-
+plementary constraints while marking weakly supported con-                       covered by static and dynamic mining, respectively. Unique
+straints  for  further  validation  or  refinement,  resulting  in  a            static constraints come from schemas, descriptions, formats,
+richer and more reliable constraint set than approaches based                    and documented rules. Unique dynamic constraints come from
+solely on specifications or execution traces.                                    observed  runtime  relations,  concrete  field  correlations,  and
+      b) Types  of  Constraints:   We  classified  1,769  unique                 execution-specific behaviors. The imbalance does not mean
+constraints  mined  by  DUALMINE  from  the  first  run  into                    static is better; it may reflect that LLM/static mining produces
+18 test oracle categories, as shown in Table II. Each con-                       many more candidate constraints. This also indicates that the
+straint  may  belong  to  one  or  more  categories.  The  most                  two approaches capture different aspects of API behavior.
+frequent  category  is  Value-In-Range,  with  406  constraints                     Static   mining   primarily   derives   semantic   constraints,
+(23%),  indicating  that  bounded  numeric  or  ordinal  values                  type     definitions,     and     parameter     restrictions     from
+are commonly specified in API schemas and responses. This                        specifications,      whereas      dynamic      mining      uncovers
+is  followed  by  isUrl,  containing  292  constraints  (16.5%),                 behavioral     invariants     from     execution     traces.     For
+reflecting  the  prevalence  of  URL-related  attributes,  and  by               example,   static   analysis   may   infer   constraints   such   as
+Value-In-Set, with 266 constraints (15%), capturing enumer-                      gte(updated_at,  created_at),    while    runtime    analysis
+ated values such as status codes, country abbreviations, and                     reveals  undocumented  properties  that  are  absent  from  the
+predefined identifiers. The Exists category accounts for 230                     specification,    including    isSubstring(name,  full_name),
+constraints(13%),highlightingtheimportanceofpresenceand                          isNumeric(totalResults)    despite    totalResults    being
+nullability checks, while Composite contains 225 constraints                     represented   as   a   string,   isURL(return.pulls_url),   and
+
+
+
+                                                                               7
+
+===== GV-13 PDF PAGE 8 =====
+
+eq(sizeOf(return.items[].id),  11)    in    Youtube    API.                    tally satisfy a mathematical or logical relation in the observed
+The   latter   captures   a   domain-specific   invariant   of   the           traces. For example, in the GitLab Issue API, DUALMINE in-
+YouTube platform, where system-generated video identifiers                     ferred gte(assignee.id,  size(labels[])), suggesting that
+consistently contain exactly 11 characters.                                    the assignee identifier is always greater than or equal to the
+      b) Subset  and  Intersection:  A  large  number  of  con-                number of labels. This relation is not semantically meaningful:
+straints exhibit 103.6 subset and 331.6 intersection relation-                 database-generated  identifiers  tend  to  be  large,  while  label
+ships, indicating that static and dynamic mining often discover                arrays  usually  have  low  cardinality,  causing  the  inequality
+partially overlapping rather than identical constraints.                       to hold accidentally in the collected traces. Similarly, in the
+   Subset  relationships  occur  when  one  source  derives  a                 GitHub  API,  DUALMINE  inferred  lte(allow_auto_merge,
+stricter version of a constraint discovered by the other. For                  allow_forking) between two independent repository settings.
+example, dynamic mining infers isURL(return.owner.url),                        Under  a  boolean  encoding  where  false  <  true,  this  con-
+while static mining derives and(isURL(return.owner.url),                       straint  implies  that  auto-merge  can  be  enabled  only  when
+isRegex(return.owner.url,  ˆhttps://)), adding an ‘https’                      forking is enabled. The relation held in the observed traces
+requirement.   In   contrast,   intersection   relationships   arise           but is not a general API invariant.
+when   static   and   dynamic   mining   capture   different   but                Second, trace overfitting occurs when the execution logs
+compatible   properties.   For   example,   static   mining   in-              cover only a narrow subset of valid database states, user per-
+fers isURL  (return.url), whereas dynamic mining discov-                       missions, or environment configurations. For example, in the
+ers isSubstring(return.url,  return.releases_url). Nei-                        GitHub API, the collected traces lacked diverse organization
+ther  constraint  subsumes  the  other,  yet  both  describe  valid            and collaborator configurations, leading DUALMINE to infer
+aspects of the field behavior. The large number of intersection                that organization members never have push permission, i.e.,
+cases highlights the complementary nature of two approaches.                   permissions.push==false. Although this property held for
+      c) Independence   set:   Only  3  independent  relation-                 the specific organization scope during testing, it is violated in
+ships  are  observed,  all  of  which  are  from  GitLab  APIs.                repositorieswithmorepermissivesettings.Suchfalsepositives
+This small number indicates that direct contradictions between                 reflect sampling bias rather than semantic API rules.
+static  and  dynamic  constraints  are  relatively  rare.  Indepen-               These errors indicate that the limitations of DUALMINE are
+dent  relationships  arise  when  static  and  dynamic  mining                 mainly caused by insufficient evidence for constraints that are
+infer  completely  different  constraints.  For  example,  static              unique to one source. They suggest directions for improve-
+mining derives URL-format constraints on return.web_url,                       ment. First, the validator can incorporate stronger semantic
+whiledynamicminingdiscoversisSubstring(input.branch,                           checks  to  reject  relations  between  fields  with  incompatible
+return.web_url). Since the two complementary constraints                       domain roles, such as identifiers and collection sizes. Second,
+describe  unrelated  properties,  they  form  a  independent  re-              the counterexample generator could target underrepresented
+lationship,  illustrating  the  distinct  perspectives  provided  by           configurations,suchasalternativepermissionlevels,repository
+specification and runtime analysis.                                            settings, and organization states, to reduce trace overfitting.
+      d) Union set:  We identify 16 union relationships, also                  B. Dual-Validation Capability (RQ2)
+primarily in GitLab. These occur when static and dynamic
+mining infer complementary constraints that can be combined                       To assess the contribution of our dual-validation, we com-
+into  a  richer  representation.  For  example,  for  the  GitLab              pare the complete version of DUALMINE (Full DUALMINE)
+GET  /projects endpoint, static mining infers the conditional                  with a variant in which validation is disabled (w/o DV).
+constraint  implies(toBool(default(input.with_issues_e-                           As seen in Table IV, dual validation substantially improves
+nabled,‘false’)),  eq(issues_enabled,true)),  while  dy-                       constraint quality. In one of five runs across all datasets, the
+namic     mining     infers     the     value-domain     constraint            full version achieves a precision of 96%, compared with 83%
+in(issues_enabled,[0,1]).Sincethetwoconstraintscapture                         without validation. Although disabling validation increases the
+complementary aspects of the API behavior, their union yields                  number of true positives (2,264 vs. 1,789), it also introduces
+the stronger specification.                                                    nearly six times more false positives (479 vs. 81).
+   3) Error  Analysis  of  DUALMINE:  We perform a qual-                          The differences in TP and FP show the tradeoff introduced
+itative analysis of the false-positive constraints generated by                by  validation.  Overall,  dual  validation  removes  398  false
+DUALMINE tocharacterizeitslimitations.Mostfalsepositives                       positives. Thus, dual validation trades a 21.9% reduction in
+occur  in  the  Unique  category,  i.e.,  constraints  mined  from             valid-constraint yield for an 82.9% reduction in false positives,
+only one source without cross-source support. This suggests                    increasing precision from 83% to 96%. This indicates that
+that dual validation is most effective when static and dynamic                 validation is conservative: it substantially improves precision,
+evidence can corroborate or challenge each other, but false                    but may discard or leave unresolved some valid constraints
+positives may still remain when a constraint is supported by                   when complementary evidence is insufficient.
+only one source and no decisive counter-evidence is available.                    This result supports the design of dual validation. By check-
+   Thefalsepositivesproducedby DUALMINE mainlyfallinto                         ing mined constraints against complementary evidence from
+two categories. First, spurious cross-field correlations arise                 specificationsandexecutions, DUALMINE removesdocument-
+when fields representing unrelated domain concepts acciden-                    ation-induced and trace-induced false positives. Nevertheless,
+
+
+
+                                                                            8
+
+===== GV-13 PDF PAGE 9 =====
+
+                                 TABLE IV                                                                            TABLE V
+       ABLATION STUDY OF DUAL VALIDATION (DV) (RQ2) AND                                  TOKEN CONSUMPTION AND CONSTRAINT EFFICIENCY (RQ4)
+         COUNTEREXAMPLE (CE)-GUIDED REFINEMENT. (RQ3)                                              SATORI              RBCTest                 DUALMINE
+           Full DUALMINE            w/o DV              w/o CE                     API            In    Out  Eff.      In    Out  Eff.     In    Out  Cache  Eff.
+Datasets      TP  FP  P (%)      TP    FP  P (%)      TP  FP  P (%)   Refined      Canada      27.8      3.7   1.1   20.0      3.1   1.9497.2    23.9        4.0   0.1
+Canada        64    0      100    62      4        94 63    1        98   0        GitLab       458    66.4      1  630.3    88.5   0.4 179.5  340.7      26.1   1.9
+GitLab     1,009  50        95 1,357  358        791,009  50        95   30        GitHub     298.3    44.9   0.4   170.8    17.2   0.8 120.1  117.4      50.1   1.5
+GitHub       399  17        96  473    75        86  398  18        96   35        OMDb        16.7      2.6   0.5   29.0      3.3   0.2  4.3      1.4        1.5   3.3
+OMDb          22    0      100    25      0      100  22    0      100    0        Spotify     42.7      5.9   0.9   74.0      8.1   0.4 21.7    16.0        6.2   2.3
+Spotify      102    1        99 120    11        92  102    1        99  13        Yelp          21      2.7   0.5    1.4      0.2   0.0 12.1    12.2      12.3   0.7
+Yelp          20    0      100    32      2        94 20    0      100    1        YouTube    102.4    16.5   0.4   171.2    21.3   0.5 139.8  150.4      22.9   0.5
+YouTube      173  13        93  195    29        87  174  12        94    9        Total      966.8  144.7   0.8  1096.5  141.6   0.5   974.7  662.0    123.1   1.1
+Total      1,789  81        96 2,264  479        831,788  82        96   88
+
+the full version retains 78.1% of the valid constraints while                      the Refined column of Table IV, CE improves the specificity
+eliminating most false positives. This tradeoff also motivates                     of 88 constraints, with the largest numbers on GitHub (35),
+the counterexample-guided refinement, which aims to special-                       GitLab  (30),  Spotify  (13),  and  YouTube  (9).  These  results
+ize valid constraints that remain unresolved after validation.                     show that TP/FP alone underestimates the value of CE because
+   The  benefit  of  dual  validation  varies  across  APIs.  The                  two constraints may both be counted as true positives even
+largest gain occurs on GitLab, where false positives drop from                     when one is more precise and useful as a test oracle.
+358 to 52 and precision improves from 79% to 95%. This                                For the GitLab endpoint GET /projects/id/repository/
+                                                                                   branches,  the  w/o  CE  variant  infers  only:  isSubstring
+suggests that GitLab produces many plausible but unsupported                       (commit.short_id,  commit.id).     After     counterexample-
+constraints, likely because its richer repository metadata cre-                    guided refinement, the full version strengthens this constraint
+ates more opportunities for both documentation-induced and                         by adding the missing SHA-format predicates for both fields:
+trace-induced false positives. Dual validation also improves                             and(
+precision on GitHub, Spotify, Yelp, and YouTube, showing                                 isRegex(commit.id,  ’ˆ[a-f0-9]{40}$’),
+that the effect is not limited to one API.                                               isRegex(commit.short_id,  ’ˆ[a-f0-9]{7,8}$’),
+   Most  rejected  constraints  stem  from  limitations  of  the                         isSubstring(commit.short_id,  commit.id)
+                                                                                         )
+individual  mining  sources.  Specification-derived  constraints                   Thus, CE converts a valid but incomplete relationship into a
+may  originate  from  incomplete  or  outdated  documentation                      more informative oracle that captures both the containment
+that    does    not    accurately    reflect    the    implementation,             relation and the expected commit-hash formats.
+while  runtime-derived  constraints  may  result  from  limited                       The results also reveal a limitation. Because CE refines con-
+execution  diversity,  causing  coincidental  patterns  in  traces                 straintsusingadditionalgeneratedexecutions,itmayoccasion-
+to  be  misidentified  as  genuine  invariants.  For  example,                     ally introduce or retain a constraint that is later judged false,
+runtime   mining   may   infer   contains(["Apache  License                        as reflected by the small FP difference on YouTube. That is,
+2.0",  "MIT  License"],  return[].license.name)           for                      the refined constraints might not always be correct. However,
+GitHub_GetOrganizationRepositories because all observed                            this effect is minor in aggregate: the full version preserves the
+repositories happen to use one of these licenses. However,                         same overall precision as w/o CE while producing substan-
+GitHub  repositories  can  be  distributed  under  many  other                     tially more precise constraints for 88 properties. Overall, CE
+licenses, making the inferred constraint a sampling artifact.                      complementsdualvalidationbyimprovingconstraintquality.
+C. Counterexample (CE)-Guided Refinement (RQ3)
+   To evaluate the contribution of counterexample-guided re-                       D. Cost-Effectiveness Analysis (RQ4)
+finement, we compare the full version of DUALMINE with a                              To  evaluate  the  efficiency  of  LLM  token  usage,  we  de-
+variant that disables CE while keeping hybrid mining and dual                      fine Constraint Efficiency  =              # TP(Token Usage)/1k.  A  higher  value
+validation unchanged. Table IV shows that CE has little effect                     indicates better cost-effectiveness, demonstrating a method’s
+on coarse TP/FP-based correctness metrics. The full version                        ability to infer more correct constraints with fewer tokens.
+and the w/o CE variant both achieve 96% precision, differing                          Table  V  reports  token  consumption  and  constraint  effi-
+by only one true positive and one false positive across all                        ciency for the approaches, measured as the number of val-
+datasets. This result indicates that the dual-validation stage                     idated  constraints  discovered  per  1k  consumed  tokens.  We
+already removes more incorrect constraints before refinement.                      exclude AGORA+ because it does not use LLMs. Overall,
+   The main contribution of CE is therefore not to increase                        DUALMINE  achieves  higher  efficiency  than  RBCTest  (1.1
+the  number  of  accepted  constraints,  but  to  improve  the                     versus 0.5 constraints per 1k tokens, a 2.2× improvement)
+specificity  and  expressiveness  of  the  accepted  constraints.                  and SATORI (1.1 versus 0.8 constraints per 1K tokens). This
+By  generating  targeted  counterexamples  for  non-equivalent                     indicatesthat DUALMINE discoversmorevalidatedconstraints
+or  uncertain  constraints,  CE  can  strengthen  overly  general                  for a comparable token budget. Although it produces more
+constraints, add missing predicates, and specialize constraints                    output tokens (662.0K vs. 141.6K and 144.7), it uses fewer
+to more precise behavioral conditions. Overall, as shown in                        input tokens (974.7K vs. 1096.5K and 966.8). The additional
+
+
+
+                                                                                9
+
+===== GV-13 PDF PAGE 10 =====
+
+outputcostmainlycomesfromvalidationandcounterexample-
+guided refinement, which iteratively analyze and revise candi-
+date constraints. Despite this overhead, these stages improve
+constraint quality and yield higher efficiency. The gains are
+especially large on GitLab (1.9 vs. 0.4 and 1), OMDb (3.3
+vs. 0.2 and 0.5), and Spotify (2.3 vs. 0.4 and 0.9). While
+DUALMINE is less efficient on a few APIs such as Canada,
+the  overall  results  show  that  investing  tokens  in  validation
+produces substantially more correct constraints.
+   In terms of monetary cost, DualMine requires about $7.85,
+compared with $2.79 for RBCTest and $2.66 for SATORI.
+Thus, DualMine is 2.8× more expensive than them. However,
+the  higher  cost  is  primarily  driven  by  the  validation  and
+refinement phases, which consume additional output tokens                                    Fig. 2.  DUALMINE: Bug Category Distribution
+to verify candidate constraints and generate counterexamples.
+This extra investment leads to substantially higher constraint                 their isUrl and isNumber constraints. The Composite category
+correctnessandefficiencyacrossmostAPIs,indicatingthatthe                       identifies violations across multiple fields, e.g., updated_at
+increased token cost is a trade-off that improves the reliability              >=  created_at. Other categories, including Value-In-Range,
+and practical usefulness of the mined constraints  1                           isUrl, DefaultValue, isDate, and Value-In-Set, capture in-
+E. Fault Detection (RQ5)                                                       valid ranges, malformed values, and external-resource failures.
+   Westudywhethertheconstraintsdiscoveredby DUALMINE                           F. Threats to Validity
+can serve as effective test oracles for detecting real API faults.                Internal Validity. The results may be affected by LLM con-
+We define a fault as a contract violation in which an API re-                  figurations, prompts, and implementation choices. To mitigate
+sponse contradicts a validated behavioral constraint supported                 this threat, we used a consistent setup across all APIs and
+by the specification, official documentation, repeated execu-                  validated our implementation and baseline integrations.
+tions, or source-level evidence when available. To avoid count-                   External  Validity.  We  evaluated  DUALMINE  on  diverse
+ing duplicate reports, we group repeated violations that share                 real-world  REST  APIs  from  the  AGORA+  and  RBCTest
+the same endpoint, response field, violated constraint, and root               benchmarks. Although the dataset spans multiple domains, the
+cause into a single fault. We distinguish two sources of fault                 findings may not generalize to atypical APIs, especially those
+discovery. In validation-time fault discovery, a specification-                with sparse documentation or limited execution traces.
+supported constraint is violated by an observed response dur-                     Conclusion Validity. The gains may depend on the selected
+ing dual validation. Such a violation is not immediately treated               benchmark, specifications, and test workloads. To strengthen
+as a false constraint. Instead, we manually inspect the violated               validity, we compared DUALMINE against multiple baselines.
+constraint, the observed response, the API documentation, and                                           VI.  RELATED WORK
+repeated executions to determine whether the violation reflects                   Prior surveys and studies highlight the growing automation
+an invalid constraint or a real contract violation. In oracle-time             in  REST  API  testing  [8],  [9],  [10],  [11],  [12],  [13],  [14],
+fault discovery, a constraint that has already passed validation               [15]. Existing approaches are broadly divided into response
+is  used  as  a  test  oracle  on  newly  executed  requests.  Any             validation, oracle generation, and AI-assisted API testing.
+response that violates such a validated constraint is reported                    Response Validation. Status-code validation checks if an
+as a candidate fault and manually confirmed using the same                     API returns the expected HTTP status and is widely used in
+evidence. We report de-duplicated faults across both sources.                  Postman [16], Katalon [17], RestTestGen [18], and KAT [19].
+   Fig. 2  shows the  distribution of  the 48  faults in  8 con-               Schema validation checks required fields and data types but
+straint  types  detected  by  DUALMINE.  Template  Literals                    cannot  verify  semantic  correctness,  so  responses  may  pass
+is the most frequent (29.2%), followed by I/O (27.1%) and                      validation while still being logically incorrect.
+Composite  (20.8%),  indicating  that  regular-expression  er-                    Oracle and Constraint Mining. Prior REST API oracle
+rors, implementation-level I/O errors, and composite valida-                   research  has  explored  metamorphic  relations  [20],  mining-
+tion  logic  account  for  the  majority  of  detected  faults.  The           based   [1], [2], [3], [4], and learning-based [21], [22], [23],
+DefaultValue category captures inconsistent default-value be-                  enabling the inference of richer correctness constraints beyond
+havior, e.g., anonymous_access_enabled is specified with a                     structural  checks.  EmRest  uses  error-message  evidence  for
+default value of true but the API returns null. The isUrl                      REST API testing [24]. Static REST analysis tools (e.g., Re-
+and isNumber categories detect contract violations, such as the                SpecTor and RESTπ) recover specifications or path-sensitive
+OMDb API returning "N/A" for Poster and Metascore despite                      API types from implementations [25], [26].
+
+
+  1GPT-5 pricing: $1.25/1M input tokens ($0.125 cached) and $10/1M output         AI-Assisted API Testing. ML/LLMs have been used for
+tokens.                                                                        API  input  generation,  dependency  reasoning,  graph-based
+
+
+
+                                                                            10
+
+===== GV-13 PDF PAGE 11 =====
+
+exploration, and specification enhancement [27], [28], [29],                                    [12]A. Sharma, M. Revathi        et al., “Automated api testing,” in2018 3rd In-
+[30],  [31],  [32],  [33],  [34],  [35],  [36],  [37],  [38].  These                                  ternational Conference on Inventive Computation Technologies (ICICT).
+methods  improve  test  generation  and  exploration,  whereas                                        IEEE, 2018, pp. 788–791.
+                                                                                                [13]B.  Marculescu,  M.  Zhang,  and  A.  Arcuri,  “On  the  Faults  Found
+we  focus  on  discovering  response-body  constraints  as  test                                      in  REST  APIs  by  Automated  Test  Generation,” ACM  Trans.  Softw.
+oracles. DUALMINE leverages APIPilot [39] as the execution                                            Eng.  Methodol.,  vol.  31,  no.  3,  Mar.  2022.  [Online].  Available:
+engine to automatically produce diverse execution traces and                                          https://doi.org/10.1145/3491038
+                                                                                                [14]A.   Martin-Lopez,   A.   Arcuri,   S.   Segura,   and   A.   Ruiz-Cortes,   “
+counterexamples.  These  runtime  artifacts  support  dynamic                                         Black-Box and White-Box Test Case Generation for RESTful APIs:
+constraint mining and iterative validation.                                                           Enemies or Allies? ,” in 2021 IEEE 32nd International Symposium on
+                                                                                                      Software Reliability Engineering (ISSRE).    Los Alamitos, CA, USA:
+                               VII.  CONCLUSION                                                       IEEE Computer Society, Oct. 2021, pp. 231–241. [Online]. Available:
+   This  paper  presented  DUALMINE,  a  hybrid  framework                                            https://doi.ieeecomputersociety.org/10.1109/ISSRE52982.2021.00034
+                                                                                                [15]F. Molina, A. Gorla, and M. d’Amorim, “Test oracle automation in the
+for automated REST API constraint discovery that combines                                             era of llms,” ACM Trans. Softw. Eng. Methodol., vol. 34, no. 5, pp.
+specification-based mining, runtime invariant mining, dual val-                                       1–24, 2025. [Online]. Available: https://doi.org/10.1145/3715107
+idation, and counterexample-guided refinement. By leveraging                                    [16]“Postman     API     Testing     Tool,”     2024.     [Online].     Available:
+                                                                                                      https://www.postman.com/
+both static and dynamic evidence, DUALMINE discovers more                                       [17]“Katalon  studio  automation  testing  tool,”  2024.  [Online].  Available:
+validconstraintswhileachievinghigherprecisionthanexisting                                             https://katalon.com/
+approaches. Our results and ablation studies demonstrate the                                    [18]E.  Viglianisi,  M.  Dallago,  and  M.  Ceccato,  “  RESTTESTGEN:
+                                                                                                      Automated  Black-Box  Testing  of  RESTful  APIs  ,”  in  2020  IEEE
+effectiveness  of  the  proposed  techniques  in  improving  the                                      13th   International   Conference   on   Software   Testing,   Validation
+quality of discovered API constraints.                                                                and    Verification    (ICST).      Los    Alamitos,    CA,    USA:    IEEE
+   Data Availability Statement. Our data and code are pub-                                            Computer   Society,   Oct.   2020,   pp.   142–152.   [Online].   Available:
+                                                                                                      https://doi.ieeecomputersociety.org/10.1109/ICST46399.2020.00024
+licly available at our website [6].                                                             [19]T.  Le,  T.  Tran,  D.  Cao,  V.  Le,  T.  N.  Nguyen,  and  V.  Nguyen,
+                                                                                                      “   KAT:   Dependency-Aware   Automated   API   Testing   with   Large
+                                   REFERENCES                                                         Language  Models  ,”  in 2024  IEEE  Conference  on  Software  Testing,
+ [1]J. C. Alonso, A. Martin-Lopez, S. Segura, G. Bavota, and A. Ruiz-                                 Verification   and   Validation   (ICST).     Los   Alamitos,   CA,   USA:
+      Cort´es,“Satori:Statictestoraclegenerationforrestapis,”inProceedings                            IEEE  Computer  Society,  May  2024,  pp.  82–92.  [Online].  Available:
+      of the 2025 Automated Software Engineering Conference, ser. ASE’25.                             https://doi.ieeecomputersociety.org/10.1109/ICST60714.2024.00017
+      ACM Press, 2025.                                                                          [20]S. Segura, J. A. Parejo, J. Troya, and A. Ruiz-Cort      ´es, “Metamorphic
+ [2]H. Huynh, Q.-T. Le, T. Nguyen, V. Nguyen, V. Nguyen, and T. N.                                    testingofrestfulwebapis,”IEEETransactionsonSoftwareEngineering,
+      Nguyen, “RBCTest: Leveraging LLMs to mine and verify oracles of                                 vol. 44, no. 11, pp. 1083–1099, 2018.
+      api response bodies for restful api testing,” in Proceedings of the 48th                  [21]E.  Dinella,  G.  Ryan,  T.  Mytkowicz,  and  S.  K.  Lahiri,  “Toga:  A
+      IEEE/ACM International Conference on Software Engineering (ICSE).                               neural method for test oracle generation,” in Proceedings of the 44th
+      ACM, 2026. [Online]. Available: https://arxiv.org/abs/2504.17287                                International Conference on Software Engineering, ser. ICSE ’22.  New
+ [3]J.  C.  Alonso,  S.  Segura,  and  A.  Ruiz-Cort    ´es,  “Agora:  Automated                      York, NY, USA: Association for Computing Machinery, 2022, pp. 2130–
+      generation  of  test  oracles  for  rest  apis,”  in  Proceedings  of  the                      2141. [Online]. Available: https://doi.org/10.1145/3510003.3510141
+      32nd  ACM  SIGSOFT  International  Symposium  on  Software  Testing                       [22]G. Wu, W. Cao, Y. Yao, H. Wei, T. Chen, and X. Ma, “Llm meets
+      and  Analysis,  ser.  ISSTA  2023.    New  York,  NY,  USA:  Association                        bounded  model  checking:  Neuro-symbolic  loop  invariant  inference,”
+      for  Computing  Machinery,  2023,  p.  1018–1030.  [Online].  Available:                        in  Proceedings  of  the  39th  IEEE/ACM  International  Conference  on
+      https://doi.org/10.1145/3597926.3598114                                                         Automated Software Engineering, ser. ASE ’24.   New York, NY, USA:
+ [4]J.  C.  Alonso,  M.  D.  Ernst,  S.  Segura,  and  A.  Ruiz-Cort    ´es,  “Test                   Association for Computing Machinery, 2024, pp. 406–417. [Online].
+      oracle  generation  for  REST  APIs,”  ACM  Transactions  on  Software                          Available: https://doi.org/10.1145/3691620.3695014
+      Engineering and Methodology, vol. 35, no. 1, 2025. [Online]. Available:                   [23]S.  Chakraborty,  S.  Lahiri,  S.  Fakhoury,  A.  Lal,  M.  Musuvathi,
+      https://doi.org/10.1145/3726524                                                                 A.  Rastogi,  A.  Senthilnathan,  R.  Sharma,  and  N.  Swamy,  “Ranking
+ [5]E. Clarke, O. Grumberg, S. Jha, Y. Lu, and H. Veith, “Counterexample-                             llm-generated  loop  invariants  for  program  verification,”  in Findings
+      guided   abstraction   refinement   for   symbolic   model   checking,”  J.                     of  the  Association  for  Computational  Linguistics:  EMNLP  2023.
+      ACM,   vol.   50,   no.   5,   pp.   752–794,   2003.   [Online].   Available:                  Singapore:   Association   for   Computational   Linguistics,   2023,   pp.
+      https://doi.org/10.1145/876638.876643                                                           9164–9175. [Online]. Available: https://aclanthology.org/2023.findings-
+ [6]“Dualmine,”                  2026.                  [Online].                  Available:         emnlp.614
+      https://anonymous.4open.science/r/dualmine                                                [24]L. Xu, H. Wu, Z. Pan, T. Xu, S. Wang, X. Niu, and C. Nie, “Effective
+ [7]Z. Ji, N. Lee, R. Frieske, T. Yu, D. Su, Y. Xu, E. Ishii, Y. J. Bang,                             rest  apis  testing  with  error  message  analysis,”  Proc.  ACM  Softw.
+      A. Madotto, and P. Fung, “Survey of hallucination in natural language                           Eng.,  vol.  2,  no.  ISSTA,  pp.  1978–2000,  2025.  [Online].  Available:
+      generation,”  ACM  Comput.  Surv.,  vol.  55,  no.  12,  2023.  [Online].                       https://doi.org/10.1145/3728964
+      Available: https://doi.org/10.1145/3571730                                                [25]R. Huang, M. Motwani, I. Martinez, and A. Orso, “Generating rest api
+ [8]M. Kim, Q. Xin, S. Sinha, and A. Orso, “Automated test generation                                 specifications through static analysis,” inProceedings of the IEEE/ACM
+      for  rest  apis:  no  time  to  rest  yet,”  in  Proceedings  of  the  31st                     46th International Conference on Software Engineering, ser. ICSE ’24.
+      ACM  SIGSOFT  International  Symposium  on  Software  Testing  and                              New  York,  NY,  USA:  Association  for  Computing  Machinery,  2024.
+      Analysis,   ser.   ISSTA   2022.     New   York,   NY,   USA:   Association                     [Online]. Available: https://doi.org/10.1145/3597503.3639137
+      for  Computing  Machinery,  2022,  p.  289–301.  [Online].  Available:                    [26]M. W. Aldrich, K. H. Levin, M. Coblenz, and J. S. Foster, “Restpi:
+      https://doi.org/10.1145/3533767.3534401                                                         Path-sensitive type inference for rest apis,” Proc. ACM Program. Lang.,
+ [9]A. Golmohammadi, M. Zhang, and A. Arcuri, “Testing restful apis: A                                vol. 9, no. OOPSLA2, pp. 144–165, Oct. 2025. [Online]. Available:
+      survey,” ACM Trans. Softw. Eng. Methodol., vol. 33, no. 1, Nov. 2023.                           https://doi.org/10.1145/3763055
+      [Online]. Available: https://doi.org/10.1145/3617175                                      [27]S. Gu, N. Nashid, and A. Mesbah, “Llm test generation via iterative
+[10]A. Ehsan, M. A. M. Abuhaliqa, C. Catal, and D. Mishra, “Restful api                               hybrid  program  analysis,”  in  Proceedings  of  the  IEEE/ACM  48th
+      testing methodologies: Rationale, challenges, and solution directions,”                         International  Conference  on  Software  Engineering,  ser.  ICSE  ’26.
+      Applied Sciences, vol. 12, no. 9, p. 4369, 2022.                                                New  York,  NY,  USA:  Association  for  Computing  Machinery,  2026.
+[11]A. Martin-Lopez, S. Segura, and A. Ruiz-Cort      ´es, “Online testing of                         [Online]. Available: https://doi.org/10.1145/3744916.3764553
+      restful  apis:  promises  and  challenges,”  in  Proceedings  of  the  30th
+      ACM Joint European Software Engineering Conference and Symposium
+      on  the  Foundations  of  Software  Engineering,  ser.  ESEC/FSE  2022.
+      New York, NY, USA: Association for Computing Machinery, 2022, p.
+      408–420. [Online]. Available: https://doi.org/10.1145/3540250.3549144
+
+                                                                                            11
+
+===== GV-13 PDF PAGE 12 =====
+
+[28]P.  Godefroid,  N.  Klarlund,  and  K.  Sen,  “Dart:  Directed  automated                     [34]M.  Kim,  T.  Stennett,  D.  Shah,  S.  Sinha,  and  A.  Orso,  “Leveraging
+      random testing,” inProceedings of the 2005 ACM SIGPLAN Conference                                  large language models to improve REST API testing,” in Proceedings
+      on Programming Language Design and Implementation, ser. PLDI ’05.                                  of  the  2024  ACM/IEEE  44th  International  Conference  on  Software
+      New York, NY, USA: Association for Computing Machinery, 2005, pp.                                  Engineering: New Ideas and Emerging Results, ser. ICSE-NIER ’24.
+      213–223. [Online]. Available: https://doi.org/10.1145/1065010.1065036                              Association  for  Computing  Machinery,  2024,  pp.  37–41.  [Online].
+[29]R. Majumdar and K. Sen, “Hybrid concolic testing,” in       Proceedings of                           Available: https://doi.org/10.1145/3639476.3639769
+      the 29th International Conference on Software Engineering, ser. ICSE                        [35]M. Kim, T. Stennett, S. Sinha, and A. Orso, “A multi-agent approach
+      ’07.    Washington, DC, USA: IEEE Computer Society, 2007, pp. 416–                                 for  rest  api  testing  with  semantic  graphs  and  llm-driven  inputs,”
+      426.                                                                                               in  Proceedings  of  the  IEEE/ACM  47th  International  Conference  on
+[30]C.  Csallner,  N.  Tillmann,  and  Y.  Smaragdakis,  “Dysy:  Dynamic                                 SoftwareEngineering,ser.ICSE’25.  IEEEPress,2025,pp.1409–1421.
+      symbolic  execution  for  invariant  inference,”  in  Proceedings  of  the                         [Online]. Available: https://doi.org/10.1109/ICSE55347.2025.00179
+      30th International Conference on Software Engineering, ser. ICSE ’08.                       [36]M.  Kim,  S.  Sinha,  and  A.  Orso,  “Llamaresttest:  Effective  rest  api
+      New York, NY, USA: Association for Computing Machinery, 2008, pp.                                  testing with small language models,”Proc. ACM Softw. Eng., vol. 2, no.
+      281–290. [Online]. Available: https://doi.org/10.1145/1368088.1368127                              FSE, Jun. 2025. [Online]. Available: https://doi.org/10.1145/3715737
+[31]J. C. Alonso, A. Martin-Lopez, S. Segura, J. M. Garcia, and A. Ruiz-                          [37]C. Wen, J. Cao, J. Su, Z. Xu, S. Qin, M. He, H. Li, S.-C. Cheung,
+      Cortes,“Arte:Automatedgenerationofrealistictestinputsforwebapis,”                                  and  C.  Tian,  “Enchanting  program  specification  synthesis  by  large
+      IEEETransactionsonSoftwareEngineering,vol.49,no.1,pp.348–363,                                      language  models  using  static  analysis  and  program  verification,”  in
+      2022.                                                                                              Computer Aided Verification: 36th International Conference, CAV 2024,
+[32]V. Atlidakis, P. Godefroid, and M. Polishchuk, “RESTler: stateful REST                               Montreal, QC, Canada, July 24–27, 2024, Proceedings, Part II, ser.
+      API fuzzing,” in Proceedings of the 41st International Conference on                               CAV  ’24.    Berlin,  Heidelberg:  Springer-Verlag,  2024,  pp.  302–328.
+      Software Engineering, ser. ICSE ’19.    IEEE Press, 2019, p. 748–758.                              [Online]. Available: https://doi.org/10.1007/978-3-031-65630-9                16
+      [Online]. Available: https://doi.org/10.1109/ICSE.2019.00083                                [38]D.  Saha,  D.  Sondhi,  S.  Haldar,  and  S.  Sinha,  “Rest  api  functional
+[33]Y.  Liu,  Y.  Li,  G.  Deng,  Y.  Liu,  R.  Wan,  R.  Wu,  D.  Ji,  S.  Xu,                          tester,”   in   Proceedings   of   the   18th   Innovations   in   Software
+      and M. Bao, “Morest: model-based restful api testing with execution                                Engineering  Conference,  ser.  ISEC  ’25.     New  York,  NY,  USA:
+      feedback,”  in  Proceedings  of  the  44th  International  Conference  on                          Association  for  Computing  Machinery,  2025.  [Online].  Available:
+      Software Engineering, ser. ICSE ’22.  New York, NY, USA: Association                               https://doi.org/10.1145/3717383.3717388
+      for  Computing  Machinery,  2022,  p.  1406–1417.  [Online].  Available:                    [39]“Apipilot,”2025.[Online].Available:https://github.com/vnkata/APIPilot
+      https://doi.org/10.1145/3510003.3510133
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                              12

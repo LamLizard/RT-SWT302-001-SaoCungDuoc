@@ -1,0 +1,55 @@
+{
+  "pages_read": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "factors": {
+    "P": {
+      "sign": "·",
+      "reason": "Demo sinh calculator.py và Python unittest từ requirement PDF. API endpoint/OAI_CONFIG_LIST là cấu hình gọi LLM, không REST API SUT của nghiên cứu.",
+      "locator": "§3/PDF2; AppendixA.1–A.6/PDF5–6",
+      "confidence": "high"
+    },
+    "I": {
+      "sign": "·",
+      "reason": "TCGA/TCMA/TCVA sinh/sửa/validate tests và cả implementation. Paper nói edge cases ở discussion nhưng không đặc tả hay thí nghiệm EP/BVA, partitions hoặc boundary request generator.",
+      "locator": "§3/PDF2; §4/PDF2–3; §5/PDF4; AppendixA.4–A.6/PDF6",
+      "confidence": "high"
+    },
+    "C": {
+      "sign": "·",
+      "reason": "§4 và appendix chỉ mô tả setup, agents và vòng sửa đến pass; không báo thí nghiệm có random/fuzz comparator. Temperature điều khiển randomness của LLM không phải một nhánh đối chứng.",
+      "locator": "§4/PDF2–3; AppendixA.2–A.6/PDF5–6",
+      "confidence": "high"
+    },
+    "O": {
+      "sign": "·",
+      "reason": "§4 nêu định tính high coverage/adaptability; Figs1–2 là workflow, không có mutation score, distinct bugs/failures yield hoặc bảng kết quả định lượng. Pass/fail của generated tests và sửa cả SUT không đủ chứng minh fault detection.",
+      "locator": "§3/Fig1/PDF2; §4/Fig2/PDF3; §5/PDF4; AppendixA.5–A.6/PDF6",
+      "confidence": "high"
+    }
+  },
+  "notes": [
+    "Giữ···· sau đọc phương pháp/evaluation/appendix. Không suy độ chắc từ câu quảng bá abstract."
+  ],
+  "visual_checks": [
+    {
+      "page": 3,
+      "file": "tmp\\pdfs\\pico-review-2026-10-20\\root-renders\\GV-17-p3.png",
+      "finding": "§4 chỉ mô tả định tính vàFig2 workflow; không bảng results."
+    }
+  ],
+  "id": "GV-17",
+  "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\59-GV-17-Intelligent-Test-Automation.pdf",
+  "old_signs": {
+    "P": "·",
+    "I": "·",
+    "C": "·",
+    "O": "·"
+  },
+  "changes": []
+}

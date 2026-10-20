@@ -81,3 +81,21 @@
 - **Hiệu chỉnh có nguồn:** GV-03 giữ issue year 2025 (đầu vào ghi 2024); GV-01 tách issue 2025/online 2026; GV-15 dùng 39 endpoints/7 services theo thân bài; GV-19 chưa thấy kết quả định lượng đáp ứng IC-E. Phân biệt program mutants với input/response mutation và các metric proxy.
 - **Phạm vi:** bổ sung nền vào bảng Lâm trên nhánh `Lam`; chưa đổi 42 paper đã screening, PRISMA, CSV hoặc RQ. Nguồn ABS/META không tự coi đã qua V2. Nguồn ngoài IC-Y/IC-P/IC-I vẫn được giữ với nhãn nền theo chỉ định, chưa tự nới protocol.
 - **Khử trùng:** đối chiếu DOI/arXiv đầu vào với bảng gộp hiện tại không thấy trùng dòng chính; RESTestBench, RESTOR và Prompt-Based đã có bản PDF/tài liệu RBL-2 ở Tùng, phải gộp thành một paper khi tích hợp tiếp.
+
+## 8. Đối chiếu lại 17 PDF người phụ trách tải về — 20/10/2026
+
+- **Đầu vào:** 17 file hiện có trong `Paper-source`, số #43–#59. Khớp tên/tác giả/DOI hoặc arXiv với danh sách 20 bài, không dùng tên file làm bằng chứng duy nhất. Đọc lại phương pháp, số liệu và hạn chế; render và xem các bảng cần kiểm cột/đơn vị của AGORA+, Nüwa, IoT và Crowdsourced.
+- **Trạng thái mới:** **17 FT + 2 ABS + 1 META**. Nâng GV-07 (AGORA+), GV-13 (Nüwa), GV-16 (Crowdsourced), GV-17 (IoT) từ ABS sang FT. Còn thiếu PDF GV-01/GV-03/GV-20; các mức 13/6/1 tại §7 là lịch sử lượt đầu.
+- **Hiệu chỉnh chính:** AGORA+ precision 68%/80% tương ứng 50/10K calls, 32 bugs có 17 confirmed; Meta ACH 31.677 generated và 9.095 buildable mutants; Nüwa tách 55 reported bugs ở bug-finding khỏi số 56 ở phép so Table II. IoT ghi đúng time-to-first-crash qua 3 lần, không suy thành số unique bugs; Crowdsourced ghi QWK theo app/dimension và giới hạn reference tree/taxonomy dùng chung.
+- **Metadata/artifact:** RESTOR PDF có DOI 10.1145/3832185 và PACMSE/ISSTA October 2026; bổ sung link paper dẫn cho RESTCov, ArrayDiff, Nüwa, DualMine và YAKUSU. How Far PDF dẫn Zenodo 21102431, khác record 21295460 đã tìm trên web; ghi rõ khác biệt, chưa tự gán quan hệ phiên bản. METFORD local vẫn là preprint; ITA local 9 trang vẫn chưa có kết quả định lượng IC-E.
+- **PICO:** chấm lại 4 bài mới có toàn văn; Nüwa C✓ theo rubric rộng (random syntax generator cùng 24h), không coi là uniform REST input. Giữ tách biệt output/input mutations với killed source-code mutants; RQ ban đầu không đổi.
+- **Tệp cập nhật:** `evidence-table.md` (22 dòng, 17 link PDF local), `teacher-papers-audit.md` (mapping và locator từng file), nhật ký này. Không nhập thêm paper vào tập 42/PRISMA; không thay tên/nội dung PDF hoặc thao tác Git commit/push.
+
+## 9. Loại nguồn không có PDF và đổi tên file — 20/10/2026
+
+- **Yêu cầu người phụ trách:** không tải được PDF được coi là không đọc được, bỏ khỏi evidence table; đổi tên các bài đọc được để map bảng Lâm.
+- **Loại 3 nguồn khỏi tập hiện hành:** Software Testing on Microservices-Based Systems: A Systematic Literature Review and Thematic Analysis (vị trí gốc 1 / mã cũ GV-01); Evaluating large language models for software testing (vị trí gốc 3 / mã cũ GV-03); Research on Software Fault Injection Testing Technology (vị trí gốc 20 / mã cũ GV-20). Lý do chung: không có toàn văn PDF local, tương ứng không tiếp tục dùng bằng chứng abstract/metadata; không kết luận các bài không liên quan.
+- **Tập còn lại:** 17 bài GV có toàn văn; bảng Lâm **19 dòng = 2 ACM cũ + 17 GV**, không giữ hàng ABS/META/chờ tải. RQ không đổi.
+- **Mã mới:** GV-01–GV-17 liên tục theo thứ tự các bài còn lại. Các mã GV trong §7–8 là mã lịch sử theo danh sách 20 nguồn, không phải mã hiện hành. Mapping vị trí gốc ↔ mã mới ↔ dòng Lâm ↔ PDF được ghi ở `teacher-papers-audit.md`.
+- **Tên PDF mới:** `43-GV-01-YAKUSU.pdf` đến `59-GV-17-Intelligent-Test-Automation.pdf`, theo đúng thứ tự dòng #3–#19 của evidence table. Chỉ đổi tên 17 PDF bổ sung trong Paper-source; xác minh SHA256 trước/sau khớp toàn bộ, không thay nội dung PDF. Giữ các file #01–#42.
+- **Đồng bộ:** sửa link PDF và các tham chiếu mã hiện hành trong evidence table/audit; bỏ bảng lịch sử web khỏi audit hiện hành, giữ lịch sử thao tác ở nhật ký này. Không đổi tập 42/PRISMA hoặc commit/push.

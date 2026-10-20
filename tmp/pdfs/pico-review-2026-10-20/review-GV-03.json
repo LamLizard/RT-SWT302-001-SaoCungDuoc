@@ -1,0 +1,15 @@
+{
+  "id": "GV-03",
+  "pdf": "Paper-source/45-GV-03-Prompt-Based-REST-API-Amplification.pdf",
+  "pages_read": [1, 2, 3, 4, 5, 6, 7],
+  "factors": {
+    "P": {"sign": "·", "reason": "SUT thực nghiệm là microservice warehouse-management độc quyền của công ty logistics, sáu endpoints bị ẩn đường dẫn vì bảo mật; PetStore mã mở thuộc nghiên cứu trước, không phải evaluation subject hiện tại.", "locator": "§3.1–3.3/PDF2–3; Table1/PDF3", "confidence": "high"},
+    "I": {"sign": "◐", "reason": "Prompt amplification yêu cầu thêm tests cho boundary conditions, erroneous inputs và alternative paths từ seed happy-path; có can thiệp gần biên/invalid domain nhưng không thiết kế EP+BVA chính hay thí nghiệm kết hợp riêng.", "locator": "§4.1/PDF3–4; §5.1/PDF4", "confidence": "high"},
+    "C": {"sign": "·", "reason": "Đối chiếu baseline suite với ba prompt designs; không có random/fuzz generation comparator. So ngữ cảnh industrial và nghiên cứu PetStore trước cũng không phải random arm.", "locator": "§4.1/PDF3–4; Tables2–3/PDF5", "confidence": "high"},
+    "O": {"sign": "·", "reason": "Kết quả đo structural API coverage, số tests generated/executable/merged và edited LoC. Observations/anomalies tại§5.3 là định tính, chủ yếu helper methods/state/flakiness/auth/tooling; không báo distinct detected bugs/mutants. §7.3 và kết luận chỉ rõ coverage chưa đo fault detection và để fault-detection adequacy cho future work.", "locator": "§4.3/PDF4; Tables2–3 và§5.3/PDF5–6; §7.3,§8/PDF7", "confidence": "high"}
+  },
+  "old_signs": {"P": "·", "I": "◐", "C": "·", "O": "·"},
+  "changes": [],
+  "notes": ["Đây là arXiv/preprint có ACM template placeholders trên trang1; metadata quality không thay đổi điểm PICO.", "Không dùng lời giới thiệu revealing anomalies để nâng O khi phần kết quả không đo fault-detection outcome."],
+  "visual_checks": []
+}

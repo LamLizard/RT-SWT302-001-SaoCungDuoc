@@ -1,0 +1,15 @@
+{
+  "id": "GV-01",
+  "pdf": "Paper-source/43-GV-01-YAKUSU.pdf",
+  "pages_read": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "factors": {
+    "P": {"sign": "·", "reason": "SUT là các ứng dụng Android có mã nguồn trên GitHub và bug reports; giao diện UI/Espresso là đối tượng kiểm thử, không phải REST SUT hoặc RESTestBench.", "locator": "§3/PDF3–7; §4 và §5.1/PDF7", "confidence": "high"},
+    "I": {"sign": "·", "reason": "Phương pháp chính dùng ontology, NLP và tìm kiếm ánh xạ abstract steps sang UI actions. Không triển khai EP/BVA, phân hoạch miền hoặc kiểu giá trị input. Random UI actions chỉ lấp bước thiếu trong bug report.", "locator": "§3.1–3.3/PDF3–7; Algorithm2/PDF6", "confidence": "high"},
+    "C": {"sign": "·", "reason": "Đánh giá effectiveness và thời gian chạy của Yakusu trên các bug reports đã tái hiện thủ công; không có nhánh đối chứng random/fuzz. Chọn issue ngẫu nhiên và random actions nội bộ không phải comparator.", "locator": "§5.1/PDF7; §5.2/PDF8–9; Table1/PDF9", "confidence": "high"},
+    "O": {"sign": "◐", "reason": "Tái hiện thành công 37/62 issues thực tế; xác minh hành động và stack trace thủ công. Đây là bug/failure reproduction, không phải mutation score hay program mutants.", "locator": "§5.2.1/PDF8; Table1/PDF9", "confidence": "high"}
+  },
+  "old_signs": {"P": "·", "I": "·", "C": "·", "O": "◐"},
+  "changes": [],
+  "notes": ["12/37 issues thành công chỉ cần khởi chạy ứng dụng; Table1 trình bày25 trường hợp không tầm thường.", "Không có LLM: đây là NLP/program-analysis tool; không suy I từ mọi phép phân loại abstract steps."],
+  "visual_checks": []
+}

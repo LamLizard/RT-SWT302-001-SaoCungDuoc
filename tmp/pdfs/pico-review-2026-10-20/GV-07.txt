@@ -1,0 +1,1480 @@
+
+
+===== GV-07 PDF PAGE 1 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing
+of Array Programming Frameworks
+
+ZHICHAO ZHOU,              ShanghaiTech University, China
+JINGZHU HE∗,ShanghaiTech University, China
+
+Arrayprogramming (AP)frameworks (e.g.,NumPyand Octave)are widelyadoptedinscientific computing.
+Critical defects can jeopardize the entire ecosystem. The stability of API designs enables differential testing
+on various implementations (e.g., two versions). However, two primary obstacles remain. First, current
+test generation cannot effectively generate valid inputs, as the APIs (e.g., matrix multiplication) have type
+constraints and semantic requirements. Second, unit testing approaches test APIs independently, but they
+shareacoreN-dimensionalarraystructure(ndarray)asinputs.ModifyingoneAPImayalterthendarray’s
+properties,breakingthecorrectnessofothers.Weproposeadifferentialtestingtoolforarrayprogramming,
+calledArrayDiff. We first collect semantic requirements from NumPy’s APIs and leverage LLMs to transfer
+NumPy’srequirementstootherframeworks.Then,weproposeaninput-requirement-awareAPIcallgenerator
+(IRA-ACG).BasedonIRA-ACG,ArrayDiffemployssearchalgorithmstoevolvetestswhileensuringvalid
+inputs. ArrayDiff can generate valid and complex API call sequences to detect potential differences. We
+evaluate ArrayDiff and its ablation versions on five AP pairs. They detect 47 valid-input differences and
+39 invalid ones, with 23 confirmed as bugs or document issues. IRA-ACG boosts the detection of valid-input
+differences, which constitute most confirmed bugs. Comparing ArrayDiff with TitanFuzz (LLM-based
+fuzzer) andGhostwriter(unit tester) confirms the benefits of IRA-ACG and sequence-level testing.
+CCSConcepts:•Softwareanditsengineering→Softwaretestinganddebugging; Search-based software
+engineering.
+Additional Key Words and Phrases: array, random algorithm, genetic algorithm, differential testing
+ACMReferenceFormat:
+ZhichaoZhouandJingzhuHe.2026.LLM-AssistedInput-Requirement-AwareDifferentialTestingofArray
+ProgrammingFrameworks. Proc. ACM Softw. Eng.3,FSE,ArticleFSE155(July2026),24pages.https://doi.org/
+10.1145/3808162
+
+1   Introduction
+                                           Arrayprogramming(AP)offersapowerfulandexpressivesyntax
+
+ 1     importnumpyasnp                     for manipulating data in multi-dimensional arrays [33]. Frame-
+
+ 2     v1=np.ones(            16,  dtype="int64")works like NumPy [33], Matlab [52], and Octave [53] leverage
+ 3     v2=np.reshape(v1,  (            4,  4))this paradigm to provide high-level abstractions for scientific
+ 4     print(np.trace(v2))#  output:  4
+                                           computing. They are essential to various domains [33] such as
+    Fig. 1. A NumPy Example.               deep learning [46, 60] and astronomy [65]. Their key data struc-
+                                           ture is the N-dimensional array (a.k.a., ndarray). An ndarray is
+                                           a container of a specific shape that contains dataof a particular
+scalar type (dtype). They provide diverse APIs for the ndarray, such as creation, manipulation, and
+
+∗Jingzhu He is the corresponding author.
+
+Authors’Contact Information:Zhichao Zhou, ShanghaiTechUniversity, Shanghai, China,zhouzhch@shanghaitech.edu.cn;
+Jingzhu He, ShanghaiTech University, Shanghai, China, hejzh1@shanghaitech.edu.cn.
+
+
+
+This work is licensed under a Creative Commons Attribution 4.0 International License.
+© 2026 Copyright held by the owner/author(s).
+ACM 2994-970X/2026/7-ARTFSE155
+https://doi.org/10.1145/3808162
+
+
+                                       Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 2 =====
+
+FSE155:2                                                                                                                                     Zhichao Zhou and Jingzhu He
+
+mathematical operations. Fig.1provides an examplewith NumPy. Itcreates a 1-D ndarraywhose
+dtypeis integer,reshapesitto amatrix,andcomputes thediagonalsum.Due totheirfundamental
+role in numerical computation, even a single defect can have a critical impact on the scientific
+computing ecosystem. A particular API difference between two implementations (for example,
+twoversions)canbeaseverebug[15,64].Itinspiresustoperformdifferentialtesting[20,64],i.e.,
+comparing outputs of two implementations under identical tests to detect potential defects.
+   Typically, the differences comefrom three major parts.First, continuous updates of theseframe-
+worksmayintroducedifferences(e.g.,bugsandAPIchanges).Second,aframework’ssameversion
+runs ondifferent CPU architectures(e.g., AMD andARM), which couldbehave differently dueto
+not fully masking architectural discrepancies. Third, several API-compatible libraries are proposed
+to exploit specific data-parallel devices like GPUs. For example,CuPy(compatiblewith NumPy)
+offers improved performance via NVIDIA GPUs. A critical factor for migrating developers is that
+theselibraries’functionalitiesshouldbehaveascloselyaspossibletotheoriginalframework.Mean-
+while,developersneedtoknowtheinherentdifferencesbetweenthem(e.g.,differentreactionsto
+undefined behaviors) to ensure that their programs behave correctly after migration.
+                                                   To be compatible with the origin, API-compatible li-
+
+ 1     importcupyascp                           braries’ maintainers have adopted differential testing in
+
+ 2     #out triggers an unexpected exception    their manual unit tests. However, the array framework
+ 3     cp.nanargmin(a,  out=b)                  providesnumerous APIsto deliverdiversefunctionalities,
+ 4     #CuPy  's  manual  test:
+ 5     data=random_array()                      each of which may contain several optional parameters
+ 6     #without  out                            to provide fine-grained customization. Manually testing
+ 7     a=np.nanargmin(np.array(data))
+ 8     b=cp.nanargmin(cp.array(data))           such complex logic is tedious and a heavy burden, calling
+ 9     assert_array_equal(a,  b)                for automated testing to bridge the gap. Fig.2provides an
+                                                example: a CuPy previously unknown exception detected
+Fig.2.CuPy-8782:Anexceptiondetected             by ourtool,ArrayDiff. Itcalls nanargminto geta’s mini-
+byArrayDiffinnanargminwiththeinef-              mumvalue’sindexwithanoptionalparameterout=btoset
+fectual manual test.                            theresultinbinsteadofreturningit.However,nanargmin
+                                                incorrectly swaps out with another optional parameter
+dtype for calling an innerfunction, and a crash happens due toa type error. CuPy’smanual test
+(Lines4-9)misses thisbugbecauseitonly compares nanargmin withdefaultparameters(out and
+dtypeas None), failing to exhaustively explore program behaviors.
+
+1.1   Challenges and Our Approach
+We aimtoautomaticallydetectdifferencesbetweenAP framework implementations.Thesediffer-
+ences include implementation bugs and inherent differences (e.g., numerical errors).
+   CurrenttestingtechniquesforAPframeworksfacetwoprimarychallenges.First,theystruggle
+togeneratevalidinputs thattriggercomprehensiveprogrambehaviors.Array APIsimposestrict
+semantic requirements beyond basic language grammar and type constraints. For example, the
+matmuloperationnecessitates(𝑚×𝑛) and(𝑛×𝑝) dimensioncompatibility.Whilegrammar-based
+fuzzers[26,71]generateinputswithagrammar-basedspecificationandautomatedtestgeneration
+tools [21, 47, 57] ensure type correctness, they lack the domain-specific knowledge required to
+satisfythesesemanticconstraints,leadingtoinvalidtests.Toaddressthischallenge,TitanFuzz[13],
+which tests deep learning libraries with many array operations, employs LLMs to generate inputs;
+however, its evaluation shows that the validity rate is only about 40%, which is confirmed by our
+experiment. The second challenge is that many tools create tests for each API independently (i.e.,
+unittesting)[14,41,47,49,77].However,APframeworks’primarycharacteristicisthatmostAPIs
+use ndarraysas input/output.Modifying one APImay modifythe ndarray’s properties,breaking
+other API’s correctness.Hence, they could missmany bugs caused by chainedAPI sequences [13].
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 3 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                        FSE155:3
+
+
+
+ 1     importnumpyasnp                                          1     #(1)  Pynguin  's  generated  test  for  diagflat:
+ 2     #(1)  diagflat  's  expected  behavior:                  2     none_type_0=                        None
+ 3     a=np.array(          1.)#  a:  1.                        3     diagflat(none_type_0)
+ 4     print(np.diagflat(a).shape)#  output:  (1,1)             4     #(2)  Ghostwriter  's  generated  test  for  diagflat:
+ 5     #(2)  ArrayDiff  's  generated  test:                    5     @given  (v=arrays(dtype=dtypes(),  shape=shapes()),
+ 6     a=np.var(np.array([                        1,3]))#  a:  1.6     k=integers()):
+ 7     print(np.diagflat(a).shape)#  output:()                  7             diagflat(v,  k)
+
+                  (a) Bug reproduction.                               (b) Tests of PynguinandGhostwriter.
+
+       Fig. 3.NumPy-27783detected by                        ArrayDiff: Violatediagflatcontract that the output is 2-D.
+
+
+
+
+Input-requirement-awareAPIcallgeneration: To address the first challenge, we propose an
+LLM-assisted procedureto gather input semanticsbeyond type constraintsfor an AP framework’s
+APIs. Asemanticrequirement defines aninput condition onthe shapes of ndarraysand the values
+of non-ndarray parameters. Then, we propose an input-requirement-aware API call generator
+(IRA-ACG) to generate API calls with inputs satisfying the collected requirements for a test. Its
+general process is (1) pick an array API to call; (2) attempt to select an existing ndarray from the
+test that satisfies the requirements of the ndarray-type parameter, and generate a valid concrete
+value for the scalar-type parameter; (3) and infer the output ndarray’s shape and save it as the
+input candidate forfuture call generation. Theshape inference is basedon the API semanticsand
+doesnotrequiredynamicexecution.Hence,IRA-ACGcanbeexecutedmultipletimescontinuously
+to generate complex API call sequences without runtime information.
+APIcallsequencegeneration:Toovercomethesecondchallenge,weemployasearchalgorithm
+(e.g., feedback-directed random algorithm [57] and genetic algorithm [58]) to generate tests for
+difference detection. It generates tests by repeatedly invoking IRA-ACG to ensure input validity.
+OurtestsconsistofanAPIcallsequence:TheoutputndarraysofanAPIcallareusedasinputsfor
+subsequent calls, thereby overcoming the limitation that unit testing only tests a single API.
+
+1.2   Motivating Example
+   Fig.3presents a formerly unknown NumPy bug detected when applying        ArrayDiff to the
+NumPy-CuPy pair. Fig.3ashows that NumPy claims that          diagflat returns a 2-D array. Line 3
+behaves correctly with the constant input “1.”. However, anArrayDiff’s test passes thevar’s
+output “1.” todiagflat. Its return violates the contract that diagflat’s return is 2-D. This bug
+can cause programs that depend on this contract to crash or run abnormally. The root cause is
+that diagflat calls a function __array_wrap__. It behaves normally on the constant input “1.”
+but mishandles an internal property (PY_TYPE) of var’s output. We use two test generators to
+generate tests for diagflat, and present them in Fig.3b:          Pynguin [47] is the state-of-the-art
+search-basedtest generator, andGhostwriter[49](a property-basedtestgenerator [27])ranked
+first in NumPy code coverage in a recent competition [19] whilePynguin ranked third.Pynguin’
+test calls diagflat with a None value (Lines 2-3). The input is invalid, not to mention triggering
+the bug.Ghostwritertakes NumPy’stype constraints intoaccount and uses@givenannotation
+todescribethem,sothatthetestisparameterizedandcanbeexecutedwitharandominputengine
+(Lines 5-7). However, this bug is undetected since the input is not created via APIs like var.
+   ArrayDiff generates a valid (i.e., non-empty) ndarray input for var based on our API call
+generator (IRA-ACG) and creates the call sequence from Lines 6-7 by passing var’s output to
+diagflat, thus detecting this bug.
+
+
+                                       Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 4 =====
+
+FSE155:4                                                                                                                                     Zhichao Zhou and Jingzhu He
+
+1.3   Contributions
+Our contributions are summarized as follows:
+•We collect input semantic requirements for 216 NumPy APIs and propose an LLM-assisted
+procedure to transfer them to other AP frameworks, enablingArrayDiff’s general applicability. It
+successfullytransfersNumPy’srequirementsto249OctaveAPIsusingfiveopen-weightedmodels.
+• We propose the input-requirement-aware API call generator (IRA-ACG) to generate API calls
+with inputs that satisfy these semantic requirements.
+•Weemploysearchalgorithms(e.g.,feedback-directedrandom[57]andgenetic[58]algorithms)to
+iteratively generate test sequences via the IRA-ACG for difference detection.
+•WeevaluatedArrayDiff(variantswith/withoutsemanticknowledge)andthebaselinesincluding
+TitanFuzz[13]andGhostwriter[49]over5 runs(10hbudget)onfiveAPpairsacrossNumPy,
+CuPy, and Octave.Ghostwriter’s NumPy-only support limits its use to NumPy pairs.
+   For all pairs, ArrayDiff variants with semantic knowledge detect 46 (average 29 in the first
+hour) valid-input differences and 20 invalid ones. The counterpart numbers are 43 (9 in the first
+hour) and 38, confirming that IRA-ACG enhances it in effectiveness and efficiency of detecting
+valid-input differences, which accounts for 19 out of 21 confirmed bugs.TitanFuzz detects 26
+valid(3missedbyArrayDiff)and40 invaliddifferences(15missed). Itsperformancemirrorsnon-
+semantic-knowledgeArrayDiff owing to theircomparable input validity (47% vs. 49%),whereas
+semantic ArrayDiff reaches 84%. Ghostwriter’s single detection confirms the value of API
+sequences. Valid differences mainly stem from bugs, API changes, and numerical errors.
+   Thepaperisstructuredasfollows.Section2reviewsrelatedwork.Section3introduces                   ArrayD-
+iff. Section4presents the evaluation. Section5discusses the experimental setting and validity
+threats. Section6concludes the paper. Section7provides our artifact.
+
+2   Related Work
+We introduce related studies on (1) Array programming, (2) Differentialtesting, and (3) Feedback-
+directed random software testing and Search-based software testing.
+Array programming. Array programming (AP) provides a concise and expressive syntax for
+operatingmultidimensionalarrays[33].ThefamousframeworksincludeNumPy[33],Matlab[52],
+andOctave[53](Matlab’sopen-sourcealternative).Theyunderpinnearlyallcomputingfields[33],
+such as deeplearning [38, 46, 60], quantum computing[37, 39], anddata science [9, 51, 62, 63, 65,
+70,78].Existingstudiesonarrayprogrammingmainlyfocusonperformanceimprovement[6,7,25,
+42,82,85]andlanguagedesign[4,5,61].Ourworkfocusesondetectingfunctionalitydifferences
+betweenarrayprogrammingframeworkimplementations(e.g.,twoversions).Thecloseststudy
+is AutoMR [81]. AutoMR automatically infers mathematical metamorphic relations (MRs, e.g.,
+sin(x)=sin(x+2𝜋))totest29NumPy’snumericalfunctions.EachMRisrelatedtoasingleAPI,
+andAutoMRusesthemtotestAPIsindividually,ignoringthebugscausedbyAPIsequences.In
+contrast,ArrayDiff generates API sequences for differential testing.
+Differentialtesting.Ourwork appliesdifferentialtesting, whichaddresses thechallengeof test
+assertiongeneration[23,29].Generalautomatedtestingtechniquesoftenlackdomainknowledge
+ofspecificsoftware,makingitdifficulttoverifywhethertestresultsmeetexpectations.Differential
+testingrunsthesametestsontwosoftwareversionsandcomparestheirresultsasthetestassertion.
+Ithasbeenwidelyusedinsoftwaretesting.Manystudiesfocusondifferentiallytestingthedeep
+learning(DL)libraries,which,likeAPframeworks,arealsobuiltaroundmulti-dimensionalarrays
+(tensors [1]). They can be categorized into API-level testers [14, 41, 56, 77, 79] and sequence-level
+testers[13,31,43,44,73,76]likeArrayDiff.Mostofthesesequence-leveltesters[31,43,44,73,
+76] synthesize DL models to test DL libraries. However, the DL models are the API sequences
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 5 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                        FSE155:5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                        Fig. 4. Overview of ArrayDiff.
+
+
+with limited patterns [13], missing diverse sequences that cause bugs.ArrayDiff can generate
+arbitraryAPIsequenceswithoutsuchstructuralconstraints.TitanFuzz[13]alsogeneratesarbitrary
+API sequences via leveraging LLMs to insert API calls. However, LLMs may generate invalid
+inputs. Our evaluation shows that only about 49% of the generated API sequences are valid.
+In contrast, ArrayDiff considers input requirements when inserting API calls. Furthermore,
+ArrayDiff leverages LLMs to transfer manually collected API requirements from NumPy to other
+AP frameworks, enabling its general applicability.ArrayDiff achieves a valid test rate of roughly
+80%,bothfor NumPyandOctave.ArrayDiffdetectsnearlytwice asmanyvalid-inputdifferences
+(themainsourceofconfirmedbugs)asTitanFuzz(seeSection4.2).Furthermore,LLM-basedtesting
+has widely used in various areas, such as GUI [45], language processors [18, 75], and embedded
+devices [55]. Refer to surveys [72] for further studies.
+Feedback-directedrandomandsearch-basedsoftwaretesting. Feedback-directed random
+software testing (RST) [57] and Search-based software testing (SBST) [68] are two widely used
+techniquesingeneratingtests.RSTrandomlyinsertsstatementsintotestsandcheckswhetherthey
+passor fail(trigger anexception).A testis used forfurther insertionifit passes.Otherwise, itis
+savedasabugtrigger.SBSTformulatesthetestgoal(e.g.,codecoverage)asfitnessfunctionstoguide
+geneticalgorithmsinfindingsolutions.AtypicalSBSTprocedureinvolvesageneratorgenerating
+random solutions (e.g., tests). Then, SBST selects some of them based on feedback from fitness
+functions as the next generation. Next, it mutates them, creating more solutions. The routine stops
+whentheoptimumisreachedorthetimebudgetisexhausted.ExistingresearchonRSTandSBST
+mainly focuses on applications [3, 16, 32, 35, 36, 47, 50, 74], search algorithms [22, 28, 58, 59, 80]
+andtestunderstandability[10,11,67].OurworkusesRSTand SBSTtodifferentiallytestNumPy
+implementations.Ourcontributionistheproposalofaninput-requirement-awarecallgenerator
+that enables the algorithms to generate valid inputs.
+Grammar-basedFuzzing. Grammar-based fuzzers [17, 26, 40, 71] leverage language grammars
+(e.g.,context-freegrammars)toproducestructuredinputssuchasXMLandPython.ArrayDiffalso
+generates grammatically valid programs. Besides,ArrayDiff goes beyond the language grammar.
+It emphasizes the semantic input requirements. For example, dot([1,2],  [1])satisfies Octave
+grammar, but dot raises an error “sizesof X and Y must match”. Thus, a grammarformalism alone
+cannot replace our LLM-assisted requirement-collection procedure.
+
+3   ArrayDiff
+In this section, we present ArrayDiff. Fig.4shows its overview.        ArrayDiff accepts two AP
+framework implementations, such as NumPy or Octave across different versions. The general
+process of ArrayDiff is running a search algorithm (e.g., a random or genetic algorithm) to
+
+
+                                    Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 6 =====
+
+FSE155:6                                                                                                                                     Zhichao Zhou and Jingzhu He
+
+                             Table 1. Input semantic requirements of APIs under test.
+
+
+    Category                            Requirement                                               RepresentingAPIs
+                                        Non-empty (contains≥ 1 element)                           min, max, average
+    Single NDArray                      Particular shapes                                         diag (1 or 2-D)
+                                                                                                  vander, convolve (1-D)
+                                        All/partial dimensions match                              stack, concatenate
+                                                                                                  matmul, dot
+    Inter NdArrays                      Broadcast compatibility [33]:                             add, equal, where
+                                        arrays have compatible shapes that can be                 left_shift
+                                        auto-expanded to the same shape                           logical_and
+                                        Specific value ranges, e.g.,
+    Non-NDArray Parameters              Parameter order (ndarray’s memory layout): "C", "F", "A", "K"reshape, ravel
+                                        Parameter trim: "b" (from back), "f" (from front), "fb" (both)trim_zeros
+    Inter NDArrays and Non-NDArrays     Parameter axis’s value range is[0,ndarray.dimension)      min, std
+                                        Parameter shape matches element count of ndarray          reshape
+
+
+conduct differential testing. To effectively detect differences, the search algorithm must produce
+validinputs(e.g.,thedimensioncompatibilityformatmul’stwooperands)totriggerdiverseprogram
+behavior. To achieve this, we first manually collect input requirements for NumPy APIs. Next,
+we leverage LLMs to transfer NumPy’s requirements to other array programming frameworks by
+identifying equivalentAPIs. The requirements onndarrays all relate totheir shape (Section3.1).
+Then, we propose an input-requirement-aware API call generator to produce inputs satisfying
+therequirements,a.k.a.,IRA-ACG.Itprovidestwooperatorsforthesearchalgorithm:appending
+and replacing API calls. The appending operator performs three steps: (1) selects a candidate
+from shuffled APIs; (2) attempts to synthesize inputs satisfying the collected requirements; and
+(3) appends a new call if successful or chooses the next API. The replacing operator is similar
+to the former one, but has an extra check before replacing an existing call with a new one: The
+outputndarrayoftheoldcallmaybeusedasinputinothercalls.Hence,thenewandoldoutputs
+shouldbethesameindatatypeandshapetopreventbreakingtheinputrequirements(Section3.2).
+WithIRA-ACG,ArrayDiffemploysasearchalgorithm:❶initializeteststhroughtheappending
+operator,❷ create more tests (through appending and replacing operators),❸ run tests and keep
+difference-exposingtests,❹savetestspassingontwoimplementationsforfurthertestcreation,
+and❺remove pass tests’ statements that yield NaNs (i.e., invalid values) (Section3.3).
+
+3.1   LLM-Assisted Input Requirement Collecting Procedure
+                                   Generating tests with valid inputs to reach core program states is
+
+ 1     fromnumpyimport                    *key to difference detection. We divide the valid input requirements
+
+ 2     v1=arange(      0,4)        into types and semantics. We leverage Fig.5as an example. The type
+ 3     v2=reshape(v1,  (      4,  1))constraints are: (1) arange accepts numerical parameters; (2) reshape
+ 4     v3=matmul(v1,  v2)
+                                   requiresanndarrayasitsfirstargument,followedbyatuplespecifying
+Fig. 5.  An example showing        a new shape; and (3) matmul requires two ndarrays and their dtypes
+input requirements.                supportthemultiplicationoperation.Thesemanticrequirementsare:
+                                   (1) reshape’s newshapemust preserve element count(4= 4×1); and
+                                   (2) matmul requires the columns of the first operand match the rows
+of the second ((1,4) and (4,1)). It is feasible to automatically infer type constraints since the
+documents of the AP frameworks equip each API with structured comments to describe types.
+However, the semantic requirements are described in natural language and are hard to infer
+automatically.Toaddressthischallenge,TitanFuzz[13]leveragesLLMstogenerateinputs,whileits
+evaluation shows that about 60% of the generated tests are invalid. Deng et al. [12] show that even
+state-of-the-artLLMs(e.g.,GPT-4-Turbo)strugglewiththeseimplicitconstraints.However,the
+APIsofAPframeworksarestable.Forexample,fromAug2024toJan2025,onlyoneAPI(unstack)
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 7 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                        FSE155:7
+
+
+
+
+
+
+
+
+
+
+
+
+             Fig. 6. Transferring semantic requirements from NumPy to other AP frameworks.
+
+
+wasaddedintoNumPy.Therefore,ratherthanrelyingsolelyonLLMs,weadoptanLLM-assisted
+process:We manuallycollectNumPy’s requirementsandtransfer themtoother frameworksvia
+LLMs.Theinputgenerator(Section3.2)employstheserequirementstofilterouttheinvalidinputs.
+  To conduct manual analysis on NumPy, we first determine the APIs under test: From400+ APIs
+collected by developers, we exclude nondeterministic APIs (e.g., random operations) and APIs
+whoseinputsandoutputsarenotscalarorndarrays.Finally,the216APIsareselected.Foreach
+API,weinspectthedocumentationandvalidatethepresenceoftherequirementsbydesigningand
+runningtests.Arequirementisdeterminedifatestcanbeconstructedtotriggeranexceptionwhen
+violating it. For example, in Fig.5, a         mismatch exception is triggered when replacing matmul(v1,
+v2)withmatmul(v2, v2).Finally,wecollectedseventypesofsemanticrequirementsfortheAPIs
+(Table1). We categorize them based on the parameters involved: Single NDArray, Inter NdArrays,
+Non-NDArray Parameters, and Inter NDArrays and Non-NDArray Parameters. The requirements
+concerningndarraysexclusivelyrelatetotheirshapeattributes.Ashapeisatuplethatspecifiesthe
+sizeofeachdimension.Forexample,theminAPIreturnstheminimumvalue,thusrequiringthat
+ndarraysarenotempty,i.e.,theshape’sallelementsmustbepositive.Therequirementsconcerning
+non-ndarrayparametersrelatetothevalues.Forexample,trim_zerosremovesleadingandtrailing
+zeros from ndarrays. The trim parameter controls the truncation direction and has three valid
+options: "b" (from back), "f" (from front), "fb" (both). Each requirement is formulated as an input
+filter. For example, Table1’s Non-empty is formulated as        lambda  a:  prod(a.shape)>0. These
+filters are used in the input generator (Section3.2) to get the valid inputs.
+  For other AP frameworks, we automatically transfer NumPy’s requirements to them, mainly
+basedonLLMs identifyingequivalentAPIs.Fig.6showstheprocessusing Octaveasanexample:
+(1) For each API in the target AP framework (called APIt), we provide its documentation and
+the names and brief descriptions of 216 NumPy APIs to the LLM, and prompt it to identify the
+equivalent API and generate proof code. Fig.6exemplifies the proof code with        cumsum of NumPy
+andOctave.IftheLLMdoesnot returntheequivalentAPI(APIe)ortheproofcodefails(i.e.,the
+ndarrayvaluesbetweenNumPyandOctavearedifferent),wemarktheAPItastheremainingAPIs.
+(2) Otherwise, LLM’s correct proof enables us to transfer the mandatory parameters’ requirements
+from APIe to APIt. Then, for APIt’s each optional parameter, we ask the LLM to return which
+APIe’sparameterisequivalentandtheproofcode.Fig.6showsthattheLLMsprovethatfor       cumsum,
+NumPy’saxis(0-basedindexing)andOctave’sdim(1-based)areequivalent.Asaresult,wetransfer
+the requirement of cumsum of NumPy related to thendarray and axis parameters to Octave, i.e,
+axis in [0,𝑙𝑒𝑛(shape)) is transferred to dim in [1,𝑙𝑒𝑛(shape)]. (3) For each remaining API (e.g.,
+cummax and debug_on_error in Fig.6), we ask the LLM to determine whether it is irrelevant to
+arrayprogramming(e.g.,debuggingandloggingfunctions),andwefilterit(e.g.,debug_on_error)
+out ifthe response isyes.(4) For eachrelevantAPI (e.g., cummax), weidentify those Octave APIs
+that share identical input and output parameter names and are matched with NumPy APIs (e.g.,
+
+
+                                   Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 8 =====
+
+FSE155:8                                                                                                                                     Zhichao Zhou and Jingzhu He
+
+ Algorithm1:AppendinganAPIcallto                                             Algorithm 2: Replacing a test state-
+  a test                                                                      ment’s API call
+
+ 1   Algorithm append(test)                                                  1   Algorithm replace(test, stmt)
+ 2             APIs← shuffle(ArrayAPIs)                                      2             APIs← shuffle(ArrayAPIs)
+ 3            foreach api ∈ APIs do                                          3            foreach api ∈ APIs do
+ 4                        ok, inputs← genInput(test, api)                    4                        ok, inputs← genInput(test.preStmts(stmt), api)
+ 5                     if !ok then                                           5                     if !ok then
+ 6                              continue                                     6                              continue
+ 7                     end                                                   7                     end
+ 8                        ndarray← api.getReturnNDArray(inputs)              8                        ndarray← api.getReturnNDArray(inputs)
+                  //unique  variable  name,  dtype,  shape                   9                     if !sameDTypeAndShape(ndarray,  stmt.lhs)then
+ 9                        test.ndarrays.append(ndarray)                     10                              continue
+10                        test.appendStatement(ndarray,api,inputs)          11                     end
+11                     return                                               12                        stmt.replaceAPICall(api,inputs)
+12            end                                                           13                     return
+                                                                            14            end
+
+
+cumsum).Then, wepassthemto LLMforchoosingone withthesameinput requirementsasthe
+target API. Therefore, we indirectlyextract cummax’s requirements. Our experiment(Section4.1)
+evaluates five models, and they transfer requirements for 249 Octave APIs.
+
+3.2   Input-Requirement-Aware API Call Generator (IRA-ACG)
+We propose our input-requirement-aware API call generator (IRA-ACG) to guarantee that the
+inputssatisfythecollectedrequirements.Itprovidestwooperationsforthetestevolutionofsearch
+algorithmstoconductdifferentialtesting(Section3.3):appendinganAPIcalltoatestandreplacing
+an existingone. Their generalworkflow is:(1) pick onefrom shuffledAPIs; (2) synthesizeinputs
+satisfyingtherequirements;and(3)appendorreplaceacallifsuccessful,otherwisegobackto(1).
+Our evaluation (Section4.2) shows it significantlyimproves             ArrayDiff’s validinput generation.
+                                                                                Algorithm1shows the appending proce-
+ Algorithm 3: Generating inputs for an                                       dure. It loops to select a candidate from shuf-
+ API call                                                                    fled APIs (Line 3) and applies genInput to it
+
+ 1   Algorithm genInput(test, api)                                          (Line 4): genInput (Algorithm3) iteratively
+
+ 2             inputs← []                                                    generates a concrete value for each parame-
+ 3            foreach p ∈ api.parameters do
+ 4                     if p.optional∧ random(0,1) < 0.5then                  ter. Lines 4-6 probabilistically skip optional pa-
+ 5                              continue                                     rameters. For ndarray parameters (Lines 8-9),
+ 6                     end
+ 7                     if p.type= NDArraythen                                ndarrays are first chosen by dtype compatibil-
+ 8                                  chosen← dtypeFilter(api,inputs,test.ndarrays)ity by the target API’s requirements and deter-
+ 9                                  chosen← semanticFilter(api,inputs,chosen)
+10                     else                                                  minedinputs,followedbysemanticconstraints
+11                                  chosen← semanticPickValues(api,inputs)
+12                     end                                                   checking through our LLM-assisted collected
+
+13                     if |chosen| = 0then                                   rules. For non-ndarray parameters, which in-
+14                              return False, None
+15                     end                                                   clude scalartypes (integer,float, boolean,and
+16                        inputs.append(randomPick(chosen))                  char) and Python data structures (string, list,
+17            end
+18            return True, inputs                                            and tuple) containing scalar elements, Line
+                                                                            11 chooses the candidates from semantically-
+                                                                             specifiedrangeswhenavailable;otherwise,the
+type-determined global range is used. As a result, the filtered candidates satisfy the type and
+semanticrequirements.Weleveragechoosingtwondarrays(a1anda2)formatmulasanexample.
+Theonlyrequirementfor𝑎1’scandidateinputsisthatthedtypesupportsmultiplication.Aftera1is
+resolved, dtypeFilter filters ndarrays whose dtype does not support multiplication witha1, and
+semanticFilter filters ones whose shape is not compatible witha1. The procedure aborts and
+returnsfalseifnocandidatesatisfiestherequirements(Lines13-15),andappendgoestothenext
+API.Afterreceivinginputs,append’sLine8formsanewndarrayvariablewithauniquename,and
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 9 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                        FSE155:9
+
+ Algorithm4: Random testing                                                     Algorithm6: Auxiliary functions
+
+ 1   Algorithm RA(popSize, initMaxLength)                                      1   Procedure InitTests(popSize, initMaxLength)
+ 2             currentPop← InitTests(popSize,initMaxLength) // ❶               2             tests← []
+ 3             passTests← []                                                   3            for i ∈ [0,popSize) do
+ 4            repeat                                                           4                        test← Test()
+ 5                       CreatMore(currentPop, passTests, popSize) // ❷        5                        i, length← 0,random(0,initMaxLength)
+ 6                        runResult← RunAndSaveDiff(currentPop) // ❸           6                     for j ∈ [0,length) do
+ 7                        newPassTests← runResult.passTests // ❹                7                      append(test)   //invoke  Algorithm1
+ 8                       RemoveNaNStmts(newPassTests, runResult) // ❺          8                     end
+ 9                        passTests← passTests+newPassTests                    9                        tests.append(test)
+10                        currentPop← []                                      10            end
+11            until time budget is out                                        11            return tests
+ 1   Procedure CreatMore(currentPop, passTests, popSize)                       1   Procedure Append(test)
+ 2            while|currentPop| < popSize do                                   2            for i ∈ [0,random(0,|test|)] do
+ 3                        passTest← copy(random(passTests))
+ 4                       Append(passTest)                                      3                append(test)   //invoke  Algorithm1
+
+ 5                        currentPop← currentPop+[passTest]                    4            end
+ 6            end                                                              1   Procedure Minimize(test, stmt)
+                                                                               2            return getRecursiveDependencies(stmt)+[stmt]
+                                                                               1   Procedure RemoveNaNStmts(tests, runResult)
+ Algorithm5: Search-based testing                                              2            foreach test∈ tests do
+ 1   Algorithm GA(popSize, initMaxLength)                                      3                        stmts← runResult.getNaNStmts(test)
+ 2             currentPop← InitTests(popSize,initMaxLength) // ❶               4                        test.RemoveWithRecursiveDependent(stmts)
+ 3            repeat                                                           5            end
+ 4                        newPop← []                                           6            return test
+ 5                       CreateMore(newPop, currentPop) // ❷                   1   Procedure Modify(test)
+ 6                        runResult← RunAndSaveDiff(newPop) // ❸               2            foreach statement∈ test do
+ 7                        currentPop←SelectTests(runResult, popSize)// ❹       3                     if random(0,1) < 1/|test| then
+
+ 8                       RemoveNaNStmts(currentPop, runResult) // ❺             4                      replace(test, statement)   //invoke  Algorithm2
+
+ 9            until time budget is out                                         5                     end
+10   Procedure CreateMore(newPop, currentPop)                                  6            end
+11            foreach t1, t2 ∈ currentPop do                                   1   Procedure Remove(test)
+12                        n1, n2← Crossover(t1, t2)                                     //remove  each  statement  with  probability     1/|test|
+13                        newPop.add( Mutate(t1), Mutate(t2), Mutate(n1),      1   Procedure Mutate(test)
+                  Mutate(n2) )                                                 2             operators← [Remove,Modify,Append]
+14            end                                                              3            foreach operator∈ operators do
+15            return newPop                                                    4                     if random(0,1) < 1/3then
+16   Procedure SelectTests(runResult, popSize)                                  5                                 operator(test)
+17             fitness← ComputeFitness(runResult)                              6                     end
+18             selected← Select(fitness, popSize)                              7            end
+19            return selected                                                  8            return test
+
+
+
+
+
+itsdtypeandshape.Notethat(1)thedtypeandshapeareinferredbasedontheAPI’ssemanticsand
+donotrequiredynamicexecution.Forexample,matmulontwondarrayswith(1,2)and(2,1)shapes
+always generates one with (1,1) shape; and (2) some APIs may produce shape-undeterministic
+outputs.Forexample,trim_zerostrimstheinput’zerosastheoutput.Hence,theoutput’sshape
+depends on the input’s element values. For these APIs, we mark the output ndarrays asShapeUn-
+known, and they are always filtered by semanticFilter. Lines 9-10 add the novel ndarray into
+thetest’sndarrays forbeinganinputcandidatein thefuture,and append thecompleteAPIcall
+statementwithresolvedinputsandthereturnedndarrayintothetest.Thisprocedurecanappenda
+statement toan emptytest. Thecreation APIs(e.g.,arrayandarange) have no ndarraysas inputs
+and no semantic requirements, so inputs can always be generated.
+    Algorithm2shows the replacement. It tries to replace a statement’s API call with a new one,
+andtheoldandnewcallsreturntwondarrayswiththesamedtypeandshape.LikeAlgorithm1,it
+dependsongenInput(Line4).ThedifferenceisthatweusepreStmtstoselectstatementsbefore
+thechosenone.Therefore,thendarraysdefinedafteritwillnotbeinputcandidates.Then,Lines
+8-11 getthe newndarray andcontinue ifit differsfrom theold onein dtype andshape. Otherwise,
+Line 12 replaces stmt’s old call with the new one.
+
+
+                                                   Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 10 =====
+
+FSE155:10                                                                                                                                   Zhichao Zhou and Jingzhu He
+
+3.3   Random/Search-Based Differential Testing
+WepresentadifferentialtestingapproachthatemploysasearchalgorithmtoiterativelyinvokeIRA-
+ACG (Section3.2) to evolve tests (API sequences). Unlike prior work that generates API sequences
+with patterns (e.g., deep learning models) [31,43,44,73,76], our algorithm can produce arbitrary
+sequences. Moreover, the inputs from IRA-ACG satisfy the semantic requirements collected in
+Section3.1.Ourevaluation(Section4.2)showsthatabout80%oftestsarevalid,whilethecounterpart
+numberofTitanFuzz[13](anLLM-InputGenapproach)initsexperimentisnearly40%.ArrayDiff
+istheoreticallycompatiblewithanysearchalgorithm.Wechoosetwomainstreamalgorithmsin
+softwaretesting:afeedback-directedrandomalgorithm(RA)[57]andageneticalgorithm(GA)[58].
+
+3.3.1    Feedback-Directed Random Algorithm. Werefer to previous studies [48, 57] to implement
+ourrandomalgorithm(RA).TheoverallprocedureisshowninAlgorithm4.Eachstepisasfollows:
+❶ Initialize Tests: A group of tests is generated by Algorithm6’s                   InitTests (Line 1): loop to
+create a random-length test by iteratively invoking IRA-ACG’s appending operation until tests
+reach the population size. These tests are later used to generate more tests. Then, we initialize
+passTests as empty to store tests that pass on both AP implementations (Line 2).
+❷CreateMoreTests:RAusesCreatMoretocreatetestsuntil currentPop’ssizereachespopSize
+(Line 5). CreatMore randomly choosesa passTest, appliesAlgorithm6’s                  Append into it,and adds it
+to currentPop.Appendfirstselectsarandomvalue𝛽 from 0to𝑙.Then,itrepeats 𝛽 timestoapply
+IRA-ACG’s appending operator to the test.
+❸RunTestsandKeepDiffTests:WerunthetestsontwoAPimplementations(Line6).Fora
+test’s two executions, we check whether they exit abnormally. If both exit abnormally, we regard
+thistest asinvalidand removeitin evolutionsince evolvingonit willlikelykeep itinvalid,thus
+makingituselessindifferencedetection.Ifonlyoneexitsabnormally,weregardthetestasdetecting
+adifference.Otherwise,wecomparetheruntimevaluesofallndarrays.Iftheydiffer,thetestisalso
+a detector. Note that float-value ndarrays from two executions may have slight errors. To tolerate
+them, we adopt NumPy’stesting practiceand use the following formula for comparison:
+
+                                          |𝑎−𝑏| < max(1,|𝑏|)×1−7,                                                     (1)
+
+where max ensures that the tolerance keeps 1−7 when |𝑏| < 1. Finally, we keep a detector in
+thefinalreportandremoveitinevolutiontoreduceredundantdetection.Meanwhile,weapply
+Algorithm6’s                  Minimizetothedetectorandthedifference-inducingstatementtogettheminimized
+versionandreportittoo.Minimizereliesontheassumptionthattheobserveddifferenceoriginates
+fromthedifference-inducingstatementoritsdependencies.Thisassumptiondoesnotholdifthe
+AP framework enters an incorrect internal state due to other statements. However, this case does
+notariseinourevaluation.Fortheteststhatpassontwoimplementations,werecordtheirruntime
+information into runResult, including the ndarray values and coverage.
+❹SavePassTestsasSeeds: We obtain alltests passing on twoimplementations from runResult
+(Line 7). It will be added to passTests (Line 9) for further test creation.
+❺RemoveNaNStatements: IRA-ACG ensuresthatinput ndarraysmeettypeandshape require-
+ments, but their values may still be invalid. For example, it may pass negative values to sqrt,
+yieldingNaN(not-a-number)valuestodenoteinvalidinputs.TheseNaNvaluespropagatewhen
+using them as inputs [44], obstructing effective comparison of AP frameworks’ core behaviors.
+Hence,Line8removesstatementsreturningNaNvaluesfrompassTests.Deletingastatementcauses
+the statements using its defined variable to be invalid. Hence, we recursively delete them.
+   Afterthelast step,weupdate passTests andclear currentPop.Then, theRArepeatsthe routine if
+the budget remains. Otherwise, it conveys detected differences in the final report.
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 11 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                       FSE155:11
+
+3.3.2    Genetic Algorithm. We refer to previous studies [22, 58] to implement our genetic algorithm
+(GA). The procedure (Algorithm5) is similar to the RA. The main differences are as follows:
+❷CreateMoreTests:DifferentfromtheRAthatcreatestestsonlyviaappendingstatementsto
+the passTests, the GA employs two GA operators to generate tests (Algorithm5’s                  CreateMore):
+   Crossover chooses two parents and exchanges parts of their copies to produce two children.
+The general procedure is: Copy two tests (𝑡1 and𝑡2) and select a random value𝛼 in (0,1). Then,
+Swapthelast𝛼|𝑡1| statements(𝑠1)of𝑡1 andthelast(1−𝛼)|𝑡2| statements(𝑠2)of𝑡2.However,these
+statements may use the ndarrays defined by previous statements, and swapping without these
+dependenciescausesthenewteststobeillegal.Hence,weaddthedependenciesto𝑠1/𝑠2too.Finally,
+we remove𝑠1 from𝑡1and add𝑠2, and vice versa.
+   Mutate(showninAlgorithm6’s                   Mutate)appliesRemove,Modify,andAppendintoatestwith
+probability1/3.Hence,onlyonesub-operatorisappliedonaverage.Assumingthetest’slengthis𝑙,
+Removedeleteseachstatementwithprobability 1/𝑙.Werecursivelydeletethestatementsusingthe
+variabledefinedinthedeletedones;ModifyappliesIRA-ACG’sreplacingoperator(Algorithm2)
+intoeachstatementwithprobability1/𝑙;AppendisalreadydescribedintheRA.ItappliesIRA-ACG’s
+appending operator (Algorithm1) to the test.
+❹ Save Pass Tests as Seeds: Different from the RA, which saves all tests that pass on two
+implementations for further test creation, the GA requires fitness functions to judge tests for
+keepingelitesfromtheminfurtherevolution.Afitnessfunctiondenoteswhetheracodeelement
+(e.g., a statement or method) is covered. We maintain a binary fitness vector for each passing test,
+where elements correspond to statements, with 1 indicating covered and 0 indicating uncovered.
+Specifically,ourNumPy/CuPyfitnessfunctionscorrespondtostatementcoverage[66],whereeach
+fitness value reflects the coverage of a specific statement. For Octave, we instead adopt method
+coverage [66], in which each fitness value corresponds to a method, due to the lack of suitable
+statementcoveragetools.Aftercomputingthefitnessvectorsforalltests,weselectasubsetoftests
+thatoutperformothersinfitnessscores(i.e.,theelites)forfurtherevolutionviaMOSA[58].MOSA
+andits variant[58,59],based onParetodominance[54],arethe state-of-the-artmultiple-objective
+sortingalgorithmsinsearch-basedtestgeneration[8,19].Paretodominancedefinesadominance
+relation for two fitness vectors of length𝑛:𝑣1 dominates (≻)𝑣2 if:
+                    (∀𝑖 ∈ {1,...,𝑛} : 𝑣1[𝑖] ≥ 𝑣2[𝑖])∧(∃𝑖 ∈ {1,...,𝑛} : 𝑣1[𝑖] > 𝑣2[𝑖]).                        (2)
+
+MOSAsortsvectorsinto𝑚 groupscalledParetofronts[54]thatsatisfy(1)nodominancerelation
+in a Pareto front, i.e.,
+                ∀𝑖 ∈ {1,...,𝑚} :∀𝑗,𝑘 ∈ {1,...,|𝐹𝑖|} : (𝐹𝑖[𝑗] ⊁ 𝐹𝑖[𝑘])∧(𝐹𝑖[𝑘] ⊁ 𝐹𝑖[𝑗]),                  (3)
+
+(2)andforanyvectorinalatterParetofront,itisdominatedbyatleastonevectorinaprevious
+front, i.e.,
+         ∀𝑖, 𝑗 ∈ {1,...,𝑚} :𝑖 < 𝑗  =⇒ (∀𝑘 ∈ {1,...,|𝐹𝑗|},∃𝑚 ∈ {1,...,|𝐹𝑖|} : 𝐹𝑖[𝑚] ≻ 𝐹𝑗[𝑘]).         (4)
+
+Then,MOSAkeepstestsinevolutionbytheirvectorsfrom𝐹1 to𝐹𝑚 untilthekepttestsreachthe
+maximum.Thesetestsformanovelpopulation.Then,theGArepeatsuntilthebudgetisexhausted.
+
+4   Evaluation
+OurevaluationconcentratesonArrayDiff’sdetectionperformanceandanswersthefollowing
+research questions:
+RQ1: (Effectiveness of LLM-assisted requirement transfer approach) How effectively does the
+LLM-assisted approach transfer NumPy API requirements to other AP frameworks (Section4.1)?
+
+
+                                    Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 12 =====
+
+FSE155:12                                                                                                                                   Zhichao Zhou and Jingzhu He
+
+                              Table 2. Requirement transfer results of five models.
+
+
+                                      Directly      MatchedOptional      Non-Array       Indirectly        Whole
+              Model                 MatchedAPIs        Parameters           APIs       MatchedAPIs      MatchedAPIs
+                                    #correctness       #correctness     #correctness    #correctness     #correctness
+                                        (Acc.)            (Acc.)            (Acc.)         (Acc.)       (Acc.|Recall)
+    DeepSeek-R1(671BMoE[30])             126                47               855             32              158
+                                       (0.992)            (0.979)           (0.993)        (0.800)       (0.946 | 0.635)
+      DeepSeek-V3(671BMoE)               111                38               778             75              186
+                                       (1.000)            (1.000)           (0.997)        (0.670)       (0.834 | 0.747)
+    Llama4-Maverick(400BMoE)             107                9                762             64              171
+                                       (0.982)            (1.000)           (0.996)        (0.621)       (0.807 | 0.687)
+         Qwen3-32B(Dense)                128                47               920             53              181
+                                       (0.992)            (1.000)           (0.980)        (0.779)       (0.919 | 0.727)
+         Qwen3-14B(Dense)                106                27               864             36              142
+                                       (0.981)            (1.000)           (0.969)        (0.750)       (0.910 | 0.570)
+
+
+RQ2: (Effectiveness of ArrayDiff) How effectively doesArrayDiff detect AP implementation
+differences (Section4.2)?
+RQ3: (Root Causes of Differences) What are the root causes of differences (Section4.3)?
+
+4.1   RQ1: Effectiveness of LLM-Assisted Requirement Transfer Approach
+WeproposeanLLM-assistedapproachfortransferringmanuallycollectedinputrequirementsfrom
+NumPy to other AP frameworks (Section3.1). This RQ investigates its effectiveness.
+•Subjects: We select Octave [53] as the target AP framework, extracting 1,546 APIs along with
+their functional and parameter descriptions from its structured documentation.
+•LLMs: We evaluate five popular open-weighted LLMs (details shown in Table2). The parameter
+number of these models ranges from 14B to 671B.
+•EvaluationMetrics:We judgethe resultsby running proofcode andchecking resultsfor direct
+API andoptional parameter matching.For non-arrayAPIs, we judgethe results byreviewing the
+documents. For indirect transfer requirements, we write tests to verify whether the target API
+sharesthe sameinput requirementsas theAPI selectedby LLMs.Then, wecount twometrics: the
+numberofcorrectcasesandtheaccuracy(#correctness/#total)of(1)targetAPIsdirectlymatched
+toNumPyAPIs, (2)matchedoptionalparameters,(3)non-array APIs,and(4)indirectlymatched
+APIs. We count all models’ whole matched APIs (direct/indirect) and compute each’s total correct
+APIs,accuracy,andrecall(#correctness/#whole).Previousitems’recallsarenotcomputed,since
+an API may be directly matched by a model and indirectly by another.
+•Results: Table2presents the requirement transfer results for five models. Among these, Qwen3-
+32BachievesthehighestmatchedAPIcorrectness(128)andnon-arrayAPIs(920),Qwen3-32Band
+DeepSeek-R1 attain the highest matched parameter correctness (47), and DeepSeek-V3 reaches the
+highestindirectmatchcorrectness(75).Intermsofaccuracy,DeepSeek-R1leadsinindirectmatch
+accuracyandnon-arrayAPIs,whileQwen3-32BdominatesdirectAPIandparameteraccuracy.We
+summarizetheseresults,andthewholematchedAPIcountis249,andthenon-arrayAPIcountis
+979.Wemanuallyexaminethe316remainingAPIsthatareneithernon-arraynormatched,mostly
+involvingspecialtypes(e.g.,first-classfunction)oradvancedAPIs(e.g.,differentialequationsolvers)
+thatarenotsupportedbyourcollected216NumPyAPIs.TheseadvancedAPIsareapplications
+of AP rather thanits core (creations, manipulations,and basic math computations) and are thus
+beyond the scope of this paper. Testing them requires manual integration intoArrayDiff.
+•Analysis:Eventhesmallestmodel,Qwen3-14B,retrievesoverhalfofthematchedAPIs,indicating
+thatourapproachiseffectiveacrossmodelscales.AlthoughDeepSeek-V3showslowerperformance
+inmatchingAPIsbetweenNumPyandOctave,itexcelsatindirectmatching.Forinstance,while
+failingtodirectlymatchvar(failingtogenerateproofcode),itcorrectlydirectlymatchesmeanand
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 13 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                       FSE155:13
+
+                           Table 3. AP framework implementation pairs under test.
+
+                    A                                   B                               Description
+   CuPy-13.3.0 (latest) on NVIDIA GPU     NumPy-2.2.2 (latest) on AMD64    NumPy and NumPy-compatible library
+   CuPy-13.3.0 (latest) on NVIDIA GPU        NumPy-2.1.0 on AMD64          NumPy and NumPy-compatible library
+                                           (latest at CuPy-13.3.0 release)
+     NumPy-2.2.2 (latest) on AMD64           NumPy-1.26.4 on AMD64                  Two NumPy versions
+     NumPy-2.2.2 (latest) on AMD64           NumPy-2.2.2 on ARM64              NumPy under two architectures
+     Octave-10.2.0 (latest) on AMD64         Octave-9.4.0 on AMD64                  Two Octave versions
+
+
+infers that Octave’svar and mean share the same input requirement (non-empty ndarrays). This
+demonstratesthatourindirectmatchingstrategyenhancesLLMs’requirementtransfercapability.
+
+  AnswertoRQ1:  Ourapproach successfullytransfersrequirementsfor 249OctaveAPIsusing
+  five models. Qwen3-32B achieves the highest direct API matches (128) and optional parameter
+  matches (47), while DeepSeek-V3 leads in indirect matches (75).
+
+4.2   RQ2: Effectiveness ofArrayDiff
+This RQ aims to investigateArrayDiff in detecting AP implementation differences.
+•Subjects: Table3lists five AP pairs, where        A is the latest andB is its compatible library, prior
+majorrelease,oradifferentarchitecture.Notethatthefirstpaircorrespondstothelatestversionsof
+CuPy/NumPy.However,whenCuPy-13.3.0wasreleasedinAugust2024,NumPy-2.1.0wasthelatest.
+The API changes introduced in NumPy-2.2.2 had not yet been integrated into CuPy. Therefore, we
+additionally include CuPy-13.3.0 vs. NumPy-2.1.0 as a more suitable pair for differential testing.
+Section5.1justifies excluding NumPy/CuPy vs. Octave.
+•EvaluatedApproaches:(1)ArrayDiffandtheablatedvariants:Weintegratearandomalgorithm
+(RA) anda genetic algorithm (GA)withArrayDiff (Section3.3). Thesetwo algorithms utilize our
+IRA-ACG (Section3.2) to generate tests with inputs that satisfy the input requirements (Table1)
+anddynamically removethestatements thatyieldNaN values.ToevaluateArrayDiffandeach
+component’s contribution, we propose sixArrayDiff variants:
+RA+Semantic+NaN (RSN): The RA with semantic knowledge and the NAN statement remover.
+RA+Semantic (RS): The RA with semantic knowledge and without the NAN statement remover.
+RA: The RAwithout semantic knowledgeand the NANstatement remover.It only guaranteesto
+generate inputs that satisfy the type constraints.
+GA+Semantic+NaN (GSN): The GA with semantic knowledge and the NAN statement remover.
+GA+Semantic (GS): The GA with semantic knowledge and without the NAN statement remover.
+GA: The GA without semantic knowledge and the NAN statement remover.
+(2) Baselines: To validate IRA-ACG and API sequence generation, we useTitanFuzz (T) [13] and
+Python unit test generator Ghostwriter (GW) [49] as baselines. Unlike our approach, which
+extractsrequirementsviaLLMsforIRA-ACG(Section3.2),            TitanFuzzgeneratessequencesdirectly
+using LLMs. We extendTitanFuzz’s support beyond PyTorch and TensorFlow to include NumPy,
+CuPy, and Octave. This requires minimal effort asTitanFuzz leverages LLMs for code generation,
+requiringonlyminormodificationstothepromptsandexecutionenvironment.UnlikeArrayDiff,
+GhostwritergeneratesunittestsattheAPIlevel.ItachievedthehighestNumPycoveragein[19]
+by considering NumPy-specific types and semantic constraints (e.g., broadcasting [33] in Table1).
+Ghostwriter is excluded from NumPy–CuPy and Octave evaluations. For CuPy, migrating its
+NumPy-generated tests requires significant manual effort (e.g., converting ndarrays). For Octave,
+Ghostwriter lacks support, and to our knowledge, no unit test generator exists.
+
+
+                                    Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 14 =====
+
+FSE155:14                                                                                                                                   Zhichao Zhou and Jingzhu He
+
+Table4.  Result ofeffectiveness (Differences), efficiency (AUC), validity,and difference-trigger test (Δ Test)
+length. Values are reported as Median (IQR); Italics indicate the best median.
+
+                                                                (a) CuPy 13.3.0 versus NumPy 2.2.2
+      Method       Diff. (Valid| Invalid)           AUC (Valid | Invalid)        Δ Len (Origin | Mini.)               Validity
+      RSN            32 (32-32) | 15 (14-15)          82 (78-82) | 35 (33-37)          135 (134-136) | 8 (8-8)          86% (85%-86%)
+      RS               33 (33-33) | 15 (14-15)           83 (82-85) | 35 (34-36)          131 (129-132) | 8 (8-8)          85% (85%-85%)
+      RA              28 (27-28) | 30 (29-30)           64 (62-64) | 70 (68-70)              19 (19-19) | 6 (6-6)             33% (33%-34%)
+      GSN           27 (27-28) | 13 (12-14)          71 (70-72) | 33 (30-33)          430 (369-532) | 6 (6-6)           90% (89%-91%)
+      GS              28 (27-28) | 13 (12-13)          73 (73-75) | 33 (30-33)          336 (312-393) | 6 (6-6)           90% (88%-90%)
+      GA             18 (18-19) | 21 (20-22)          43 (43-46) | 53 (46-55)             62 (45-65) | 5 (5-5)             63% (62%-63%)
+      T                 14 (14-15) | 29 (27-29)                         - | -                                34 (33-37) | -                 43% (42%-43%)
+                                                                (b) CuPy 13.3.0 versus NumPy 2.1.0
+      Method       Diff. (Valid| Invalid)           AUC (Valid | Invalid)        Δ Len (Origin | Mini.)               Validity
+      RSN            31 (30-32) | 13 (12-13)          81 (79-84) | 33 (31-34)          136 (135-136) | 8 (8-8)          86% (85%-86%)
+      RS               31 (30-31) | 14 (13-14)           82 (78-82) | 36 (33-36)          128 (126-129) | 8 (8-8)          85% (85%-85%)
+      RA              26 (24-26) | 28 (27-28)           64 (61-65) | 69 (66-70)              19 (18-19) | 6 (6-6)             33% (32%-34%)
+      GSN           27 (27-27) | 12 (11-12)          71 (70-72) | 30 (28-31)          275 (219-323) | 6 (6-6)           95% (93%-95%)
+      GS              27 (25-27) | 12 (11-12)          71 (67-71) | 30 (29-31)          231 (182-240) | 6 (6-6)          90% (89%-93%)
+      GA             17 (16-18) | 21 (20-21)          42 (42-43) | 50 (49-53)             23 (23-58) | 5 (5-5)             63% (63%-63%)
+      T                 14 (14-15) | 26 (25-27)                         - | -                                34 (32-36) | -                 42% (39%-43%)
+                                                               (c) NumPy-2.2.2 versus NumPy-1.26.4
+      Method       Diff. (Valid| Invalid)           AUC (Valid | Invalid)        Δ Len (Origin | Mini.)               Validity
+      RSN                  7 (7-7) | 0 (0-0)                   68 (68-69) | 0 (0-0)             220 (218-222) | 9 (8-9)          85% (85%-85%)
+      RS                     7 (7-7) | 0 (0-0)                   69 (68-69) | 0 (0-0)             207 (207-216) | 8 (8-8)          83% (83%-83%)
+      RA                   6 (6-7) | 4 (4-4)                57 (55-64) | 64 (64-64)              19 (19-19) | 6 (6-6)             34% (33%-34%)
+      GSN                  7 (6-7) | 0 (0-0)                   68 (59-68) | 0 (0-0)             376 (321-666) | 7 (7-8)           89% (87%-90%)
+      GS                     7 (7-7) | 0 (0-0)                   69 (68-69) | 0 (0-0)             355 (255-405) | 7 (7-7)          87% (86%-88%)
+      GA                   3 (3-4) | 3 (2-3)                29 (27-36) | 48 (32-49)            28 (24-110) | 6 (5-6)            61% (61%-61%)
+      T                    6 (5-7) | 10 (10-11)                            - | -                                29 (27-35) | -                 62% (62%-62%)
+      GW                  1 (1-1) | 0 (0-0)                              - | -                                       - | -                                    -
+                                                      (d) NumPy on AMD64 versus NumPy on ARM64
+      Method       Diff. (Valid| Invalid)           AUC (Valid | Invalid)        Δ Len (Origin | Mini.)               Validity
+      RSN                  2 (2-2) | 2 (1-2)                63 (63-64) | 89 (49-94)          235 (234-271) | 9 (8-9)          83% (83%-84%)
+      RS                     2 (2-3) | 2 (1-2)                 66 (66-96) | 85 (49-95)         210 (207-219) | 9 (9-10)         82% (82%-82%)
+      RA                    2 (2-2) | 1 (1-1)                63 (54-65) | 49 (49-49)              18 (17-18) | 5 (5-5)             35% (34%-35%)
+      GSN                  2 (1-2) | 1 (1-2)                65 (33-65) | 47 (47-90)          249 (211-255) | 7 (7-8)          83% (82%-83%)
+      GS                     2 (2-2) | 2 (2-2)                65 (65-66) | 96 (90-97)         437 (361-440) | 9 (8-11)          84% (82%-84%)
+      GA                   1 (0-1) | 1 (1-1)                 32 (0-32) | 49 (49-49)             32 (20-148) | 5 (5-6)            60% (60%-61%)
+      T                      1 (1-1) | 2 (2-3)                              - | -                                21 (13-22) | -                 53% (51%-53%)
+      GW                  0 (0-0) | 0 (0-0)                              - | -                                       - | -                                    -
+                                                               (e) Octave-10.2.0 versus Octave-9.4.0
+      Method       Diff. (Valid| Invalid)           AUC (Valid | Invalid)        Δ Len (Origin | Mini.)               Validity
+      RSN                  4 (4-4) | 1 (0-1)                 97 (96-97) | 42 (0-46)           162 (162-163) | 5 (5-5)          78% (78%-78%)
+      RS                     4 (4-4) | 1 (1-1)                 98 (97-98) | 40 (40-48)          165 (164-168) | 5 (5-5)          77% (77%-77%)
+      RA                    4 (3-4) | 1 (1-1)                96 (74-97) | 44 (41-47)             26 (25-26) | 5 (5-6)             34% (33%-34%)
+      GSN                 3 (3-3) | 0 (0-0)                   73 (73-74) | 0 (0-0)             282 (214-335) | 4 (4-4)           80% (79%-80%)
+      GS                    3 (2-3) | 0 (0-0)                   73 (49-74) | 0 (0-0)             254 (212-415) | 4 (4-4)          79% (78%-80%)
+      GA                   2 (2-2) | 0 (0-1)                  49 (48-49) | 0 (0-49)              84 (74-663) | 5 (5-5)            56% (56%-57%)
+      T                      0 (0-0) | 0 (0-0)                              - | -                                    0 (0-0) | -                    45% (42%-45%)
+
+
+
+
+
+
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 15 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                       FSE155:15
+
+Table 5. Pairwise comparisonacross all pairs under test; Eachcell(𝑎,𝑏) denotes the numberof pairs where
+method𝑎 (row) significantly outperforms method𝑏 (column) (𝐴𝑎𝑏 > 0.5,𝑝 < 0.05).
+
+        (a) Valid Differences              (b) Invalid Differences             (c) Valid AUC               (d) Invalid AUC
+
+
+
+ RSN   –    0    2    3    3    5    3    2RSN–    0    0    0    0    0    0    1RSN–    0    2    3    3    5RSN–    0    0    2    1    0
+ RS    0    –    2    2    3    4    4    2RS0    –    0    0    2    0    0    1RS0    –    4    2    3    5RS1    –    0    1    1    1
+ RA    0    0    –    0    0    5    3    2RA3    3    –    4    4    2    1    2RA0    0    –    0    0    5RA3    3    –    4    4    2
+ GSN   0    0    0    –    0    3    3    2GSN0    0    0    –    0    0    0    1GSN0    0    2    –    0    4GSN0    0    0    –    0    0
+ GS    0    0    0    0    –    4    3    2GS0    0    0    0    –    0    0    1GS0    0    2    1    –    4GS0    0    0    0    –    1
+ GA    0    0    0    0    0    –    2    0GA3    3    0    3    3    –    0    2GA0    0    0    0    0    –GA3    3    0    3    3    –
+ T     0    0    0    0    0    0    –    2T3    3    2    3    3    4    –    2
+ GW    0    0    0    0    0    0    0    –GW0    0    0    0    0    0    0    –
+
+•Configuration:ForArrayDiff,theparameters’valuesofRAandGAare200forthepopulation
+size and 50 for the initial tests’ maximum length (see Section3.3). We follow            TitanFuzz’s default
+configuration[13],usingInCoder1.3Bforfuzzingwithatemperatureof1.0.Astheoriginaltest
+seed generator, Codex (code-davinci-002), is deprecated and unavailable, we substitute it with the
+more advanced GPT-5.1-Codex (2025), which is unlikely to degradeTitanFuzz’s effectiveness.
+•Methodology:Foreachpair,werunArrayDifffivetimeswitha10-hoursearchbudget,since
+we observe that difference detection converges before reaching the budget.Ghostwriter accepts
+a NumPy API and deterministically creates tests for it. The tests consist of an API call, an annota-
+tion to describe input validity for random engines to generate diverse valid inputs (see Fig.3b),
+and assertions. We first useGhostwriter to generate tests for 216 NumPy APIs supported by
+ArrayDiff.Then,werepeatfivetimestouseGhostwriter’sdefaultinputenginetoexecuteeach
+API’stests ontwo implementationsuntila testpasses onone implementationandfails onanother
+(i.e., a difference), or the search budget is out. The budget is10 (hours)/216∗2≈ 400 seconds. We
+doublethetimetoensureafairercomparison,becausewhenGhostwriter’stestterminatesupon
+detectinganissue,muchofthebudgetthatcouldbeassignedtoothertestswouldbewasted.While
+TitanFuzzgeneratessequenceslikeArrayDiff,itprocessesAPIsindependentlybygeneratingand
+fuzzingseedsforeachseparately.Wethusallocate400secondsperAPIforTitanFuzz,matching
+Ghostwriter.Thisbudgetstemsfrom(10h/216)×2≈ 400s(where216istheNumPyAPIcount),
+ensuring 400 seconds is also sufficient for Octave’s 249 APIs.
+•EvaluationMetrics:Eachdifferenceofthefinalreportsincludesatestandthedetectiontime
+pointrelativetostartingtheexecution.Weremoveduplicates,recordtheuniquedifferences,andthe
+time first detected. Then, we computea tool’seffectiveness, efficiency[59], Validity, and Difference-
+trigger test length. Effectivenessdenotesthetotalofuniquedifferences.Weregardexception-related
+differences asequivalentif theyare triggeredat thesame codelinewith identicalmessages. For
+data-related issues, weidentify the triggering API,reviewthe runtime information, andexamine
+thesourcecodetodetermineduplicates.Ifduplicationcannotbeconfirmed,wetreatthecaseas
+unique. Efficiencyrefers to the unique count at various time points. Formally, we regard whole
+differences as a set𝐷. We construct𝑃 ={𝑃1,...,𝑃𝑛} for each execution, where𝑃𝑖 = (𝑐,𝑡) is a tuple
+of the percentage of the detection number to |𝐷| (𝑐) and the time point (𝑡). Then, we quantify
+efficiency via the Area-Under-Curve (AUC) [59]:
+                                           Í|𝑃|−1
+                            𝐴𝑈𝐶(𝑃) =         𝑖=1  (𝑃𝑖.𝑐+𝑃𝑖+1.𝑐)×(𝑃𝑖+1.𝑡 −𝑃𝑖.𝑡)
+                                                    2×𝑇𝑜𝑡𝑎𝑙𝑆𝑒𝑎𝑐ℎ𝐵𝑢𝑑𝑔𝑒𝑡          ×100.                              (5)
+AUC’srangeis[0,100].HigherAUCrepresentsbetterefficiency.Specifically,wecomputeeffective-
+nessandefficiencyintwogroups:thosewithvalidinputsandthosewithinvalidinputs.Theformer
+arepotentialbugsthatmattertomaintainers.Thelatteraretrivialformaintainersbutimportantfor
+
+
+                                        Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 16 =====
+
+FSE155:16                                                                                                                                   Zhichao Zhou and Jingzhu He
+
+                                                                       Table 6. Summary of invalid inputs.
+ 1     importnumpy_or_cupyasxp
+ 2     a=xp.array([          1])
+ 3     a[[0,0]]=[      2,3]                                         ParameterType           Reason         Count
+ 4     print(a)                                                                           Invalid shape      28
+ 5     #  numpy:  [3]  cupy:  vary                                                        Invalid value      12
+                                                                         ndarray          Invalid dtype      3
+Fig.7. ReferencedifferencebetweenNumPyand                                                Parameter miss      1
+CuPy.                                                                  non-ndarray        Invalid value      9
+                                                                                         Parameter miss      1
+
+
+migrating developers (e.g., from NumPy to CuPy) to ensure their programs behave normally. After
+the effectiveness and efficiency are calculated, we use Mann-Whitney U Test and Vargha-Delaney
+ ˆ𝐴𝑎𝑏 [2, 69] tocheck whether an approach𝑎 statistically outperformsanother𝑏 ( ˆ𝐴𝑎𝑏 > 0.5 and the
+significantvalue𝑝 issmallerthan 0.05). Validity denotestheproportionofvalidtests,i.e.,those
+thatpassonbothAPimplementationsoraredifference-triggertestswithmanuallyconfirmedvalid
+inputs.Wealsoreportthedifference-triggertestlength,measuredbothbeforeandaftertheMinimize
+procedure(Algorithm6).Efficiencyisnotreportedfor                  TitanFuzzandGhostwriterbecausethey
+utilizeindependentper-APIbudgets,unlikeArrayDiff’sfixedtotalbudget.Furthermore,since
+Ghostwritergeneratesfixed parameterizedtests,metrics tailoredforsequence generators(i.e.,
+validity and test length) are inapplicable to its evaluation.
+•Effectiveness:Table4reports the effectiveness of the evaluated approaches, using the median
+andIQR(interquartilerange,fromthe1stto3rdquartile)ofdetecteddifferences.PairwiseMann-
+Whitney U test results across all approaches are detailed in Table5(a, b). Three key findings
+emerge: (1) semantic-aware ArrayDiff variants significantly outperform their non-semantic
+counterparts on valid inputs. Specifically, RA+Semantic+NaN (RSN) and RA+Semantic (RS) are the
+topperformers,withmedianvaliddifferencesof76and77,respectively.Table5(a)confirmsthey
+significantly surpass other approaches on two to five AP pairs; (2)TitanFuzz (T) andArrayDiff
+RAleadindetectingdifferencesoninvalidinputs,achievingmediantotalsof67and64,respectively.
+Table5(b) confirms they significantly dominate other approaches on two to four test pairs; (3)
+ArrayDiff’s RA variantsoutperform the GA variants.ArrayDiffvariants collectively identify
+47 valid and 39 invalid unique differences. These counts are below the median summary due to
+substantialredundancy(97%)betweenthefirsttwoCuPy/NumPypairs.TitanFuzzdetects26valid
+differences, of which 3 are not detected byArrayDiff, and 40 invalid differences, of which 15
+arenotdetectedbyArrayDiff.GhostwriteronlydetectsonedifferencebetweentwoNumPy
+versions.Itisapreviouslyreportedcrashbug(NumPy-18445)relatedtoaparticularndarraydtype
+timedelat64 for date time computation. Two valid differences between two NumPy versions
+detectedbyTitanFuzzbutnotbyArrayDiffarerelatedtostringandsubarraydtypes,which
+aredocumented API changes.               ArrayDiff does not detect them since it currently only involves
+int, float, and bool. Besides, TitanFuzz reveals a mechanism-level difference between CuPy
+and NumPy using valid inputs, which ArrayDiff fails to detect: CuPy’s__setitem__ exhibits
+differentbehaviorfromNumPywhenintegerarraysreferencethesamememorylocationmultiple
+times. Fig.7provides an example. Line 3 assigns the 0th element of         a twice. NumPy stores the
+value from the last assignment, resulting in a being “[3]”. Such behavior is undefined in CuPy;
+therefore, a’s value may vary.ArrayDiff misses this case because it only generates API calls
+rather than assignment statements, whereas TitanFuzz’s LLM can insert arbitrary statements.
+ArrayDiff and TitanFuzz detect 54 differences caused by invalid inputs, among which 15 are
+detectedonlybyTitanFuzzand14onlybyArrayDiff.Aftermanualreview,wecategorizethemin
+Table6. Invalid shape occupies over half, confirming the importance of our semantic requirements.
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 17 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                       FSE155:17
+
+
+
+
+
+
+
+
+
+
+                                Fig. 8. Differences with valid inputs over time.
+
+
+TitanFuzzdetectstwocaseswithmissingrequiredparametersbecauseitsLLMcaninsertarbitrary
+code. We review the documents and the behavior of the latest version to check whether each
+difference is addressed. Eleven are solved. Two (CuPy-8807andCuPy-9110) are confirmed as a
+NumPy-compatible bug and an illegal-memory-access bug. We list all of them in our artifact.
+•Efficiency:Table4andTable5(c,d)presenttheefficiencyresults.Fig.8illustratesthedetectionof
+valid-inputdifferencesovertime.Tominimizerandomeffects,weonlyreportdifferencesidentified
+in atleast threeout offive runs,using their meandetection time.Under validinputs, thevariants
+with semantic knowledge outperform the other variants for all pairs. Meanwhile, the semantic-
+awarevariantsidentifynearly85%ofallvalid-inputdifferencesincludedinFig.8withinthefirst
+hour.ForAUCunderinvalidinputs,RAisthebestapproachexceptforNumPyonAMD64/ARM64,
+where this pair exhibits only two differences, providing insufficient evidence.
+•Validity: Table4shows that, on average of five pairs, the median proportions of valid tests
+are84%(RA+Semantic+NaN),82%(RA+Semantic),34%(RA),87%(GA+Semantic+NaN),86%(GA
++Semantic),61%(GA),and49%(TitanFuzz).IRA-ACGimprovesRAby48%,andtheNANstatement
+remover improves by 2%. IRA-ACG improves GA by 25%, and the remover improves by 1%. GA
+variants outperformRA variants invalidity, particularlyin the GA–RAcomparison (61% vs.34%).
+The main reason is that GA’s Mutate (see Algorithm6) applies                   Remove, Modify, and Append
+into a test with probability 1/3. Modify and Append may introduce invalidity but Remove does
+not. Meanwhile, the probability of at least one of Modify and Append applied in an iteration is
+1−(1− 1/3)×(1− 1/3) = 5/9, i.e., the probability of introducing invalidity is 5/9. RA always
+applies Append to test in an iteration, i.e., RA theoretically generates 1/(5/9) ≈ 1.8 times more
+invalidteststhanGA,whichisconsistentwithourexperimentaldata((1−0.34)/(1−0.61) ≈ 1.69).
+TitanFuzz’svalidityisnearlyhalfofArrayDiff’svariantswithsemanticknowledge,showingthat
+its LLM (InCoder 1.3B model) for fuzzing has limited capability in generating valid NumPy/CuPy
+and Octave programs, likely due to its relatively small model size. Although more advanced LLMs
+(e.g.,GPT-5andGemini)couldimprovevalidity,thelargenumberofinvocationsduringfuzzing
+would consume a substantial number of tokens and incur high financial costs.
+•Difference-triggertestlength:Table4shows that, averaged over all pairs, the median original
+test length of ArrayDiff’s variants with semantic knowledge is 248, whereas the mean length
+withoutsemanticknowledgeis33.Thisgaparisesbecause,withoutsemanticknowledge,Array-
+Diffcannotgeneratelongandvalidtests,whichinturnimpairsitsabilitytodetectdifferences.
+TitanFuzz’saveragevalidityandtestlengthare0.49and24,respectively.Thesevaluesareclose
+toArrayDiff without semantic knowledge, supporting our argument. The average of allArray-
+Diffvariants’medianminimizedtestlengthsis6,confirmingtheeffectivenessofourMinimize
+procedure and its significant improvement in test readability.
+•Analysis:UsefulnessofIRA-ACG.WeproposetheIRA-ACG(Section3.2)togenerateAPIcalls
+with inputs satisfying LLM-assisted collected semantic requirements (Table1). The experimental
+results of the five pairs confirm the usefulness of IRA-ACG. Note that IRA-ACG still generates
+invalid inputs. One reason is that the IRA-ACG’s semantic requirements only involve the ndarrays’
+
+
+                                    Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 18 =====
+
+FSE155:18                                                                                                                                   Zhichao Zhou and Jingzhu He
+
+shape and data type, not their concrete values. Hence, invalid inputs (e.g., zero for reciprocal)
+could begenerated. Second,the implementationsvary slightly invalidity. We useNumPy-2 asthe
+norm. Hence, others may receive invalid inputs.
+SuperiorityofRA.TheRAvariantsoutperformtheirGAcounterpartsindetectingdifferences.
+The reason is that a coverage criterion, such as statement or method coverage, is insufficient for
+detecting differences [24, 84]. GA thus favors tests covering more code, but ignores other key
+factorslikespecificinputstriggeringexceptions.Incontrast,RArandomlyselectstests,improving
+test diversity. Fig.8shows GA converging earlier than RA, supporting this observation.
+TitanFuzz.TitanFuzz detects fewer valid-input differences than semantic-awareArrayDiff,
+butmorewithinvalidinputsthanArrayDiff’sallvariants.Forvalidinputs,theprimaryreason
+isthat theInCoder1.3Bmodel (theLLMusedbyTitanFuzzforfuzzing) haslimitedcapacityto
+generatevalidprogramsmainlyduetoitsrelativelysmallparametersize.Usinglargermodelssuch
+asGPT-5mayimproveTitanFuzz’sperformance;however,unliketheInCoder1.3Bmodel,they
+aredifficulttodeploylocallyinpracticeandwouldincursubstantialcostsfrommodelproviders
+duetomassivetokenconsumptionduringfuzzing,confirmingArrayDiff’sresource-efficiency
+advantage.Forinvalid inputs,unlikeArrayDiff,whichalways generatesAPIcallswith required
+parameters (with valid/invalid values),TitanFuzz’s LLM produces any statements (e.g., API calls
+with missing or incorrectly typed parameters). Hence, it reveals more invalid-input differences.
+                                                        Ghostwriter.TworeasonscauseGhostwriter’s
+
+ 1     importnumpyasnp                                  poor performance. First, it misses program behav-
+
+ 2     a1=np.flipud(np.array([                                1,2]))#  a1:  [2,  1]ior, such as not taking the various APIs’ outputs
+ 3     a2=np.empty((),  dtype="int64")                  as inputs and only using the default values for op-
+ 4     np.min(a1,  out=a2)
+ 5     assert  a2.item()==                    1  #2!=1  tional parameters. Second, it produces inadequate
+                                                        assertions:Itonlychecksshapeanddtypeinsteadof
+ Fig. 9.NumPy-27820:                          min’s incorrect output.values. The bug shown in Fig.9detected by        Array-
+                                                        Diff exemplifies Ghostwriter’s limitations:min
+                                                        outputs 2 for [2,1]. Triggering it requires that (1)
+creating [2,1] viaflipudinsteadofdirectcreation,(2)usingoutoptionalparametertostorethe
+result in a2, (3) and asserting the a2’s value.Ghostwriter satisfies none of these conditions.
+Two NumPy-CuPy pairs. We evaluate CuPy-13.3.0 against both NumPy-2.1.0 (CuPy-13.3.0’s
+officially supported version) and 2.2.2 (to match the version used in our other pairs). Findings
+are 97%identical (67/69 differences),as NumPy’sevolutionfrom 2.1.0to 2.2.2 primarilyinvolved
+non-breaking bug fixes. A unique finding in 2.1.0 identified a bug (Fig.9) fixed in 2.2.2 after our
+report.Oneinvalid-inputdifferencedetectedonlyin2.2.2alsoexistsin2.1.0,butwasmissed.The
+reason may be due to the algorithm’s randomness.
+
+  AnswertoRQ2: ArrayDiff’s RA variants with semantic knowledge detect more valid dif-
+  ferencesandachievehigherefficiencythanothervariantsandbaselines.TheNaNstatement
+  remover improves test validity but yields no significant improvement in difference detection.
+  Our Minimize procedure produces significantly shorter difference-triggering tests.
+
+4.3   RQ3: Root Causes of Differences
+ThisRQinvestigatestherootcausesofthe50differenceswithvalidinputs.Weexcludetheonlyone
+difference detected byGhostwriter since it has been reported and still unfixed (NumPy-18445),
+and those with invalid inputs, as their root causes originate from input invalidity rather than
+actual implementationinconsistencies. Specifically,ArrayDiff identifies 47differences, with24
+being unique to it, whereasTitanFuzz detects 26 cases, including only three exclusive findings.
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 19 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                       FSE155:19
+
+
+
+   Table 7. Summary of reviewed differences.            •Methodology: We first verify each difference in
+                                                        the latest version, the documentation, and the re-
+ Library    VerifiedBug      API       False    All     port’s existence in GitHub. If it is not solved, we
+           (Novel | Fixed) Changes    Positive          report it to GitHub. We mark it with one of the fol-
+  CuPy       15 (14 | 3)      0          8       23
+ NumPy        4 (4 | 3)       5          1       10     lowing tags: VerifiedBug, APIChange, FalsePositive,
+  Octave         0            3          1       4      PendingReview.Finally,weanalyzeitsrootcauseifit
+   All       19 (18 | 6)      8          10      37
+                                                        isa fixedbug, anapi change,or afalsepositive. We
+                                                        require the bug to be fixed to determine its cause.
+                                                        •RootCauses: Table7presents the summary of 37
+                                                        revieweddifferences.19casesarebugs:onewaspre-
+                                                       viouslyreported,and6havebeenfixed.Hence,we
+                                                        analyzetherootcausesof24differences,including
+                                                        6 fixed bugs, 8 API changes, and 10 false positives.
+                                                        Fig.10presents them:
+                                                        Fixed Bugs (6). The root cause of the three fixed
+                                                        bugs (CuPy-8782,CuPy-8784, andCuPy-8806) is
+                                                        the misuse of the optional parameters. For example,
+                                                        CuPy-8782describes that the                   nanargmin API mis-
+                                                        matchestwoparameterswhenusingthemasacall’s
+                                                        inputs, triggering a crash. Two bugs (NumPy-27783
+       Fig. 10. Root causes of differences.             andNumPy-27820) are due to corner cases, result-
+                                                        ing inincorrect results.For example,NumPy-27783
+                                                        shows that an auxiliary function __array_wrap__
+behavesincorrectlyonndarrayswithaparticularPY_TYPE(aproperty)value.Third,specialfloating-
+pointvalues(InfandNaN)oftentriggerdifferences.Theirnon-standardhandlingrequirements
+significantlycomplicateimplementation.NumPy-27902showsthat                                                 dotvariesinNaNsfordifferent-
+shaped ndarrays. Seven unfixed bugs are also related to Inf and NaN.
+APIChanges(8). Six differencesare due to APIchanges.NumPy-27969andNumPy-27971report
+two cases where NumPy-2 and CuPy/NumPy-1 vary in the data type of the API’s output. They
+alsovaryintheoutput’sshapeoflinalg.solve.Theevaluationalsodetectsfivechangeslistedin
+release noteof NumPy-2andOctave-10(2by                            TitanFuzz). Forexample, Octave’svarnow raises
+an error for non-float inputs to preventan overflow bug.
+FalsePositives(10).NumericerrorsyieldfourbenignNumPy-CuPydifferencesandoneinOctave.
+CuPy-8755reports that they vary in an integer computation. The reason is that even if users
+declareanintegerndarray,CuPytreatsitselementsasfloating-pointtypeintheGPUcomputation.
+AnotherissuerelatedtotheGPUisthefloat16precisiondifferencebetweenGPUandCPU(posted
+inCuPy-9086posted by others).CuPy-8736reports that the results of applying                                                    prod on numbers
+are different. The reason is the difference in computation order. Different computation orders
+causedifferentintermediateerrors,therebyaffectingnumericalaccuracy[34].Thelastoneisthat
+ndarrays may have a numeric error that we allow (see Formula1), but using them as the inputs
+triggers a difference. For example, we may get a0 and 1−8 from NumPy and CuPy. The difference
+issmallerthanourthreshold(1−7),butcallingsignreturnsa 0(zero)and 1(positive),leadingto
+an unignorable error. Such a difference exists in Octave, too. Two differencesare due to undefined
+behaviors: NumPy’sreshape and empty do not guarantee the output ndarray’s memory layout.
+CuPy-8779highlightsaperformance-drivendivergence:while                  ravelaffectsarraycontiguity,CuPy
+doesnotguaranteeNumPy-identicalpropertiestominimizeexecutionoverhead.Fig.7presents
+another changeof CuPy forperformance, detected byTitanFuzz, wheninteger arrays reference
+
+
+                                     Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 20 =====
+
+FSE155:20                                                                                                                                   Zhichao Zhou and Jingzhu He
+
+the same memory location multiple times.NumPy-28376shows that                                 signbit for NaN differs on
+AMD64andARM64becausetheirlow-leveldependenciesrepresenttheNaNsignbitinconsistently.
+•Analysis: Octave yields significantly fewer differences. The main reasons are its simplicity and
+maturity. Unlike NumPy/CuPy, Octave avoids view-related bugs (e.g., the view created by flipud
+inFig.9)byreturningfresharraysratherthanviews[       33].Moreover,withastablecodebasesince
+version 4 (2015), Octave offers greater consistency than rapidly evolving NumPy and CuPy.
+
+  AnswertoRQ3: Theprimaryrootcausesofthedetecteddifferenceswithvalidinputsinclude
+  program bugs, API changes, and numerical errors caused by platform differences.
+
+5   Discussion
+5.1   Choice of AP Pairs under Test
+Section4.2chooses five AP pairs for differential testing. NumPy/CuPy versus Octave is not chosen.
+                                                      NumPy view mechanism [33] makes many shared
+
+  1     importnumpyasnp                            #  OctaveAPIsbyNumPyandOctaveunsuitableforsequence-
+
+  2     a=np.array([[          1.],  [2.]])#  a  =  [1.;  2.]level testing. Fig.11shows this: updating          a also mod-
+  3     b=np.flipud(a)#  b  =  flipud(a)              ifiesitsviewb(flipud(a)),whereasOctave’sbuses
+  4     np.exp2(a,  out=a)#  a(:)  =  2  .^  a
+  5     # np b: [[2.], [4.]] octave b: [[2.], [1.]]   new memory and remains unchanged. Widespread
+                                                      use of NumPy views leads to an excess of such false
+      Fig. 11. NumPy’s view mechanism.                positives,maskingrealdifferences.Restrictingteststo
+                                                      non-view APIs is counterproductive, as view-related
+                                                      bugs constitute the majority of our bug findings.
+
+5.2   Threats to Validity
+Randomness. The algorithm randomness is a threat. To enhance the result’s stability, we run
+ArrayDiff and other baselines for 10 hours, five times.
+Limitations. ArrayDiff may miss certain crash-related bugs, as it marks a test invalid if both
+implementations crash. It also misses differences due to the threshold for float values.
+Parameters.RA andGA have two parameters(see Algorithm4and5) tocontrol the population
+sizeandtheinitialtestlength.Smallervaluesreducethetestdiversity.Largervaluesspendmore
+timerunningtests,reducingtheiterationrounds.Therefore,bothlargeandsmallnumbersmay
+weaken the performance. We plan to study them in the future.
+Experimentalsubjects. We pick five pairsas the subjects. RQ2’s results of all pairs(Section4.2)
+show that IRA-ACG stably enhancesArrayDiff in generating valid inputs.
+
+6   Conclusion
+We propose ArrayDiff, a differential tester for AP frameworks. It contains an LLM-assisted
+requirementcollectorandarequirement-awareAPIcallgenerator(IRA-ACG).ArrayDiffintegrates
+search algorithms to evolve API call sequences based on the IRA-ACG for difference detection.
+ExperimentalresultsshowthatIRA-ACGimprovesArrayDiffindetectingvalid-inputdifferences.
+
+7   Data-Availability Statement
+We presentArrayDiff’s prototype, experimental data, and detection details at Zenodo [83].
+
+Acknowledgments
+Wethanktheanonymousreviewersfortheirinsightfulcommentsandfeedback.Thisworkwas
+supported by ShanghaiTech.
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 21 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                       FSE155:21
+
+References
+ [1] MartínAbadi,PaulBarham,JianminChen,ZhifengChen,AndyDavis,JeffreyDean,MatthieuDevin,SanjayGhemawat,
+      GeoffreyIrving,MichaelIsard,etal.2016. {TensorFlow}:asystemfor{Large-Scale} machinelearning.In Proceedings
+      of OSDI. 265–283.doi:10.48550/arXiv.1605.08695
+ [2] AndreaArcuriandLionelBriand.2014. Ahitchhiker’sguidetostatisticaltestsforassessingrandomizedalgorithmsin
+      software engineering. Software Testing, Verification and Reliability 24, 3 (2014), 219–250.doi:10.1002/stvr.1486
+ [3] Andrea Arcuri and Juan P Galeotti. 2020.  Handling SQL databases in automated system test generation.  ACM
+      Transactions on Software Engineering and Methodology (TOSEM) 29, 4 (2020), 1–31.doi:10.1145/3391533
+ [4] Jakub Bachurski and Alan Mycroft. 2024.  Points for Free: Embedding Pointful Array Programming in Python. In
+      Proceedings of ARRAY. 1–12.doi:10.1145/3652586.3663312
+ [5] Jakub Bachurski,Alan Mycroft, andDominic Orchard. 2025. StructuringArrays with Algebraic Shapes. In Proceedings
+      of ARRAY. 1–16.doi:10.1145/3736112.3736141
+ [6] MichaelBauerandMichaelGarland.2019. LegateNumPy:Acceleratedanddistributedarraycomputing.InProceedings
+      of SC. 1–23.doi:10.1145/3295500.3356175
+ [7] Tim Besard, Christophe Foket, and Bjorn De Sutter. 2018. Effective Extensible Programming: Unleashing Julia on
+      GPUs. IEEE Transactions on Parallel and Distributed Systems (2018).doi:10.1109/TPDS.2018.2872064
+ [8] JoséCampos,YanGe,NasserAlbunian,GordonFraser,MarceloEler,andAndreaArcuri.2018. Anempiricalevaluation
+      of evolutionary algorithms for unit test suite generation. Information and Software Technology 104 (2018), 207–235.
+      doi:10.1016/j.infsof.2018.08.010
+ [9] Peter JA Cock, Tiago Antao, Jeffrey T Chang, Brad A Chapman, et al. 2009.  Biopython: freely available Python
+      tools for computational molecular biology and bioinformatics. Bioinformatics 25, 11 (2009), 1422–1423.doi:10.1093/
+      bioinformatics/btp163
+[10] ErmiraDaka,JoséMiguelRojas,andGordonFraser.2017. Generatingunittestswithdescriptivenamesor:Wouldyou
+      name your children thing1 and thing2?. In Proceedings of ISSTA. 57–67.doi:10.1145/3092703.3092727
+[11] AmirhosseinDeljouyi,RohamKoohestani,MalihehIzadi,andAndyZaidman.2025. LeveragingLargeLanguageModels
+      forEnhancingtheUnderstandabilityofGeneratedUnitTests.InProceedingsofICSE.doi:10.1109/ICSE55347.2025.00032
+[12] YinlinDeng, ChunqiuStevenXia, ZhezhenCao, MeiziniuLi,and LingmingZhang.2024. Can LLMsimplicitlylearn
+      numeric parameter constraints in data science APIs? Advances in Neural Information Processing Systems 37 (2024),
+      54205–54238.doi:10.52202/079017-1718
+[13] YinlinDeng,ChunqiuStevenXia,HaoranPeng,ChenyuanYang,andLingmingZhang.2023. Largelanguagemodels
+      are zero-shot fuzzers: Fuzzing deep-learning libraries via large language models. In Proceedings of ISSTA. 423–435.
+      doi:10.1145/3597926.3598067
+[14] YinlinDeng, ChenyuanYang,AnjiangWei,andLingming Zhang.2022. Fuzzingdeep-learning librariesviaautomated
+      relational api inference. In Proceedings of ESEC/FSE. 44–56.doi:10.1145/3540250.3549085
+[15] AnthonyDiFranco,HuiGuo,andCindyRubio-González.2017. Acomprehensivestudyofreal-worldnumericalbug
+      characteristics. In Proceedings of ASE. IEEE, 509–519.doi:10.1109/ASE.2017.8115662
+[16] Zhen Dong, MarcelBöhme, Lucia Cojocaru, andAbhik Roychoudhury. 2020. Time-traveltesting of android apps. In
+      Proceedings of ICSE. 481–492.doi:10.1145/3377811.3380402
+[17] Martin Eberlein, Yannic Noller, Thomas Vogel, and Lars Grunske. 2020.  Evolutionary grammar-based fuzzing. In
+      International Symposium on Search Based Software Engineering. Springer, 105–120.doi:10.1007/978-3-030-59762-7_8
+[18] JueonEom,SeyeonJeong,andTaekyoungKwon.2024. Fuzzingjavascriptinterpreterswithcoverage-guidedreinforce-
+      ment learning for llm-based mutation. In Proceedings of ISSTA. 1656–1668.doi:10.1145/3650212.3680389
+[19] NicolasErni,MohammedAl-Ameen,ChristianBirchler,PouriaDerakhshanfar,StephanLukasczyk,andSebastiano
+      Panichella. 2024.  SBFT tool competition 2024-python test case generation track. In Proceedings of SBFT. 37–40.
+      doi:10.1145/3643659.3643930
+[20] Robert BEvans andAlberto Savoia.2007. Differential testing:a newapproach tochange detection. InProceedings of
+      ESEC-FSE companion. 549–552.doi:10.1145/1295014.1295038
+[21] Gordon Fraser and Andrea Arcuri. 2011. EvoSuite: Automatic Test Suite Generation for Object-Oriented Software. In
+      Proceedings of ESEC/FSE. 416–419.doi:10.1145/2025113.2025179
+[22] GordonFraserandAndreaArcuri.2013. WholeTestSuiteGeneration. IEEE Transactions on Software Engineering 39,2
+      (2013), 276–291.doi:10.1109/TSE.2012.14
+[23] Gordon Fraser and Andreas Zeller. 2010. Mutation-driven generation of unit tests and oracles. In Proceedings of ISSTA.
+      147–158.doi:10.1145/1831708.1831728
+[24] Gregory Gay. 2017. Generating effectivetest suites by combining coverage criteria. InInternational Symposium on
+      Search Based Software Engineering. Springer, 65–82.doi:10.1007/978-3-319-66299-2_5
+[25] M N Gevorkyan, A V Demidova, A V Korolkova, and D S Kulyabov. 2019. Statistically significant performance testing
+      ofJuliascientificprogramminglanguage. Journal of Physics: Conference Series 1205,1(2019),012017.doi:10.1088/1742-
+
+
+                                            Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 22 =====
+
+FSE155:22                                                                                                                                   Zhichao Zhou and Jingzhu He
+
+
+      6596/1205/1/012017
+[26] PatriceGodefroid,AdamKiezun,andMichaelYLevin.2008. Grammar-basedwhiteboxfuzzing.In Proceedings of PLDI.
+      206–215.doi:10.1145/1375581.1375607
+[27] HarrisonGoldstein,JosephWCutler,DanielDickstein,BenjaminCPierce,andAndrewHead.2024. Property-based
+      testing in practice. In Proceedings of ICSE. 1–13.doi:10.1145/3597503.3639581
+[28] GiovanniGrano,ChristophLaaber,AnnibalePanichella,andSebastianoPanichella.2019. Testingwithfewerresources:
+      Anadaptiveapproachtoperformance-awaretestcasegeneration. IEEE Transactions on Software Engineering 47,11
+      (2019), 2332–2347.doi:10.1109/TSE.2019.2946773
+[29] MuhammadAliGulzar,YongkangZhu,andXiaofengHan.2019. Perceptionandpracticesofdifferentialtesting.In
+      Proceedings of ICSE-SEIP. IEEE, 71–80.doi:10.1109/ICSE-SEIP.2019.00016
+[30] Daya Guo, Dejian Yang,Haowei Zhang,Junxiao Song,Ruoyu Zhang,Runxin Xu, QihaoZhu, ShirongMa, Peiyi Wang,
+      Xiao Bi, et al. 2025. DeepSeek-R1 incentivizes reasoning in LLMs through reinforcement learning.  Nature (2025).
+      doi:10.1038/s41586-025-09422-z
+[31] QianyuGuo,XiaofeiXie,YiLi,XiaoyuZhang,YangLiu,XiaohongLi,andChaoShen.2020. Audee:Automatedtesting
+      for deep learning frameworks. In Proceedings of ASE. 486–498.doi:10.1145/3324884.3416571
+[32] FitashUlHaq,DonghwanShin,LionelC Briand,ThomasStifter,andJunWang.2021. Automatictestsuite generation
+      for key-points detection DNNs using many-objective search (experience paper). In Proceedings of ISSTA. 91–102.
+      doi:10.1145/3460319.3464802
+[33] CharlesRHarris,KJarrodMillman,StéfanJVanDerWalt,etal.2020. ArrayprogrammingwithNumPy. Nature 585,
+      7825 (2020), 357–362.doi:10.1038/s41586-020-2649-2
+[34]Nicholas J Higham. 2002.        Accuracy and stability of numerical algorithms. SIAM.doi:10.1137/1.9780898718027.bm
+[35] YueJiaandMarkHarman.2008. ConstructingSubtleFaultsUsingHigherOrderMutationTesting.In Proceedings of
+      SCAM. 249 – 258.doi:10.1109/SCAM.2008.36
+[36] YueJiaandMarkHarman.2011. AnAnalysisandSurveyoftheDevelopmentofMutationTesting. IEEE Transactions
+      on Software Engineering 37, 5 (2011), 649–678.doi:10.1109/TSE.2010.62
+[37] JRobertJohansson,PaulDNation,andFrancoNori.2012. QuTiP:Anopen-sourcePythonframeworkforthedynamics
+      of open quantum systems. Computer physics communications 183, 8 (2012), 1760–1772.doi:10.1016/j.cpc.2012.02.021
+[38] PhilKim.2017. Matlabdeeplearning. With machine learning, neural networks and artificial intelligence130,21(2017),
+      151.doi:10.1007/978-1-4842-2845-6
+[39] Sebastian Krämer, David Plankensteiner, Laurin Ostermann, and Helmut Ritsch. 2018. QuantumOptics. jl: A Julia
+      frameworkforsimulatingopenquantumsystems. ComputerPhysicsCommunications 227(2018),109–116.doi:10.1016/
+      j.cpc.2018.02.004
+[40] Xuan-Bach D Le, Corina Pasareanu, Rohan Padhye, David Lo, Willem Visser, and Koushik Sen. 2021.   Saffron:
+      Adaptivegrammar-basedfuzzingforworst-caseanalysis. ACMSIGSOFTSoftwareEngineeringNotes 44,4(2021),14–14.
+      doi:10.1145/3364452.3364455
+[41] MeiziniuLi,DongzeLi,JianmengLiu,JialunCao,YongqiangTian,andShing-ChiCheung.2026. EnhancingDifferential
+      TestingWithLLMsForTestingDeepLearningLibraries. ACM Transactions on Software Engineering and Methodology
+      (2026).doi:10.1145/3735637
+[42] XinyiLi,MarkBaranowski,HarveyDam,andGaneshGopalakrishnan.2025. ArrayProgrammingonGPUs:Challenges
+      and Opportunities. In Proceedings of ARRAY. 41–52.doi:10.1145/3736112.3736144
+[43] Jiawei Liu, Yuheng Huang, Zhijie Wang, Lei Ma, Chunrong Fang, Mingzheng Gu, Xufan Zhang, and Zhenyu Chen.
+      2023. Generation-based differential fuzzing for deep learning libraries. ACM Transactions on Software Engineering and
+      Methodology 33, 2 (2023), 1–28.doi:10.1145/3628159
+[44] Jiawei Liu, Jinkun Lin, Fabian Ruffy, Cheng Tan, Jinyang Li, Aurojit Panda, and Lingming Zhang. 2023. Nnsmith:
+      Generating diverseand valid testcases for deeplearning compilers. In Proceedings of ASPLOS. 530–543.doi:10.1145/
+      3575693.3575707
+[45] ZheLiu,ChunyangChen,JunjieWang,MengzhuoChen,BoyuWu,XingChe,DandanWang,andQingWang.2024.
+      Makellmatestingexpert:Bringinghuman-likeinteractiontomobileguitestingviafunctionality-awaredecisions.In
+      Proceedings of ICSE. 1–13.doi:10.1145/3597503.3639180
+[46] Carlo Lucibello and Aurora Rossi. 2025. GraphNeuralNetworks. jl: Deep Learning on Graphs with Julia. Journal of
+      Machine Learning Research 26, 80 (2025), 1–6.doi:10.48550/arXiv.2412.06354
+[47] StephanLukasczykand GordonFraser.2022. Pynguin: Automatedunittestgeneration forpython.In Proceedings of
+      ICSE-Companion. 168–172.doi:10.1145/3510454.3516829
+[48] Stephan Lukasczyk,Florian Kroiß,and GordonFraser. 2023. An empiricalstudy ofautomated unit testgeneration for
+      Python. Empirical Software Engineering 28, 2 (2023), 36.doi:10.1007/s10664-022-10248-w
+[49]David R MacIver, Zac Hatfield-Dodds, et al. 2019. Hypothesis: A new approach to property-based testing.        Journal of
+      Open Source Software 4, 43 (2019), 1891.doi:10.21105/joss.01891
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 23 =====
+
+LLM-Assisted Input-Requirement-Aware Differential Testing of Array Programming Frameworks                       FSE155:23
+
+
+[50] Ke Mao, Mark Harman, and Yue Jia. 2016. Sapienz: Multi-objective automated testing for android applications. In
+      Proceedings of ISSTA. 94–105.doi:10.1145/2931037.2931054
+[51] Wendy L Martinez, Angel R Martinez, and Jeffrey Solka. 2017. Exploratory data analysis with MATLAB.doi:10.1201/
+      b10434
+[52] CleveMoler and JackLittle. 2020. A history ofMATLAB. Proceedings of the ACM on Programming Languages 4, HOPL
+      (2020), 1–67.doi:10.1145/3386331
+[53] Sandeep Nagar. 2017. Introduction to Octave. In Introduction to Octave: For Engineers and Scientists. Springer, 1–16.
+      doi:10.1007/978-1-4842-3201-9_1
+[54] P.Ngatchou,A.Zarei,andA.El-Sharkawi.2005. ParetoMultiObjectiveOptimization.In Proceedings of ISAP.84–91.
+      doi:10.1109/ISAP.2005.1599245
+[55] YaroslavOliinyk, Michael Scott, Ryan Tsang, Chongzhou Fang, HoumanHomayoun, et al. 2024. Fuzzing {BusyBox}:
+      Leveraging {LLM} and Crash Reuse for Embedded Bug Unearthing. In Proceedings of USENIX Security. 883–900.
+      doi:10.48550/arXiv.2403.03897
+[56] ShiwenOu, Yuwei Li, LuYu,Chengkun Wei,Tingke Wen, QiangpuChen, Yu Chen,Haizhi Tang, andZulie Pan. 2025.
+      MirrorFuzz: Leveraging LLM and Shared Bugs for Deep Learning Framework APIs Fuzzing. IEEE Transactions on
+      Software Engineering (2025).doi:10.1109/TSE.2025.3619966
+[57] CarlosPachecoandMichaelDErnst.2007. Randoop:feedback-directedrandomtestingforJava.InOOPSLA-Companion.
+      815–816.doi:10.1145/1297846.1297902
+[58] Annibale Panichella, Fitsum Meshesha Kifetew, and Paolo Tonella. 2015.   Reformulating Branch Coverage as a
+      Many-Objective Optimization Problem. In Proceedings of ICST. 1–10.doi:10.1109/ICST.2015.7102604
+[59] Annibale Panichella, Fitsum Meshesha Kifetew, and Paolo Tonella. 2018. Automated Test Case Generation as a Many-
+      ObjectiveOptimisationProblemwithDynamicSelectionoftheTargets. IEEE Transactions on Software Engineering 44
+      (2018), 122–158.doi:10.1109/TSE.2017.2663435
+[60]Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, et al. 2019. Pytorch: An imperative style, high-performance
+      deep learning library. Advances in neural information processing systems 32 (2019).doi:10.48550/arXiv.1912.01703
+[61] Adam Paszke, Daniel D Johnson, David Duvenaud, Dimitrios Vytiniotis, Alexey Radul, Matthew J Johnson, Jonathan
+      Ragan-Kelley, and Dougal Maclaurin. 2021. Getting to the point: index sets and parallelism-preserving autodiff for
+      pointful array programming. Proceedings of the ACM on Programming Languages 5, ICFP (2021), 1–29.doi:10.1145/
+      3473593
+[62] JonathanPeirce,JeremyRGray,SolSimpson,MichaelMacAskill,RichardHöchenberger,HiroyukiSogo,ErikKastman,
+      and JonasKristoffer Lindeløv. 2019. PsychoPy2: Experimentsin behaviormade easy. Behavior research methods 51
+      (2019), 195–203.doi:10.3758/s13428-018-01193-y
+[63] Jeffrey M Perkel et al. 2019.   Julia: come for the syntax, stay for the speed.   Nature 572, 7767 (2019), 141–142.
+      doi:10.1038/d41586-019-02310-3
+[64] AlexanderProchnowandJinqiuYang.2022. DiffWatch:watchoutfortheevolvingdifferentialtestingindeeplearning
+      libraries. In Proceedings ICSE-Companion. 46–50.doi:10.1145/3510454.3516835
+[65] Thomas P Robitaille, Erik J Tollerud, Perry Greenfield, Michael Droettboom, Erik Bray, Tom Aldcroft, Matt Davis,
+      Adam Ginsburg, Adrian M Price-Whelan, Wolfgang E Kerzendorf, et al. 2013. Astropy: A community Python package
+      for astronomy. Astronomy & Astrophysics 558 (2013), A33.doi:10.1051/0004-6361/201322068
+[66] JoséMiguelRojas,JoséCampos,MattiaVivanti,GordonFraser,andAndreaArcuri.2015. CombiningMultipleCoverage
+      Criteria inSearch-Based Unit TestGeneration. In Search-Based Software Engineering, MárcioBarros andYvanLabiche
+      (Eds.). 93–108.doi:10.1007/978-3-319-22183-0_7
+[67] Devjeet Roy, Ziyi Zhang, Maggie Ma, Venera Arnaoudova, Annibale Panichella, Sebastiano Panichella, Danielle
+      Gonzalez,andMehdiMirakhorli.2020. DeepTC-Enhancer:Improvingthereadabilityofautomaticallygeneratedtests.
+      In Proceedings of ASE. 287–298.doi:10.1145/3324884.3416622
+[68]Paolo Tonella. 2004. Evolutionary Testing of Classes. In       Proceedings of ISSTA. 119–128.doi:10.1145/1007512.1007528
+[69] András Vargha and Harold D Delaney. 2000. A critique and improvement of the CL common language effect size
+      statistics of McGraw and Wong. Journal of Educational and Behavioral Statistics 25, 2 (2000), 101–132.doi:10.3102/
+      10769986025002101
+[70] PauliVirtanen,RalfGommers,TravisE.Oliphant,MattHaberland,etal.2020. SciPy1.0:FundamentalAlgorithmsfor
+      Scientific Computing in Python. Nature Methods 17 (2020), 261–272.doi:10.1038/s41592-019-0686-2
+[71] Junjie Wang, Bihuan Chen, LeiWei, and Yang Liu. 2019. Superion: Grammar-aware greybox fuzzing. In Proceedings of
+      ICSE. IEEE, 724–735.doi:10.1109/ICSE.2019.00081
+[72] Junjie Wang, Yuchao Huang, Chunyang Chen, Zhe Liu, Song Wang, and Qing Wang. 2024. Software testing with
+      large language models: Survey, landscape, and vision. IEEE Transactions on Software Engineering 50, 4 (2024), 911–936.
+      doi:10.1109/TSE.2024.3368208
+
+
+
+                                             Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.
+
+===== GV-07 PDF PAGE 24 =====
+
+FSE155:24                                                                                                                                   Zhichao Zhou and Jingzhu He
+
+
+[73] Jiannan Wang, Hung Viet Pham, Qi Li, Lin Tan, Yu Guo, Adnan Aziz, and Erik Meijer. 2024.   D 3: Differential
+      Testing of Distributed Deep Learning with Model Generation.  IEEE Transactions on Software Engineering (2024).
+      doi:10.1109/TSE.2024.3461657
+[74] Song Wang, Nishtha Shrestha, Abarna Kucheri Subburaman, Junjie Wang, Moshi Wei, and Nachiappan Nagappan.
+      2021.  Automatic Unit Test Generation for Machine Learning Libraries: How Far Are We?. In Proceedings of ICSE.
+      1548–1560.doi:10.1109/ICSE43902.2021.00138
+[75] TaiyanWang,RuipengWang,YuChen,LuYu,ZuliePan,MinZhang,HuiminMa,andJinghuaZheng.2024. Enhancing
+      Black-box CompilerOption Fuzzing with LLMthrough Command Feedback.In Proceedings of ISSRE. IEEE,319–330.
+      doi:10.1109/ISSRE62328.2024.00039
+[76] Zan Wang, Ming Yan, Junjie Chen, ShuangLiu, and Dongdi Zhang. 2020. Deep learning library testing via effective
+      model generation. In Proceedings of ESEC/FSE. 788–799.doi:10.1145/3368089.3409761
+[77] Anjiang Wei, Yinlin Deng, Chenyuan Yang, and Lingming Zhang. 2022. Free lunch for testing: Fuzzing deep-learning
+      libraries from open source. In Proceedings of ICSE. 995–1007.doi:10.1145/3510003.3510041
+[78] Wes McKinney. 2010. Data Structures for Statistical Computing in Python. In Proceedings of SciPy. 56 – 61.doi:10.
+      25080/Majora-92bf1922-00a
+[79] Chenyuan Yang, Yinlin Deng, Jiayi Yao, Yuxing Tu, Hanchi Li, and Lingming Zhang. 2023.   Fuzzing automatic
+      differentiation in deep-learning libraries. InProceedings of ICSE. IEEE, 1174–1186.doi:10.1109/ICSE48619.2023.00105
+[80] Kohsuke Yatoh, Kazunori Sakamoto, Fuyuki Ishikawa, and Shinichi Honiden. 2015. Feedback-controlled random test
+      generation. In Proceedings of ISSTA. 316–326.doi:10.1145/2771783.2771805
+[81] Bo Zhang, Hongyu Zhang, Junjie Chen, Dan Hao, and Pablo Moscato. 2019. Automatic Discovery and Cleansing of
+      Numerical Metamorphic Relations. In Proceedings of ICSME. 235–245.doi:10.1109/ICSME.2019.00035
+[82] TongZhou,JunShirako,andVivekSarkar.2024. APPy:AnnotatedParallelismforPythononGPUs.In Proceedings of
+      CC. 113–125.doi:10.1145/3640537.3641575
+[83] Zhichao Zhou and Jingzhu He. 2026. Artifact for Article ‘LLM-Assisted Input-Requirement-Aware Differential Testing
+      of Array Programming Frameworks’. Zenodo.doi:10.5281/zenodo.19312972
+[84] ZhichaoZhou,YumingZhou,ChunrongFang,ZhenyuChen,XiapuLuo,JingzhuHe,andYutianTang.2024. Coverage
+      goal selector for combining multiple criteria in search-based unit test generation.  IEEE Transactions on Software
+      Engineering 50, 4 (2024), 854–883.doi:10.1109/TSE.2024.3366613
+[85] AlexandrosNikolaosZiogas,TalBen-Nun,TimoSchneider,andTorstenHoefler.2021. NPBench:Abenchmarking
+      suite for high-performance NumPy. In Proceedings of ICS. 63–74.doi:10.1145/3447818.3460360
+
+Received 2026-02-20; accepted 2026-03-24
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. FSE, Article FSE155. Publication date: July 2026.

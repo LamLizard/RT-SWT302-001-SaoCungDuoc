@@ -1,0 +1,15 @@
+{
+  "id": "GV-02",
+  "pdf": "Paper-source/44-GV-02-RESTestBench.pdf",
+  "pages_read": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "factors": {
+    "P": {"sign": "✓", "reason": "Đề xuất và thực nghiệm chính trên RESTestBench, ba dịch vụ FastAPI/TodoApp/NestJS RealWorld. Table3 dùng106 yêu cầu và228 mutations, khác mẫu45 dự kiến của nhóm.", "locator": "§3/PDF3–6; Table2/PDF4; Table3/PDF6", "confidence": "high"},
+    "I": {"sign": "·", "reason": "Can thiệp là single-step LLM generation so với refinement loop, biến thể precise/vague requirements và10 LLMs. Không có EP/BVA hay generator phân hoạch/biên được triển khai thành kỹ thuật của phép so.", "locator": "§4/PDF6; §4.1–4.2/PDF7–8; Listings4–5/PDF7–8", "confidence": "high"},
+    "C": {"sign": "·", "reason": "Đối chứng single-step/refinement và valid/mutated SUT, không có random/fuzz generator arm; cùng artifacts/evaluation không tự tạo random comparator.", "locator": "§4/PDF6; §4.1–4.2/PDF7–8; Fig3/PDF7", "confidence": "high"},
+    "O": {"sign": "✓", "reason": "Requirements-based mutation score trên chương trình SUT bị chỉnh mã có chủ đích; Listing3 sửa hàm FastAPI, §3.4 định nghĩa số mutants bị giết và MS. Mỗi requirement có singleton test; refinement trên mutated SUT còn lấy trung bình các mutant-specific tests, chưa đồng nghĩa union unique killed IDs của một suite.", "locator": "§3.3–3.4 và Listings2–3/PDF5; tiếp §3.4/PDF6; Fig3/PDF7", "confidence": "high"}
+  },
+  "old_signs": {"P": "✓", "I": "·", "C": "·", "O": "✓"},
+  "changes": [],
+  "notes": ["Từ random trong example requirement nghĩa là tạo hai user khác nhau; không phải random baseline.", "Tỷ lệ MS trên228 mutations không chuyển trực tiếp thành số unique mutants bị phát hiện của mẫu45."],
+  "visual_checks": [{"page": 5, "file": "tmp/pdfs/pico-review-2026-10-20/agent-gv01-02-03-05/GV-02-p05.png", "finding": "Đã xem Listing3 sửa source implementation và Eq1 mutation score; xác nhận program mutation, không chỉ sửa JSON responses sau thực thi."}]
+}

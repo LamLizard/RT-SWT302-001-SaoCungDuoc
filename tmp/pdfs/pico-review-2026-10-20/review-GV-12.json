@@ -1,0 +1,61 @@
+{
+  "pages_read": [
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "factors": {
+    "P": {
+      "sign": "·",
+      "reason": "Đơn vị nghiên cứu là CI build/test records trên một TeamCity production instance. TeamCity REST API chỉ cung cấp dữ liệu chẩn đoán, không là dịch vụ REST SUT để sinh test/gieo mutant.",
+      "locator": "Methods/PDF9–12; Evaluation procedure/PDF13",
+      "confidence": "high"
+    },
+    "I": {
+      "sign": "·",
+      "reason": "Pipeline thu thập context rồi phân loại code-change/flaky/infrastructure dựa trên commit và lịch sử pass/fail. Ba diagnostic classes không phải equivalence classes của request input; không có input generator EP/BVA.",
+      "locator": "Fig2 và Three-category classification/PDF10–11; System scope/PDF12",
+      "confidence": "high"
+    },
+    "C": {
+      "sign": "·",
+      "reason": "Đối chứng vận hành là điều tra thủ công trên failures tương tự, cùng bảng capability comparison. Không có nhánh random/fuzz input generation hoặc random diagnostic comparator được thí nghiệm.",
+      "locator": "Evaluation procedure/PDF13; Table1/PDF14; Table2/PDF15; Table3/PDF18",
+      "confidence": "high"
+    },
+    "O": {
+      "sign": "·",
+      "reason": "Outcome là khoảng diagnostic time. 167 là analysis sessions (có sessions không lỗi); 52/31/17% là ước lượng phân loại không giữ per-session logs, chưa ground-truth accuracy. Đây không phải số distinct defects bị một generator phát hiện hoặc program mutation score.",
+      "locator": "Results/PDF13–14; Tables1–2/PDF14–15; limitations/PDF19–20",
+      "confidence": "high"
+    }
+  },
+  "notes": [
+    "Giữ····; case studies ba lỗi vận hành minh họa diagnosis, không biến thành số unique bugs của một chiến dịch fault finding."
+  ],
+  "visual_checks": [
+    {
+      "page": 14,
+      "file": "tmp\\pdfs\\pico-review-2026-10-20\\root-renders\\GV-12-p14.png",
+      "finding": "Table1 so thời gian manual/MCP theo độ phức tạp; footnote ghi ranges calibrated."
+    }
+  ],
+  "id": "GV-12",
+  "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\54-GV-12-Beyond-Flaky-Test.pdf",
+  "old_signs": {
+    "P": "·",
+    "I": "·",
+    "C": "·",
+    "O": "·"
+  },
+  "changes": []
+}

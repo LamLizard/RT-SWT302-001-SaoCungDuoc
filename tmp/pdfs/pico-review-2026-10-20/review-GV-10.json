@@ -1,0 +1,42 @@
+{
+  "id": "GV-10",
+  "pdf": "Paper-source/52-GV-10-Mutation-Guided-Meta.pdf",
+  "pages_read": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "factors": {
+    "P": {
+      "sign": "·",
+      "reason": "Triển khai ACH trên 10795 Android Kotlin classes của các platforms nội bộ Meta và cross-app products. Không thí nghiệm REST APIs hoặc RESTestBench.",
+      "locator": "§2–3, PDF2–4; Table 2, PDF5",
+      "confidence": "high"
+    },
+    "I": {
+      "sign": "·",
+      "reason": "ACH sinh program faults theo privacy concerns, lọc equivalent mutants rồi prompt LLM sinh unit tests kill mutant. Prompts không yêu cầu EP/BVA, partitions/domains, hoặc boundary input generation; nhận xét hậu nghiệm rằng tests xử lý corner cases/special values không đủ chứng minh một kỹ thuật can thiệp như rubric.",
+      "locator": "§2/Figure 1/Table 1, PDF2–3; §4.1–4.2, PDF4–5; §6, PDF8–9",
+      "confidence": "high"
+    },
+    "C": {
+      "sign": "·",
+      "reason": "Có đối chiếu TestGen-LLM tăng coverage với ACH mutation-guided tests. Randomness trong §§4–5 là chọn test/mutant samples cho human review/equivalence assessment, không random-generation comparator. Không nhánh random test input hay random unit-test generator đối chứng trong thiết kế được báo cáo.",
+      "locator": "§4.2, PDF4–6; §5.2, PDF6–7; §6/Table 8, PDF8–9",
+      "confidence": "high"
+    },
+    "O": {
+      "sign": "✓",
+      "reason": "Program mutants từ Kotlin source, generated tests phải pass original và kill mutant mà existing tests không kill; Table 8 đo mutant-killing tests và kill rates, so với TestGen-LLM. Có 571 mutant-killing tests, 277 không tăng line coverage. Equivalent-mutant estimates và 4660 candidates không được coi mặc định là killed mutants.",
+      "locator": "§1 assurances, PDF2; §2/Table 1, PDF3; §4.1, PDF4; §6/Table 8, PDF8–9",
+      "confidence": "high"
+    }
+  },
+  "old_signs": {"P": "·", "I": "·", "C": "·", "O": "✓"},
+  "changes": [],
+  "notes": [
+    "Giữ P· I· C· O✓ sau kiểm chứng độc lập.",
+    "Table 2/PDF5 phân biệt 31677 generated; 9095 build AND pass existing tests; 4660 được agent tin non-equivalent. Dùng đúng nhãn của ba mẫu số.",
+    "Abstract nói 7 platforms, Table 2 có 8 rows do có cross-app products; không tự sửa thành 8 platforms.",
+    "O✓ là rubric rộng về program-mutant outcomes; chưa chứng minh suite-level unique mutant IDs theo dạng REST requirement như RQ nhóm."
+  ],
+  "visual_checks": [
+    {"page": 9, "file": "tmp/pdfs/pico-review-2026-10-20/GV-10-p9.png", "checked": "Table 8 headers, belief/estimated non-equivalence denominators, mutant-killing tests and kill rates vs TestGen-LLM; 571 total and 277 (49%) no-coverage tests."}
+  ]
+}

@@ -1,0 +1,1311 @@
+
+
+===== GV-04 PDF PAGE 1 =====
+
+RESTOR:AutomatedTestOracleGenerationforRESTfulAPIs
+via Reinforcement Learning
+
+XUN ZHOU,Fudan University, China
+ZHEN DONG∗,Fudan University, China
+MINGYU REN,Fudan University, China
+QIANG LI,ByteDance, China
+JUNJIE LI,ByteDance, China
+SIFAN WANG,ByteDance, China
+XIAOLONG YU,ByteDance, China
+CHAOFENG SHA,Fudan University, China
+XIN PENG,Fudan University, China
+Modern REST API testing faces a critical challenge in defining reliable test oracles, particularly in agile
+industrial environments where formal specifications (e.g., OpenAPI) are frequently missing or outdated, and
+historical execution logs are unavailable for newly deployed endpoints. In this paper, we presentRestor
+(ReinforcementEnhancedSingle-TrafficOraclegeneratorforRESTAPIs),aframeworkthatgeneratesexe-
+cutable test assertions from a single observed request–response pair in a black-box setting. Unlike existing
+approaches that rely on rule-based templates or massive training logs,Restorutilizes a novel data augmenta-
+tion pipeline to fine-tune a lightweight Large Language Model (LLM) via Group Relative Policy Optimization
+(GRPO).Thistrainingprocessenablesthemodeltointernalizetesting“commonsense”byoptimizingareward
+function that jointly encourages: (i) the selection of stable, semantically meaningful fields for validation
+and the avoidance of dynamic noise (e.g., timestamps or trace IDs); (ii) the generation of robust assertions
+that withstand logic variations. We evaluateRestoron an industrial dataset comprising over 2,300 API
+traces across 246 real-world services. Comprehensive experiments demonstrate thatRestorsignificantly
+outperforms prompt-engineered baselines and generalist models, achieving a superior 𝐹1 score of 85.42%
+in key field identification and increasing the proportion of semantically accurate assertions. Furthermore,
+deployment in a production CI/CD workflow at ByteDance confirms its practical value: the system raised the
+adoptionrateofautomaticallygeneratedtestcasesfrom74.1%toover96%,substantiallyreducingmanual
+Quality Assurance (QA) effort while ensuring high execution stability.
+
+CCS Concepts:•Software and its engineering               → Software testing and debugging;•Information
+systems→RESTfulwebservices.
+
+Additional Key Words and Phrases: REST API Testing, Oracle Generation, Deep Reinforcement Learning
+
+
+∗Corresponding Author.
+
+
+Authors’ Contact Information:Xun Zhou, Fudan University, Shanghai, China,xunzhou24@m.fudan.edu.cn;Zhen
+Dong, Fudan University, Shanghai, China,zhendong@fudan.edu.cn;Mingyu Ren, Fudan University, Shanghai, China,
+myren25@m.fudan.edu.cn;Qiang Li, ByteDance, Shanghai, China,liqiang.leo@bytedance.com;JunJie Li, ByteDance,
+Shanghai,China,wells.li@bytedance.com;SifanWang,ByteDance,Shanghai,China,wangsifan.28@bytedance.com;Xiao-
+longYu,ByteDance,Shanghai,China,yuxiaolong.1@bytedance.com;ChaofengSha,FudanUniversity,Shanghai,China,
+cfsha@fudan.edu.cn;Xin Peng, Fudan University, Shanghai, China,pengxin@fudan.edu.cn.
+
+
+
+
+This work is licensed under a Creative Commons Attribution 4.0 International License.
+©2026 Copyright held by the owner/author(s).
+ACM 2994-970X/2026/10-ARTISSTA094
+https://doi.org/10.1145/3832185
+
+
+                              Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 2 =====
+
+ISSTA094:2                                                            X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+
+ACMReferenceFormat:
+Xun Zhou, Zhen Dong, Mingyu Ren, Qiang Li, JunJie Li, Sifan Wang, Xiaolong Yu, Chaofeng Sha, and Xin
+Peng. 2026. RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning.Proc.
+ACM Softw. Eng.3, ISSTA, Article ISSTA094 (October 2026),22pages.https://doi.org/10.1145/3832185
+
+1   Introduction
+In modern software architectures, REpresentational State Transfer (REST) has established itself as
+thede factostandardfordesigningnetworked applicationsandmicroservices[             11,17,42].These
+APIsfacilitatecommunicationbetweenheterogeneouscomponentsviastandardHTTPmethods
+andlightweightformatssuchasJSON.Assystemsevolvetowardcomplex,distributedecosystems,
+the reliability of these interfaces becomes paramount. A single regression in a backend API can
+propagate cascading failures to front-end applications, resulting in critical service disruptions or
+revenue leakage. Consequently, automated API testing has become an indispensable component
+ofContinuousIntegration/ContinuousDeployment(CI/CD)pipelines,aimedatdetectingfaults
+efficiently before system release.
+   However,therapiditerationcyclescharacteristicofagiledevelopmentimposesevereconstraints
+onQualityAssurance(QA).Inmanyindustrialsettings,particularlywithinfast-paceddomainslike
+video editing or content delivery,developers frequently deploy new featuresor modify existing
+logic without updating formal documentation. This results in missing, incomplete, or outdated
+specifications(e.g.,OpenAPI/Swagger[1]).Furthermore,fornewlydeployedinterfaces,massive
+historicalexecutionlogsareoftenunavailable,renderingstatisticalanalysisimpossible.Thiscreates
+a “cold-start” testing scenario: QA engineers sometimes have to write robust test oracles based
+solely on a single traffic sample (one request-response pair) captured during a manual smoke test,
+relying on domain knowledge to infer assertion logic.
+   Existing automated testing approaches fail to adequately address this zero-specification, single-
+sample constraint. Traditional test oracle generation tools [3, 4] typically depend on accurate
+specificationstogenerateschema-validassertions;whenthespecificationisabsent,thesetoolsare
+renderedineffective.Similarly,dynamicinvariantdetectiontechniques(e.g.,AGORA+[2])require
+large-scalehistoricallogstoachievestatisticalsignificance.Applyingthemtoasinglesampleoften
+yields fragile or trivial assertions that fail to capture complex business logic.
+   Recently, Large Language Models (LLMs) have shown promise in software testing tasks [26, 34,
+40]. Yet, deploying general-purposeLarge LLMs (e.g., DeepSeek-V3 [12]) for high-frequency API
+testingpresentssignificanthurdles.First,theinferencelatencyandfinancialcostoflargeparameter
+models are prohibitive for industrial CI/CD pipelines that execute thousands of tests daily. Second,
+without specific fine-tuning, general-purpose models often lack the necessary domain rigor; they
+tend to hallucinate testing logic or over-assert on fields unrelated to business logic, generating
+“flaky”teststhatrequireconstantmaintenance.Usingsmaller,genericmodelsalleviatescostbut
+typically lacks the reasoning capability to generate assertions with high accuracy.
+   To bridge this gap, we presentRestor, a novel framework designed to generate actionable,
+industrial-gradetestassertionsfromasingleAPItrafficsamplewithoutrelianceonformalspecifi-
+cations or historical logs. Unlike standard Supervised Fine-Tuning (SFT) approaches that require a
+massive ground-truth corpus of perfect code, our approach leverages Reinforcement Learning (RL).
+Specifically,weemployGroupRelativePolicyOptimization(GRPO)[36]tofine-tunealightweight
+LLM using an execution-feedback mechanism.
+   ThecoreintuitionbehindRestoristomodelthe“commonsense”ofahumantester.Weconstruct
+a rewarding pipeline where the agent is optimized for semantic accuracy rather than mere syntax
+mimicry.Byrewardingtheagentforcorrectlyhandlingaugmentedtrafficvariations,themodel
+learnstoindependentlydistinguishvaliddatafluctuationsfromactualerrors.Thisprocessenables
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 3 =====
+
+RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                               ISSTA094:3
+
+the model to internalize the comprehensive boundaries of business logic and generate robust
+assertions, effectively bypassing the need for explicit rule definitions or extensive supervision.
+   We comprehensively evaluatedRestorthrough offline controlled experiments, expert user
+studies, and online production deployment at ByteDance. On a curated test set of unseen API
+samples,Restorachievedan                  𝐹1 scoreof85.42%inkeyfieldidentification,outperformingthelarge-
+scalegeneralistmodelDeepSeek-V3.1-Terminus[13]byofferingasuperiorbalanceofprecision
+andrecall.Regardingsemanticcorrectness,RestorgeneratedthehighestnumberofExact Match
+assertions(663)andminimizedmissedvalidationstoonly28cases,effectivelysolvingthecoverage
+issuesobservedinthebasemodel.Inqualitativeuserstudies,domainexpertsconfirmedthatRestor
+producedmoreactionableassertionswithsignificantlyreducednoise,requiringfewermanualedits
+thanbaselineapproaches.Mostnotably,inthereal-worldproductionenvironment,thedeployment
+ofRestordrove theAdoptionRateof generatedtestcasesfrom74.1%toa sustainedlevelabove
+96%, confirming its capability to meet strict industrial reliability standards.
+   The contributions of this paper are summarized as follows:
+    • WeproposeaReinforcementLearning-basedframework,Restor,thatutilizesGRPOanda
+       novelrewardstrategytofine-tunealightweightLLM.Thisallowsthemodeltolearnrigorous
+       testing logic without requiring a ground-truth corpus of code.
+    • We provide a comprehensive evaluation and report on the large-scale industrial deployment
+       ofRestoratByteDance.Toourknowledge,thisisthefirststudytodemonstratethepractical
+       efficacyofRL-fine-tunedLLMsforAPIoraclegenerationinaproductionCI/CDenvironment.
+
+   The remainder of this paper is organized as follows: Section2provides the background and a
+motivating example. Section3details theRestorapproach, including dataset construction and
+modeltraining.Section4describestheimplementationdetails.Section5presentsacomprehensive
+evaluation, including offline experiments, the qualitative user study, and industrial deployment
+results. Section6discusses related work. Section7outlines threats to validity, and Section8
+concludes the paper.
+
+2   Background and Motivating Example
+Consider the API POST  /api/subscription/plan_list, designed to retrieve user subscription details.
+Figure1(left)presentsatypicalresponsebodycontainingnestedbusinessobjects.Theresponse
+explicitlydetailstheuser’sstatusthroughfieldssuchascloud_info(cloudstorageplans)andvip_info
+(premiummembership).Keyattributesinclude is_using,whichindicateswhetheraspecificplanis
+active; subscribe_type,whichdefinestherenewalpolicy(e.g.,“un-auto”fornon-renewingor“auto”
+for recurring billing); and temporal constraints defined bybegin_timeandend_time.
+   In a rapid iterative development environment, server-side code modifications occur frequently,
+introducingtheriskofunintendedsideeffectsorregressions.Forinstance,if subscribe_typereturns
+anunrecognizedvalue(e.g.,atypoorNULL),thebillingsystemmayfailtoexecutetherenewal,
+directly leading to revenue leakage. Conversely, erroneous formatting could disrupt the front-end
+display. Consequently, Quality Assurance (QA) engineers are tasked with maintaining a robust
+suite of test cases to verify that the API functions correctly and that the data integrity involves
+strict semantic compliance.
+   To ensure reliability, test cases must go beyond simple HTTP status checks. Figure1(right)
+illustratesacomprehensivetestscriptfortheaforementionedAPI.Theassertionsverifynotonlythe
+presenceofthecloud_infostructure(Line7)butalsoenforcespecificbusinesslogic.Crucially,writing
+these assertions often relies on the QA engineer’s “common sense” and domain knowledge. For
+example,anengineercaninferthat subscribe_typeshouldbelongtoaclosedset ["auto", "un-auto"]
+
+
+                           Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 4 =====
+
+ISSTA094:4                                                            X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+
+ 1{                                                                   1...#Testprefix
+ 2  "ret":"0",                                                        2
+ 3  "errmsg":"success",                                               3#Assumetheresponsebodyis`resp`
+ 4  "systime":"1751945691302",                                        4#APIstatusassertions
+ 5  "log_id":"...",                                                   5assertresp["ret"]  =="0"
+ 6  "data":  {                                                        6assertresp["errmsg"]  =="success"
+ 7    "cloud_info":  {                                                7assert"cloud_info"inresp["data"]
+ 8      "subscribe_type":"un-auto",                                   8cloud_info  =  resp["data"]["cloud_info"]
+ 9      "plans":  [                                                   9#Commonsense:validatingenumconstraints
+10      {                                                            10assertcloud_info["subscribe_type"]in["auto",←↪
+11        "package_name":"1024GB/Monthly←↪                                     "un-auto"]
+          Subscription",                                             11
+12        "begin_time":  1750832254,                                 12forplanincloud_info["plans"]:
+13        "end_time":  1753424254,                                   13  #Commonsense:validatingtemporallogic
+14        "product_id":"pro_monthly",                                14  assert0  <  plan["begin_time"]  <  plan["end_time←↪
+15        "is_using":true                                                      "]
+16      }                                                            15  assertlen(plan["package_name"])  >  0
+17    ]                                                              16  assertlen(plan["product_id"])  >  0
+18  },                                                               17  assertisinstance(plan["is_using"],bool)
+19  "vip_info":  {                                                   18
+20    "subscribe_type":"auto",                                       19#Similarassertionsfor`vip_info`
+21    "plans":  [...]                                                20assert"vip_info"inresp["data"]
+22  },                                                               21vip_info  =  resp["data"]["vip_info"]
+23  ...                                                              22
+24}                                                                  23forplaninvip_info["plans"]:
+25}                                                                  24  ...
+
+Fig. 1.  Motivating Example. Left: Response example of POST  /subscription/plan_list. Right: A manually
+writtentestcasewhereQAengineerstypicallyinferimplicitconstraints(e.g.,temporalorderorenumerations)
+relying on domain "common sense".
+
+
+
+(Line 10) by observing different parts of the response, and intuitively asserts that a start timestamp
+should strictly precede an end timestamp (Line 14), even without explicit documentation.
+   However,manuallywritingsuchdetailedassertionsislabor-intensiveandexpensive,particularly
+giventhescaleofthousandsofinterfaces,eachoftencontainingnumerousfields.Whileautomated
+testingsolutionsexist,theyfacesignificantchallengesinourindustrialsetting.Traditionalschema-
+based tools require formal specifications (e.g., OpenAPI/Swagger), which are often absent or
+outdated in agile environments. Statistical approaches require massive historical traffic logs to
+infer patterns.In our scenario,weface a “cold start”problem:the testing platformoperates ina
+black-boxmanner,relyingon asinglecapturedtraffic sample(onerequest-responsepair)without
+access to source code or database schemas.
+   Theheavyrelianceon“commonsense”forgeneratingmeaningfulassertionssuggeststhatLarge
+LanguageModels(LLMs)couldbeaviablesolution,giventheirsemanticreasoningcapabilities.
+Nevertheless,deployinggeneral-purposeLargeLLMs(e.g.,DeepSeekV3)withinahigh-frequency
+CI/CD pipeline is impractical due to high deployment costs and latency. Conversely, smaller,
+general-purpose models often lack the specific reasoning capabilities required to generate accurate
+assertions from limited context. To address this trade-off, we propose fine-tuning a lightweight
+model. Bytraining asmaller model tointernalize this testing-specific“common sense,” weaim to
+achievehigh-qualityassertiongenerationthatsatisfiesbothaccuracyrequirementsandoperational
+constraints (cost and speed).
+
+3   Approach
+WepresentRestor,aframeworkbasedonReinforcementLearning(RL)designedtoautonomously
+generateexecutabletestassertionsfromisolatedAPItrafficsamples,evenintheabsenceofexplicit
+specifications (e.g., OpenAPI) or historical execution logs.
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 5 =====
+
+RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                               ISSTA094:5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fig. 2.  Overview of theRestorframework. The workflow comprises two primary phases: (1)Dataset Con-
+struction(top) and (2)Model Training(bottom).
+
+
+   AsillustratedinFigure2,Restoraddressesthechallengeofcreatingrobustoraclesfromlimited
+contextthroughtwocoordinatedphases.Wefirstfacilitateadataaugmentationpipelinedesigned
+toenrichrawtrafficbyidentifyingkeybusinessfieldsandgeneratingpositiveandnegativesamples
+based on inferred constraints.
+   Subsequently,we employ anRL-based training process where a Large Language Model (LLM)
+functions as the policy network. We adopt the Reinforcement Learning paradigm rather than
+traditional Supervised Fine-Tuning (SFT) for two primary reasons. First, test assertions lack a
+unique,canonical“groundtruth”;thesamesemanticconstraintcanbevalidatedthroughdiverse
+syntactic structures,making token-level imitationinefficient. Second, implicitfield constraints are
+difficulttoannotatepreciselyinastaticdataset.RLallowsthemodeltoexplorethesolutionspace
+effectively, optimizing for functional correctness and logic coverage rather than strict syntactic
+matching.
+   Specifically, we utilizeGroup Relative Policy Optimization (GRPO)[           36] to fine-tune the
+model. As a state-of-the-art on-policy algorithm, GRPO optimizes the policy using group-based
+relative rewards without the need for an additional value network. This approach significantly
+reduces the memory footprint and computational overhead compared to traditional Actor-Critic
+methods (e.g., PPO), thereby providing a cost-effective solution for industrial-scale reasoning tasks
+while maintaining high generation performance.
+
+3.1   Dataset Construction
+To facilitate the training of the agent, we construct an augmented dataset Daug derived from
+real-world production traffic. Each training instance𝑇aug ∈ Daug is represented as a tuple that
+encapsulatesnotonlytherawAPIcalltrafficbutalsothesemanticmetadatarequiredforrigorous
+
+
+                            Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 6 =====
+
+ISSTA094:6                                                            X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+assessment:
+                                      𝑇aug =⟨API,req,resp,K,S                                pos,S neg⟩
+where:
+    •⟨API,req,resp⟩                    represents the original captured traffic, containing the endpoint identifier,
+       request payload, and the raw server response.
+    •K  denotesthesetofKey Fieldsextractedfromtheresponse,whichserveasthefocalpoint
+       for assertion generation.
+    •S  pos andSneg are sets of generated response bodies representing valid (positive) and invalid
+       (negative) variations of the original data, respectively.
+   Theconstruction of𝑇aug involvestwo primaryphases:identifying whichfieldsrequire testing
+(K) and generating data variations (S       pos,S neg) to evaluate the quality of the generated assertions.
+
+3.1.1   CollectingTrafficData.Initially,wecollectproductiontrafficrecordsfromaninternalAPI
+recording platform. Each record, denoted as𝑇, encapsulates a single API interaction, comprising
+the APIendpoint identifier(API), theclient requestpayload (req), andthe serverresponse body
+(resp):
+                                                𝑇=⟨API,req,resp⟩
+Restorprimarilyfocusesonanalyzingthe     respcomponent,whichistypicallyasemi-structured
+document (e.g., JSON) representing a hierarchical collection of field-value pairs.
+3.1.2   KeyFieldLabeling.RawAPIresponsesfrequentlycontainnoise,suchastransientdiagnostic
+dataortracingidentifiers,whichareirrelevanttofunctionalcorrectness.Toensurethatthemodel
+focusesitsattentiononbusiness-criticallogicratherthanstructuralnoise,wefiltertheresponse
+fields to obtain the setK.
+   To guarantee the reliability and precision of the dataset, the labeling process was performed
+through manual annotation by three professional QA engineers from ByteDance. To mitigate
+subjectivebias,amajorityvotingmechanismwasimplementedtodeterminethefinalcomposition
+ofK. Specifically, each field was independently reviewed by the experts, and only those selected
+byat leasttwo outof thethree annotatorswere retained.Guidedby deepdomain expertise,this
+selection process adheres to three governing principles:
+   (1) EntityIdentification:Fields that uniquely identify business entities (e.g.,                                  product_id) are
+       included to ensure data integrity.
+   (2) DomainLogicConstraints:Experts label fields conveying essential domainlogic basedon
+       theirexperience.Forexample,timeintervals(e.g., begin_time, end_time)andsomeenumeration
+       fields (e.g.,subscribe_type), are selected to verify semantic compliance.
+   (3) OperationalStatus:Fieldsindicatingtheoutcomeoftherequest(e.g.,                retcodes, errmsg)are
+       retained to validate the execution state.
+Conversely,dynamicfieldssuchas log_idorservertimestamps(e.g., systime)areexplicitlyexcluded
+to maintain deterministic testing conditions.
+3.1.3   Semantic Constraint Inference andEvaluation Sample Construction.Since the dataset lacks
+formal specifications(e.g., OpenAPI), wecannot directlydetermine whether ageneratedassertion
+is factually correct. To address this, we construct positive and negative samples to serve as a
+testbedforevaluatingthequalityofmodel-generatedassertions.Theunderlyingpremiseisthata
+high-quality assertionshould passvalidation againstall positivesamples (Spos)while effectively
+flagging all negative samples (S neg).
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 7 =====
+
+RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                               ISSTA094:7
+
+   To ensure the accuracy of the inferred semantic constraints and the representativeness of the
+constructeddata,weemployedthesamerigorousannotationprotocoldescribedintheprevioussec-
+tion.Specifically,thethreeexpertQAengineersindependentlyformulatedthesemanticconstraints
+anddesigned thecorrespondingsample variations,with finaldecisionsdetermined viaamajority
+voting mechanism. For each field inK, this process yields an enriched Natural Language (NL)
+constraint based on the field’s name and its value in the original response. For example, as shown
+inTable1, theconfirmedconstraint for           begin_timeis“Should beanon-negative Unixtimestamp.”
+Guided by these verified NL constraints, we then construct two sets of samples:
+    • PositiveSamples(Spos):Weconstructresponse bodies wherethevaluesofkeyfieldsare
+       replaced but remain compliant with the inferred constraints. For instance, replacing the
+       timestamp1750832254with1750832255createsavalidvariation.Thesesamplesensurethe
+       generated assertions are not overfitting to the specific values of the single captured traffic.
+    • NegativeSamples(Sneg):Weconstructresponsebodiescontainingdeliberateviolationsof
+       theconstraints.Forexample,injecting-1intoatimestampfieldorastringintoabooleanfield
+       (seeTable1).Thesesamplesarecrucialforverifyingthatthegeneratedassertionspossess
+       sufficient strictness to detect data anomalies.
+   Foreachidentifiedkeyfield,wereplacetheoriginalfieldvaluewiththreevalidonesandthree
+invalid ones to construct response variants. Some fields such as status code may have only one
+correct value, and we do not construct valid samples for them.
+
+
+           Table 1. Augmentation Examples for Key Fields inPOST /api/subscription/plan_list
+
+        Field                   InferredConstraint            Constructed             Constructed
+                                                              PositiveValue           NegativeValue
+
+        ret                     Shouldbe’0’forsuccess.        "0"                     "1"
+
+        errmsg                  Should be ’success’.          "success"               "internal error"
+
+        ...product_id           Should be a non-empty         "another_id"            ""
+                                string.
+
+        ...begin_time           Should be a                   1750832255              -1
+                                non-negative Unix
+                                timestamp.
+
+        ...subscribe_type       Should be one of "auto"       "auto"                  "manual"
+                                or "un-auto".
+
+        ...is_using             Should be a boolean           false                   "true"
+                                value.
+
+
+
+3.2   Model Training
+3.2.1   OracleGenerationviaGroupRelativePolicyOptimization.Weformulateoraclegenerationas
+areinforcementlearningtaskwherethepolicy𝜋𝜃 generatesassertioncodeconditionedontheAPI
+context.Toefficientlyalignthemodelwithtestcorrectnessobjectiveswithoutthecomputational
+cost oftraining avalue function,we employGroupRelativePolicyOptimization(GRPO)[   36].
+   ForanAPIcontext𝑞sampledfromdistribution𝜇,GRPOsamplesagroupofoutputs{𝑜  1,𝑜2,...,𝑜𝐺}
+fromtheoldpolicy𝜋𝜃old(· |𝑞)  .Let𝑜𝑖 =(𝑜     𝑖,1,...,𝑜𝑖,|𝑜 𝑖|) denotethetokensequenceofthe𝑖-thoutput.
+
+
+                            Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 8 =====
+
+ISSTA094:8                                                            X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+The policy is optimized by maximizing the following objective:
+                                                        "     𝐺∑︁       |𝑜𝑖|∑︁(
+              JGRPO(𝜃)=E        𝑞∼𝜇,{𝑜       𝑖}𝐺𝑖=1  ∼𝜋  𝜃old(·|𝑞)1 1
+                                                          𝐺   𝑖=1  |𝑜 𝑖|𝑡=1
+                                       𝜋𝜃(𝑜 𝑖,𝑡 |𝑞,𝑜 𝑖,<𝑡  )
+                               min    𝜋𝜃old(𝑜 𝑖,𝑡 |𝑞,𝑜 𝑖,<𝑡  ) ˆ𝐴𝑖,𝑡,                                                        (1)
+                                       𝜋𝜃(𝑜 𝑖,𝑡 |𝑞,𝑜 𝑖,<𝑡  )                                                  )#
+                               clip                                             ˆ𝐴𝑖,𝑡 −𝛽D     𝐾𝐿[𝜋𝜃∥𝜋  ref]       .
+                                      𝜋𝜃old(𝑜 𝑖,𝑡 |𝑞,𝑜 𝑖,<𝑡  ),1−𝜖,1+𝜖
+
+Here, 𝜖 is the clipping hyperparameter, 𝛽 controls the KL-divergence penalty, and  ˆ𝐴𝑖,𝑡 is the
+advantageassignedtothe𝑡-thtokenofoutput𝑜𝑖.UnlikePPO,GRPOestimatestheadvantagefrom
+the relative rewards of outputs within the same group and therefore does not require a separate
+value model.
+   Following GRPO, the token-level KL divergence between the current policy and the reference
+policy is estimated as
+
+                       D𝐾𝐿[𝜋𝜃∥𝜋  ref] = 𝜋ref(𝑜 𝑖,𝑡 |𝑞,𝑜 𝑖,<𝑡  )𝜋𝜃(𝑜 𝑖,𝑡 |𝑞,𝑜 𝑖,<𝑡  )  −log   𝜋ref(𝑜 𝑖,𝑡 |𝑞,𝑜 𝑖,<𝑡  )𝜋𝜃(𝑜 𝑖,𝑡 |𝑞,𝑜 𝑖,<𝑡  )  −1.                       (2)
+
+   In our setting, each generated assertion𝑜𝑖 receives an outcome-level reward𝑟𝑖. The rewards
+within agroup are normalized bysubtracting theirmean anddividing by theirstandard deviation.
+Theresultingnormalized rewardis assignedastheadvantageofevery tokeninthecorresponding
+output:
+                                  ˆ𝐴𝑖,𝑡 = 𝑟𝑖 −mean(𝑟                 1,...,𝑟𝐺)
+                                              std(𝑟        1,...,𝑟𝐺)      ,        𝑡=1,...,|𝑜         𝑖|.                                   (3)
+This group-relative normalization serves as a baseline and captures the relative quality of each
+generated assertion without relying on a separate critic network.
+
+   Reward Definitions.The scalar reward                   𝑟𝑖 in Equation (3) evaluates the assertion’s executability,
+key-fieldcoverage,andsemanticaccuracy.Validatingthesepropertiesrequiresinteractingwiththe
+environment’s augmented datasamples. We detailthe specific reward designin the followingpart.
+
+3.2.2   Reward Function.Toguide the reinforcement learning agent toward generating test oracles
+thataresyntacticallycorrect,semanticallyprecise,andfunctionallyrobust,wedesignacomposite
+rewardmechanism. The finalrewardR for agenerated assertionA is formulatedas aconditional
+function that firstpenalizes execution failures and then linearlycombines field identification and
+semantic accuracy, clipped to a normalized range:
+                         (
+             R(A)=         𝜌fail                                                              if Exec(A,resp)=False
+                           clip(𝛼·R  ident(A)+𝛽·R     sem(A),−1,1      )    otherwise                                   (4)
+
+   whereExec(A,resp)            denotestheexecutionresultontheoriginalground-truthresponse(return-
+ingTrueonlyiftheassertionpasseswithouterror),and𝜌fail isafixedpenalty(setto−1)forinvalid
+assertions. For executable assertions, the reward is derived from two sub-components: Key Field
+Identification (Rident) and Semantic Accuracy (Rsem), balanced by coefficients𝛼 and 𝛽. The final
+score is clipped to the interval [−1,1] to ensure optimization stability during the GRPO training
+phase. The components are defined as follows:
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 9 =====
+
+RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                               ISSTA094:9
+
+   1. Validity Check (The Gatekeeper).The most fundamental requirement is that the generated
+assertionmustvalidatetheoriginalcapturedAPIresponsesuccessfully.IftheassertionA raisesan
+exceptionorassertsfalseontheobserveddataresp,itisfundamentallyflawed.Insuchcases,the
+evaluationterminatesimmediatelywiththepenalty 𝜌fail,discouragingthemodelfromgenerating
+hallucinatory or syntactically invalid code.
+   2.KeyFieldIdentification(Rident).Toensuretheassertionfocusesonbusiness-criticallogicrather
+than irrelevant noise (e.g., log IDs), we calculate the overlap between the fields accessed by the
+assertion code, denoted asF(A), and the pre-identified key field setK. We quantify relevance
+using precision and recall:
+
+                             precision=         |F(A)∩K||F(A)|    ,   recall=      |F(A)∩K||K|
+
+The relevance reward is a weighted sum of precision and recall:
+                                 𝑅ident(A)=𝑤     prec·precision+𝑤                  rec·recall
+where𝑤prec and𝑤rec balance the trade-off between avoiding noise and ensuring comprehensive
+coverage.
+   3. Semantic Accuracy (Rsem).A high-quality oracle must not only accept the observed traffic
+butalso correctlydistinguishbetween validand invaliddatadistributions. We evaluatethisusing
+theaugmenteddatasetsgenerated inSection3.1:thepositivesamples           Spos (validvariations)and
+negative samplesS                 neg (constraint violations).
+   Let 𝐾𝑖𝑙𝑙𝑅𝑎𝑡𝑒(A,S) ∈ [      0,1] represent theKill Rateof assertion            A over a set of samples S,
+defined as the proportion of samples for which the assertion evaluates to false. This reward is
+defined as the differential behavior between these two sets:
+                     Rsem(A)=𝑤     neg·𝐾𝑖𝑙𝑙𝑅𝑎𝑡𝑒(A,S         neg)−𝑤    pos·𝐾𝑖𝑙𝑙𝑅𝑎𝑡𝑒(A,S         pos)                      (5)
+where𝑤   neg and𝑤        pos are hyperparameters.
+   Intuitively, this function rewards the model for maximizing the acceptance of valid positive
+samples (avoiding false positives/overfitting) while simultaneously maximizing the rejection of
+invalid negative samples (ensuring strictness/detection capability). An ideal assertion yields a pass
+rate of1.0forS                 pos and0.0forS                    neg, resulting in a maximal component reward.
+
+4   Implementation
+The policy network ofRestor, responsible for generating assertion code token-by-token, is in-
+stantiated using Doubao-Seed-1.6-flash [6]. This choice is strategic; Doubao-Seed-1.6-flash is a
+lightweightandfast largelanguagemodeldevelopedinternallyatByteDance,enablingefficient
+iteration during training and deployment. To optimize the policy network, we employ GRPO [36]
+asthefine-tuningalgorithm,directlymaximizingtheexpectedrewardobjectivesdefinedinthe
+previous section.
+   AllmodeltrainingandexperimentationwereconductedontheinternalcloudAIserviceplatform
+at ByteDance, utilizing standard computational resources for large-scale model development.
+Regarding the hyperparameter settings for GRPO, the model was fine-tuned for 2 epochs with
+a learning rate of1   ×10−6  . To ensure training stability, the KL divergence coefficient was set to
+0.001,andthepolicyclipratiowasfixedat0.2.Duringtherolloutphase,thenumberofgenerations
+wassetto8,meaningthepolicysampled8distinctoutputsforeachtrainingprompttocalculate
+thegroup-relativeadvantage.Dueto thesubstantialcomputationalresourcesandhighfinancial
+costrequiredforreinforcementlearning fine-tuningonLargeLanguageModels,thetrainingand
+evaluation processes were conducted in a single run.
+
+
+                             Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 10 =====
+
+ISSTA094:10                                                          X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+5   Evaluation
+To comprehensively evaluate the performance ofRestor, we investigated the following three
+research questions:
+    • RQ1 (Effectiveness): How effective isRestorin generating test oracles for REST APIs
+       compared to baseline models?
+    • RQ2(ExpertEvaluationofUsefulnessandReliability):Howdosoftwaretestingexperts
+       evaluate usefulness, and reliability of the generated assertions?
+    • RQ3 (IndustrialApplication): How doesRestorperform when deployed in production
+       environment at ByteDance?
+
+5.1   Experimental Setup
+5.1.1   TestGenerationPlatform.Restorisintegratedintoourinternalautomatedtestcasegenera-
+tionplatformdeployedatByteDance.Thisplatformfacilitatesaworkflow:QAengineersupload
+anonymizedAPItrafficcapturedfromtheproductionortestenvironment,andthesystemgenerates
+a complete Python test script containing assertions. Engineers then review the generated code,
+modifyingoracceptingitforcommittotheversioncontrolsystem.Thisinfrastructureservesas
+the deployment environment for assessing industrial applicability.
+
+5.1.2   Dataset Construction.We constructed a large-scale dataset of production API traffic sourced
+fromaninternal recordingplatformatByteDance. Thedatasetcomprises over 2,300uniquetraffic
+samplesderivedfromover1,500distinctRESTAPIs(witheachAPIcontributing1to3traces).This
+spans 246 distinct servicesand 15 business lines, ensuring a diverse representation of industrial
+scenarios ranging from content management to billing systems. To protect privacy and confiden-
+tiality,allrecordedtrafficwasanonymizedpriortoanalysis,removingorirreversiblytransforming
+any personally identifiable information and other sensitive identifiers to prevent disclosure of
+individual users.
+   The dataset was randomly partitioned into training, validation, and testing sets in an 8:1:1
+ratio.Themainevaluation(RQ1)isconductedontheheld-outtestset,consistingof229unseen
+API samples. As detailed in Section3, ground truth was established through expert annotation,
+where key fields were explicitly labeled and logical constraints were described in natural language.
+We utilized a voting consensus mechanism among three QA engineers to validate the semantic
+alignment of the ground truth. This manual annotation process required substantial effort: the
+identification of key fields took approximately 4 days, while the definition of semantic constraints
+and the construction of positive and negative samples required approximately 2 weeks of effort
+from the annotators.
+
+5.1.3   Baselines.We compareRestoragainst two baseline models that rely solely on prompt
+engineering without reinforcement learning fine-tuning. To ensure a fair comparison, all models
+utilize the exact same system prompt and input format, the full details of which are provided
+in AppendixA. Furthermore, both baseline models operate in standard generation mode with
+reasoning capabilities disabled.
+    • Doubao-Seed-1.6-flash:We evaluate the original, pre-trained version of the base model.
+       Since this model serves as the initialization for our policy network, comparing against it
+       quantifies the specific performance gains attributable to the GRPO fine-tuning process.
+    • DeepSeek-V3.1-Terminus[13]:WeincludeDeepSeek-V3.1-Terminus(hereafterreferred
+       to as DeepSeek), one of the best open-source LLMs, derived from the DeepSeek-V3 [12]
+       architecture.Asalarge-parameterfoundationmodel,thisbaselinerepresentsthecapabilities
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 11 =====
+
+RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                             ISSTA094:11
+
+       of a powerful, general-purpose LLM. This comparison evaluates the trade-offs between a
+       specialized lightweight model and a large-scale generalist model.
+5.1.4   Evaluation Metrics.We assess model performance across two primary dimensions:
+   1)KeyFieldIdentification.Thismetricmeasuresthemodel’sabilitytoidentifybusiness-critical
+fields (K) while filtering out structural noise (e.g., dynamic timestamps, request IDs). We report
+precision,recall, and𝐹                             1 score.
+   2)AssertionAccuracy.Weevaluatethesemanticcorrectnessofthegeneratedassertions.Based
+on expert review, each generated assertion is categorized as:
+    •Exact Match:The logic is semantically correct and aligns with domain requirements.
+    • Overly General:The assertion is valid but too loose (e.g., checking for non-null instead of a
+       specific enum value).
+    •Partial Match:The code covers some semantic conditions but misses boundary details.
+    •Incorrect:The generated logic is wrong (false positive).
+    •Not Validated:The model failed to generate an assertion for a requisite key field.
+   3) Industrial Adoption Rate.To quantify the practical utility ofRestorin the production
+environment (RQ3), we utilize theAdoptionRate, derived from the platform described in Sec-
+tion5.1. Thismetric is defined as theratio of generated testcases that are explicitly acceptedand
+committedbyQAengineerstotherepositoryversusthetotalnumberofgenerationtasks.Ahigh
+adoption rate indicates that the generated assertions meet strict industrial standards with minimal
+need for manual modification.
+
+5.2   Analysis of RQ1: Effectiveness
+In this section, we analyze the quality of generated assertions on the curated test set, focusing on
+two key dimensions: the ability to identify business-critical fields and the semantic correctness of
+the generated logic.
+5.2.1   KeyFieldIdentification.Wefirstevaluatethecapabilityofthemodelstocorrectlyidentifythe
+set ofbusiness-critical fieldsK, distinguishingthem fromdynamic noise (e.g., log_id, timestamps).
+Figure3visualizes the distribution of precision, recall, and𝐹             1 score across the test set.
+   Asindicatedbythedistributions,Restordemonstratesasuperiorbalancebetweencoverageand
+selectivity. ByleveragingGRPO to internalize thedistinction betweensignal and noise,Restor
+achievesaprecisionof81.30%andmaintainsacompetitiverecallof96.15%,consequentlyattaining
+the highest 𝐹1 score of 85.42%.The density distributionin Figure3corroborates this stability,as
+the𝐹1 score violin forRestoris structurally tighterand concentrated at highervalues compared
+to the dispersed distributions of the baseline models.
+   In comparison, the baseline models exhibit distinct performance trade-offs. As indicated by the
+recall distribution, the large-scale model DeepSeek achieves the highest average recall of 98.64%,
+reflectingitsbroadsemanticcoverage;however,itscorrespondingprecisionisnotablylimitedat
+67.57%, indicating a tendency to over-generate assertions for irrelevant fields. Meanwhile, the base
+Doubao-flash model performs worse, exhibiting low precision (68.54%) and a moderate𝐹1 score
+(77.29%).
+   To rigorously validate these comparisons, we conducted a one-tailed Wilcoxon signed-rank test
+(𝑁=   229, confidence level 0.95). The statistical results confirm thatRestorachieves significant
+improvements in both precision and 𝐹1 score when compared to Doubao-flash (𝑝<   0.001) and
+DeepSeek(𝑝<   0.001).WhileDeepSeekexhibitsaslightlyhigheraveragerecall,itssignificantly
+lower precision ultimately yields a statistically inferior𝐹                1 score.
+
+
+                             Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 12 =====
+
+ISSTA094:12                                                          X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fig. 3. Distribution of Key Field Identification Performance. The visualization integrates violin plots to show
+data distribution density, box plots to indicate quartiles, and white diamond markers to denote the mean
+score.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fig. 4. Comparative Analysis of Assertion Accuracy. This distribution quantifies the semantic correctness of
+the generated test code, highlighting the volume of exact matches versus missed validations.
+
+
+
+5.2.2   AssertionAccuracy.Figure4presentsthebreakdownofassertionqualityintofivecategories
+as defined in the experimental setup.
+   Restorexhibits the highest efficacy, generating663Exact Matchassertions, surpassing both
+DeepSeek (622) and Doubao-flash (549). Critically,Restormaximizes coverage completeness by
+minimizingtheNotValidatedcategory.WhileDoubao-flashfailedtovalidate122requisitefieldsand
+DeepSeek missed 43,Restorreduced this figure to just28. This indicates that the RL fine-tuning
+process successfully aligned the output with the strict logical boundaries required for automated
+testing, reducing the need for manual correction.
+   HandlingFalsePositivesandNon-determinism.A critical factorin the practical usefulness
+of automated test generation is the rate of false positives (categorized here asIncorrectassertions).
+Our evaluationconfirms that suchoccurrences are exceptionally rarewithRestor. Furthermore,
+dynamicandnon-deterministicfields(e.g.,systemtimestampsorrequestIDs)areexplicitlyfiltered
+during training and inference, preventing the generation of flaky assertions. In the production
+environment,anyresidualfalsepositivesareeffectivelymitigatedthrougha“human-in-the-loop”
+mechanism:QAengineersreviewandrefinethegeneratedtestcasespriortocommittingthemto
+the code repository, ensuring that flawed assertions never disrupt automated CI/CD pipelines.
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 13 =====
+
+            RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                             ISSTA094:13
+
+           Table2.  Comparisonof GeneratedAssertions forKey Fields.For clarity, the assert keywordis omitted,and
+            specific hierarchical field paths (e.g.,resp[’data’][’space_info’][’quota’]) are abstracted asval.
+
+
+               TargetField            GroundTruth            Doubao-flash            DeepSeek                Restor
+                                      Constraint
+
+               errmsg                 Should be              ExactMatch:             ExactMatch:             ExactMatch:
+                                     ’success’.              val == ’success’        val == ’success’        val == ’success’
+
+
+               subscribe_type         Should be one of       (Not Validated)         OverlyGeneral:          ExactMatch:
+                                     ’auto’or ’un-auto’.                             len(val) > 0            val in
+                                                                                                             [’un-auto’,
+                                                                                                             ’auto’]
+
+               space_info.quota       Should be a string     OverlyGeneral:          PartialMatch:           ExactMatch:
+                                      representing a         ’quota’ in              int(val) >= 0           isinstance(str)
+                                      non-negative           space_info                                      and int(val) >= 0
+                                      integer.
+
+               plan.begin_time        Should be a            OverlyGeneral:          PartialMatch:           PartialMatch:
+                                      non-negative Unix      ’begin_time’ in         int(val) >= 0           val >= 0
+                                      timestamp.             plan
+
+               systime/log_id         Noise:Dynamic          (Ignored)               FalsePositive:          (Ignored)
+                                      system fields;                                 int(val) > 0
+                                      should be ignored.                             len(val) > 0
+
+
+            5.2.3   Case Study.To qualitatively assess model performance, we analyze assertions generated for
+            theAPI POST /api/subscription/plan_list.Table2presentsacomparativeanalysisofhowRestor
+            and the baselines handle specific critical fields and dynamic noise.
+               The baseline models exhibit distinct failure patterns. Doubao-flash predominantly relies on
+            shallowstructuralchecks,oftenvalidatingonlytheexistenceofkeys(e.g., ’quota’ in space_info)
+            ratherthantheirvalues,whichlimitsthedepthoftesting.Conversely,DeepSeek,createstwoissues
+            despite its reasoning capability: (1) Generic Constraints, where it defaults to weak checks (e.g.,
+            len > 0)insteadofinferring Enumsorvalueranges,and(2)NoiseSensitivity,whereitgenerates
+            assertions for unstable system fields (e.g.,log_id), leading to flaky tests in production.
+               In contrast,Restordemonstrates the ability to infer strict semantic boundaries. It correctly
+            identifiesenumerationconstraints(e.g.,subscribe_type),enforcessemantictypevalidationonstring-
+            encoded numbers, and successfully filters out volatile system fields, ensuring the assertions are
+            both rigorous and stable.
+
+
+
+
+
+
+
+Answer to RQ1
+Restorsignificantly improves upon prompt-based baselines in automated assertion generation.
+Itachievesthehighest𝐹1score(85.42%)inidentifyingbusiness-criticalfields,effectivelyfiltering
+dynamic noise that plagues large general-purpose models. Furthermore,Restorproduces theProc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+highest volume ofExact Matchassertions while minimizing missed validations, demonstrating
+that GRPO fine-tuning enables a lightweight model to generate stricter, more complete, and
+production-ready test oracles.
+
+===== GV-04 PDF PAGE 14 =====
+
+ISSTA094:14                                                          X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+5.3   Analysis of RQ2: Expert Evaluation of Usefulness and Reliability
+ThissectionevaluatesthepracticalutilityofRestorinreal-worldtestingworkflows.Weconducted
+astudy on48cases randomlysampledfrom ourinternal automatedtestcase generationplatform.
+Users uploaded API traffic and used our platform to generate these cases, which exhibit higher
+structural variance and noise than the curated dataset. Different from the curated setting in RQ1,
+wecollectboth(i)quantitativeevaluationresultsand(ii)qualitativefeedbackfromusers,including
+theirperceivedkeyfields,preferredassertionstrictness,andadditionalusabilityconcernssuchas
+generationlatency,codestyle,andmaintainability.Thegoalistodeterminewhetherthegenerated
+oracles are useful for our users.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fig.5. DistributionofKeyFieldIdentificationMetricsinUserStudy.Thefigureintegratesviolinplots(density),
+boxplots(quartiles),anddiamondmarkers(mean)tovisualizemodelperformancevarianceonreal-world
+data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fig. 6. Distribution ofAssertion Accuracy Categories. The chartquantifies the semantic correctnessof the
+generated logic, highlighting the volume of usable assertions (Exact Match) versus errors (Incorrect) and
+omissions (Not Validated).
+
+
+5.3.1   KeyFieldIdentification.SimilartoRQ1,weevaluatekeyfieldidentificationusingprecision,
+recall, and𝐹        1 score against expert-reviewed key field labels.
+   Figure5presents the detailed distribution of these metrics. Specifically,Restorachieves a
+precision of60.27%, a recallof 94.54%, andan 𝐹1 scoreof 69.91%, demonstrating aconcentrated dis-
+tributionthatsuggestsimprovedrobustnessonnoisyindustrialtraffic.Incontrast,DeepSeekyields
+ameanrecallof93.13%butalowerprecisionof51.67%.TheseresultsindicatethatwhileDeepSeek
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 15 =====
+
+           RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                             ISSTA094:15
+
+           adoptsanaggressiveselectionstrategythatfrequentlyincludesnon-deterministicfieldsrequiring
+           manual filtering,Restorachieves the best overall balance between coverage and selectivity.
+
+           5.3.2   Assertion Accuracy.Beyond field selection, we evaluate whether the generated assertions
+           matchexpertexpectations.Figure6summarizesthesemanticqualityofassertionsusingthesame
+           five categories defined in Section5.1.
+              Restorgenerates the largest number ofExact Matchassertions (216), exceeding DeepSeek (203)
+           and Doubao-flash (153). Moreover,Restorexhibits high reliability, producing only 3Incorrect
+           assertionsacrossallcases,whileDeepSeekgenerates15incorrectassertions.Theseresultsindicate
+           thatRestoryields moredirectly usable test logicand reduces the riskof false positives thatcan
+           interrupt CI/CD pipelines.
+
+           5.3.3   Categorized Analysis of Expert Feedback.To complement the quantitative findings, we con-
+           ductedaqualitativeuserstudyinvolving13QAengineersacross11distinctbusinesslines.Partici-
+           pants were asked to evaluate the generated oracles based on four specific criteria: (1)Relevance
+           (whethertheoraclesfocusonthecriticalfieldsactuallymonitoredinproduction),(2)Accuracy(the
+           factualcorrectness oftheassertions), (3)Experience(satisfactionwith generationspeedandsystem
+           latency), and (4)Open Feedback. We categorized their insights into four recurring core themes
+           regarding operational utility and boundary cases:
+                • Actionable Oracle Generation:Experts noted that baseline models often rely on shal-
+                   low structural checks, such as generic existence or type validation. In contrast,Restor
+                   significantly reduces manual post-editing effort by producing deeper, semantically rigorous
+                   assertions.
+                • HighExecutionEfficiency:Mostusershighlightedasubstantialimprovementingeneration
+                   speedcomparedtolarge-scalegeneralLLMs,particularlywhengeneratingcomprehensive
+                   testcaseswithnumerousassertions.Thisreductioninlatencyenhancesdeveloperexperience
+                   and facilitates seamless iterative testing within daily workflows.
+                • Payload Scale Boundaries:In a few extreme instances (3/48), the generated assertions
+                   became relativelyverbose whenprocessing complexresponse bodies withexceptional field
+                   cardinality (> 400fields), which outstrips the typical training distribution (    < 100fields).
+                   Undersuchsparseedgecases,theassertiondensityincreases,occasionallyrequiringminor
+                   manual refactoring to optimize long-term maintainability.
+                • Context-DependentDomainConstraints:Certain highly specialized business rules (e.g.,
+                   proprietary, complex billing calculations) could not be entirely inferred due to the determin-
+                   istic black-box nature. Future work will explore incorporating lightweight domain-specific
+                   prompts during inference to address this without retraining.
+
+
+
+
+
+
+
+
+
+
+           5.4   Analysis of RQ3: Industrial Application
+Answer to RQ2ToevaluatetheperformanceofRestorintheproductionenvironment,wemonitoredthesystem’s
+Expert evaluation confirms thatusage on the test generation platform (introduced in SectionRestoroutperforms baselines in both reliability and utility5.1) starting from early November
+for real-world testing. Quantitatively, it achieves the highest semantic accuracy with minimalProc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+errorsanda superiorbalancein keyfieldidentification.Qualitatively, usersreportsignificantly
+reduced manual editing efforts and improved generation efficiency, validating the model’s
+effectiveness for industrial workflows despite minor limitations with extreme payload sizes.
+
+===== GV-04 PDF PAGE 16 =====
+
+ISSTA094:16                                                          X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+2025.WeanalyzetheAdoptionRateacrosstwodimensions:temporaltrendsoverfivebi-weekly
+intervals and distribution across distinct business lines.
+
+5.4.1   Temporal Trend of Adoption Rate.To assess the impact ofRestoron testing efficiency over
+time, we analyzed the adoption trends across five bi-weekly intervals from mid-October 2025 to
+mid-December2025.Figure7illustratesthetrajectoryofuseracceptancebeforeandafterthemodel
+deployment.
+   AsillustratedinFigure7,theadoptionratestoodat74.1%priortothefulldeploymentofthefine-
+tunedmodel(beforeNovember8).Followingtherollout,thesystemdemonstratedanimmediateand
+substantialperformanceleap,withtheadoptionratesurgingto92.6%intheinitialpost-deployment
+interval. This upward trajectory continued steadily, stabilizing above 96% throughout December.
+This sustained high acceptance rate confirms the effectiveness of the GRPO fine-tuning, as the
+model consistently generates assertions that meet strict production standards, thereby minimizing
+the need for manual intervention.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fig. 7.  Temporal trends of adoption rate. The deployment of the fine-tuned model (starting early November)
+correlates with a sustained improvement in adoption, stabilizing above 97% in the final interval.
+
+
+
+5.4.2   Adoption Rate Across Business Lines.We further decomposed usage metrics by business
+line to assess domain adaptability. Figure8presents the adoption rates and generation volumes
+acrosstenbusinesslines(BL01–BL10).A’task’representsasingletestgenerationrequest,whichis
+initiated when a QA engineer uploads a sampled request-response traffic trace to the platform.
+   The resultsdemonstrate a usagepattern concentratedin core services.BL02 and BL03,which
+represent the platform’s primary workload, achieved adoption rates of 97.0% (1,064 tasks) and
+93.2%(117tasks),respectively.ThisconfirmsthatRestorsuccessfullycapturesthedomainlogic
+for the system’s most active users.Conversely, lines with low task volumes (BL04–BL10)exhibit
+higher variance. Analysissuggests this stems from two factors:specificlines with highly complex,
+context-heavy logic currently outside the model’s scope, and new engineering teams still in the
+platform onboarding phase. Overall, the tool achieves high fidelity in the dominant production
+scenarios.
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 17 =====
+
+           RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                             ISSTA094:17
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+           Fig.8. Adoptionrates(top)andtaskvolumes(bottom)distributedbyBusinessLines.Usageisconcentrated
+           in core lines (BL02, BL03) which show high adoption (>93%).
+
+
+
+
+
+
+
+
+
+
+
+           6   Related Work
+           6.1   Automated Testing of REST APIs
+           Automatedtesting of RESTAPIs primarily adopts ablack-box approach, generatingHTTP request
+           sequences to maximize code coverage or uncover faults [5, 11, 25, 42]. The majority of these
+           techniquesrelyheavilyonformalspecifications,suchastheOpenAPISpecification(OAS),toderive
+           validinputsandexpectedbehaviors[1,21,29,35].Intheabsenceofspecifications,toolsmustinfer
+           schemas from traffic, often struggling with complex dependencies.
+              Acriticalchallengeinthisdomainistheoracleproblem.Traditionaltoolstypicallyemployimplicit
+           oraclesrestrictedtodetectingcrashes(e.g.,5XXstatuscodes)orspecificationviolations[20,28],
+           failingtoverifydomain-specificbusinesslogic.Tobridgethisgap,recentworksutilizeeitherstatic
+           or dynamic inference. SATORI [3], a static approach, employs LLMs to deduce behavioral rules
+           from OAS descriptions. Conversely, dynamic invariant detection methods like AGORA+ [2] mine
+           patterns from massive executionlogs. However, both paradigmshave significantlimitations: static
+           methods depend on accurate, up-to-date specifications, while dynamic methods require extensive,
+           diverse traffic to avoid overfitting. Our work targets a strictly colder start scenario—generating
+Answer to RQ3strictassertionsfromasinglerequest-responsesamplewithoutaccesstospecificationsorhistorical
+TheindustrialdeploymentconfirmsthepracticalvalueofRestor.Followingthemodel’srelease,logs.
+the global adoption rate improved from 74.1% to a stable level exceeding 96%. Furthermore,Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+in core business lines that constitute the majority of production traffic, the tool achieved an
+acceptance rate greater than 93%. These results indicate that the fine-tuned model effectively
+delivering reliable and low-maintenance assertions for QA engineers.
+
+===== GV-04 PDF PAGE 18 =====
+
+ISSTA094:18                                                          X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+6.2   Test Oracle Generation
+General automated oracle generation often relies on white-box or grey-box information, such
+as source code analysis [14, 23], method-level contracts [9, 41], or rich documentation [18]. For
+instance,manymaturetechniquesoperateatthemethodorunitlevelwithinspecificprogramming
+languages(mainlyJava),leveraginginternalinformationsuchasdataflow,variablenames,andcode
+structuretoderiveassertions[9,14,23,30,38,41].Whileeffectiveforunittesting,theseapproaches
+are inapplicable to black-box REST API testing where only inputs and outputs are accessible.
+   Dynamicinvariantdetectionremainstheclosestpredecessortoourworkforblack-boxsystems[2,
+4].Yet,asnotedabove,itsrelianceonlarge-scaleexecutionhistorymakesitunsuitableforvalidating
+new features with scarce data. Recently, Large Language Models have been applied to oracle
+generation[22,31].However,mostLLM-basedsolutionsrelyonpromptengineeringwithlarge
+models, which incurs high latency and cost, or require code context not available in black-box
+settings.OursisdistinctinleveragingReinforcementLearningtofine-tunealightweightmodel.
+Thisenablestheagenttointernalizetestingsemanticsandgenerateexecutableassertionsefficiently,
+bypassing the need for huge contexts or expensive general-purpose models.
+
+6.3   Reinforcement Learning in Test Generation
+ReinforcementLearning(RL)hasproveneffectiveinsoftwaretestingbytrainingagentstomaximize
+objectives like code coverage or crash diversity. RL-based test generation has been successfully
+applied across diverse domains, including the validation of complex fundamental systems (e.g.,
+compilertesting[8],cyber-physicalsystems[43]),domain-specificapplicationssuchasautonomous
+drivingandrobotics[10,16,24,27,39],andgeneral-purposesoftwareslikeAndroidapplications[7,
+15,19,33,37]andCIsystems[32].Inthesecontexts,RLagentsaretypicallytrainedtogenerate
+effectivetestinputsorenvironmentconfigurationsthatmaximizeacalculatedreward,suchascrash
+probability [27] and coverage [24]. The central objective in these works remains optimizing the
+sequence or structure of the inputs fed to the system under test to achieve higher fault detection.
+   Critically, existing RL-based testing works focus almost exclusively oninput generation. The
+application of RL to theoracle problem, i.e., verifying the correctness of the output, remains
+unexplored.Tothebestofourknowledge,ourworkrepresentsthefirstapplicationofRLspecifically
+forgeneratingtestoraclesforRESTAPIsinablack-boxcontext.Insteadofoptimizinginputfuzzing,
+wetrainthemodeltodistinguishstrictlogicboundaries,transformingrawresponsesintohigh-
+quality, executable verification code.
+
+7   Threats to Validity
+We define potential threats to the validity of our study and discuss the mitigation strategies
+employed to address them.
+
+7.1   Internal Validity
+   Human Annotation Bias.The reliance on human judgment for test oracle validation (RQ1
+and RQ2) introduces risks of subjectivity and fatigue. To mitigate this, we employed three senior
+QAengineersfromByteDance.Weimplementedastrictlyblindedconsensusmechanism,where
+ground truth labels were established only upon majority agreement. This approach minimizes
+individual bias and ensures the evaluation aligns with objective industrial standards.
+
+   DataLeakage.Toensurethemodellearnsgeneralizedlogicratherthanmemorizingtraining
+data, we adopted a two-tiered strategy. First, for RQ1, we enforced strict contamination control
+by physically excluding test set API endpoints from the training corpus. Second, the real-world
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 19 =====
+
+RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                             ISSTA094:19
+
+evaluation in RQ2 utilizes traffic fromnewly developedfeatures not yet integrated into the traf-
+fic recording platform. Consequently, these samples are inherently disjoint from the training
+distribution, effectively precluding data leakage.
+
+   Validity of Adoption Rate Metric.In RQ3, we use adoption rate as a proxy for utility. A
+potentialthreatisthatusersmightcommitgeneratedcodewithoutsufficientscrutiny.However,the
+deploymentworkflowatByteDancemandatespeercodereview.Therefore,committedassertions
+represent code that has satisfied not only the author but also independent human reviewers,
+validating the practical quality of the generation.
+
+7.2   External Validity
+   GeneralizabilityofSourceData.Our dataset originates entirely from ByteDance’s production
+environment, posing a risk of overfitting to specific corporate conventions (e.g., specific envelope
+structuresornamingschemes)thatmaynotapplytootherorganizations.Toproactivelymitigate
+this threat and ensure broader generalizability, we intentionally sampled data across 15 distinct
+business lines and 246 diverse services. This extensive variety encompasses a wide spectrum of
+RESTfuldesignpatterns,payloadcomplexities,anddatalogicprevalentinthebroadersoftware
+industry.Whilethedeployedmodelmayinevitablylearncertaininternalformattingconventions,
+the underlying reinforcement learning methodology for internalizing oracle generation logic is
+highlygeneralizable. We assertthatthis frameworkcanbe readilytransferredto otherorganiza-
+tional contexts and API paradigms (such as RPC) with appropriate data collection and constraint
+definitions.
+
+   LanguageSpecificity.The current implementation ofRestorgenerates test assertions exclu-
+sively in Python. This limits the direct application of our fine-tuned model to environments using
+other technology stacks (e.g., Java/JUnit or JavaScript/Jest). However, the core contribution of this
+workliesinthereinforcementlearningmethodologythatalignsLLMswithtestinglogic("common
+sense"), ratherthan language syntax.We believethe proposed approachcan be readily adaptedto
+otherprogramminglanguagesbysubstitutingthegroundtruthsamplesandexecutionfeedback
+mechanisms in future work.
+
+8   Conclusion
+Inthispaper,wepresentedRestor,areinforcementlearning-drivenframeworkdesignedtoauto-
+mate thegeneration of precise semantictest assertions forREST APIs. By adaptinga lightweight
+Large Language Model via GRPO, our approach effectively internalizes domain-specific testing
+logic,enablingthesystemtoidentifybusiness-criticalfieldsandinferstrictlogicalconstraintsfrom
+singletrafficsamples withoutrelyingonformalspecifications. Extensiveexperimentsdemonstrate
+thatRestorsignificantly outperforms both prompt-engineered baselines and large-scale general
+models(e.g.,DeepSeek[13][12])intermsofkeyfieldidentificationprecisionandassertionsafety.
+Furthermore,thesuccessfuldeploymentofRestorwithinByteDance’sproductiontestingplat-
+form—achievingasustainedadoptionrateexceeding90%acrosscorebusinesslines—validatesits
+practical utility and robustness in accelerating industrial testing workflows.
+
+Acknowledgments
+This  work  was  supported  by  the  National  Key  R&D  Program  of  China  under  Grant  No.
+2024YFB4505902.
+
+
+                            Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 20 =====
+
+           ISSTA094:20                                                          X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+           A   Prompt Templates
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SystemPromptTemplateforTestOracleGeneration
+
+ Role
+YouareaprofessionalAPItestingexpert.Youareskilledatgeneratinghigh-qualityassertions
+based on limited API information with your professional knowledge.
+ Task
+Your taskis toanalyze therelevantinformation ofan API,combine itwith somehistorical
+traffic, and generate assertions for this API.
+ Instructions
+Please generate assertions implemented in Python. The overall requirements are as follows:
+•Based on the API information and your understanding, select important fields from the
+response body to assert.
+•Assertiontypesincludevalueequality,valuerangechecks,objectfieldexistencechecks,etc.Data Availability
+•TheassertionsyougenerateshouldbeapplicabletoallscenariosofthisAPI,notlimitedtoThe research presented in this paper was conducted within ByteDance, utilizing proprietary
+the specific response body provided in the example traffic.industrial datasets and internal closed-source models. Due to strict corporate non-disclosure
+•Generate Python assertion statements only.agreements and information security policies regarding user privacy and intellectual property, the
+ Notes     source code, raw data, and trained models cannot be made publicly available.
+Forselectingassertionfields,itisrecommendedto:
+•Focus onthe coreresources expectedto bereturned bytheAPI, forexample,  users intheReferences
+response body ofgetUsers[1]2025. OpenAPI Specification..https://www.openapis.org. Accessed: November 2025.
+•Choose fields with clear semantic constraints, such as URIs (format validation), counters[2] Juan C. Alonso, Michael D. Ernst, Sergio Segura, and Antonio Ruiz-Cortés. 2025. Test Oracle Generation for REST
+(non-negative numbers), etc.APIs.ACM Trans. Softw. Eng. Methodol.(March 2025).doi:10.1145/3726524Just Accepted.
+•DO NOT consider: timestamps or other random fields, meaningless fields.[3] JuanCAlonso,AlbertoMartin-Lopez,SergioSegura,GabrieleBavota,andAntonioRuiz-Cortés.2025. SATORI:Static
+Forassertionsondifferenttypesoffields,afterunderstandingthefieldsemanticsTest Oracle Generation for REST APIs.arXiv preprint arXiv:2508.16318(2025).
+andinferringtheirconstraints:[4] JuanC Alonso, SergioSegura,andAntonio Ruiz-Cortés.2023. AGORA:automatedgenerationoftest oraclesforREST
+•Perform format validation for strings, range validation for numbers.APIs.InProceedings of the 32nd ACM SIGSOFT International Symposium on Software Testing and Analysis. 1018–1030.
+•For enum-like fields, you may further perform set membership validation.
+•If it is truly difficult to determine constraints, only provide type validation.Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+ InputandOutputFormat
+...
+
+===== GV-04 PDF PAGE 21 =====
+
+RESTOR: Automated Test Oracle Generation for RESTful APIs via Reinforcement Learning                             ISSTA094:21
+
+
+ [5] VaggelisAtlidakis,PatriceGodefroid,andMarinaPolishchuk.2019. Restler:Statefulrestapifuzzing.In2019IEEE/ACM
+      41st International Conference on Software Engineering (ICSE). IEEE, 748–758.
+ [6] ByteDance.2025. Doubao-Seed-1.6-flashLargeLanguageModel.https://console.volcengine.com/ark/region:ark+cn-
+      beijing/model/detail?Id=doubao-seed-1-6-flash. Accessed: 2026-01-13.
+ [7] XiaobaoCai,ZhenDong,YongjiangWang,AbhishekTiwari,andXinPeng.2024. ReproducingTiming-dependent
+      GUI Flaky Tests in Android Apps via A Single Event Delay. InProceedings of the 33rd ACM SIGSOFT International
+      Symposium on Software Testing and Analysis (ISSTA).
+ [8] Junjie Chen, Chenyao Suo, Jiajun Jiang, Peiqi Chen, and Xingjian Li. 2023. Compiler test-program generation via
+      memoized configuration search. In2023 IEEE/ACM 45th International Conference on Software Engineering (ICSE). IEEE,
+      2035–2047.
+ [9] TianyiChen,KihongHeo,andMukundRaghothaman.2021. Boostingstaticanalysisaccuracywithinstrumentedtest
+      executions. InProceedings of the 29th ACM Joint Meeting on European Software Engineering Conference and Symposium
+      on the Foundations of Software Engineering. 1154–1165.
+[10] TianyiChen,QidiWang,ZhenDong,LiweiShen,andXinPeng.2023. EnhancingRoboticProgramSynthesisThrough
+      Environmental Context. InAdvances in Neural Information Processing Systems 37 (NeurIPS).
+[11] YiruChen, Chenxi Zhang,ZhenDong,Dingyu Yang,XinPeng, JiayuOu,HongYang, ZheshunWu,XiaounQu, and
+      WeiLi.2023. DynamicGraphNeuralNetworks-basedAlertLinkPredictionforOnlineServiceSystems.InProceedings
+      of the 38th IEEE/ACM International Conference on Automated Software Engineering (ASE).
+[12]DeepSeek-AI. 2024. DeepSeek-V3 Technical Report. arXiv:2412.19437[cs.CL]https://arxiv.org/abs/2412.19437
+[13] DeepSeek-AI.2025. DeepSeek-V3.1-Terminus:ASpecializedLargeLanguageModel.https://huggingface.co/deepseek-
+      ai/DeepSeek-V3.1-Terminus. Version 3.1-Terminus.
+[14] Elizabeth Dinella, Gabriel Ryan, Todd Mytkowicz, and Shuvendu K Lahiri. 2022. Toga: A neural method for test oracle
+      generation. InProceedings of the 44th International Conference on Software Engineering. 2130–2141.
+[15] Zhen Dong, Marcel Böhme, Lucia Cojocaru, and Abhik Roychoudhury. 2020. Time-travel Testing of Android Apps. In
+      Proceedings of the 42nd IEEE/ACM International Conference on Software Engineering (ICSE).
+[16] AndréaDoreste,MatteoBiagiola,andPaoloTonella.2024. Adversarialtestingwithreinforcementlearning:Acase
+      study onautonomous driving. In2024 IEEE Conference on Software Testing, Verification and Validation (ICST). IEEE,
+      293–304.
+[17] RoyThomasFielding.2000.Architectural styles and the design of network-based software architectures. Universityof
+      California, Irvine.
+[18] Gregory Gay, Sanjai Rayadurgam, and Mats PE Heimdahl. 2014. Improving the accuracy of oracle verdicts through
+      automated model steering. InProceedings of the 29th ACM/IEEE international conference on Automated software
+      engineering. 527–538.
+[19] Wunan Guo, Zhen Dong, Liwei Shen, Wei Tian, Ting Su, and Xin Peng. 2022. Detecting and Fixing Data Loss Issues
+      inAndroid Apps.InProceedings of the 31st ACM SIGSOFT International Symposium on Software Testing and Analysis
+      (ISSTA).
+[20] ZacHatfield-DoddsandDmitryDygalo.2022. Derivingsemantics-awarefuzzersfromwebapischemas.InProceedings
+      of the ACM/IEEE 44th International Conference on Software Engineering: Companion Proceedings. 345–346.
+[21] Jie He, Ezio Bartocci, Dejan Ničković, Haris Isakovic, and Radu Grosu. 2022. Deepstl: from english requirements to
+      signal temporal logic. InProceedings of the 44th International Conference on Software Engineering. 610–622.
+[22] Yibo He, Jiaming Huang, Hao Yu, and Tao Xie. 2024. An empirical study on focal methods in deep-learning-based
+      approaches for assertion generation.Proceedings of the ACM on Software Engineering1, FSE (2024), 1750–1771.
+[23] Soneya Binta Hossain and Matthew Dwyer. 2024. Togll: Correct and strong test oracle generation withllms.arXiv
+      preprint arXiv:2405.03786(2024).
+[24] Dmytro Humeniuk, Foutse Khomh, and Giuliano Antoniol. 2024.  Reinforcement learning informed evolutionary
+      searchforautonomoussystemstesting.ACMTransactionsonSoftwareEngineeringandMethodology33,8(2024),1–45.
+[25] Myeongsoo Kim, Saurabh Sinha, and Alessandro Orso. 2025.  Llamaresttest: Effective rest api testing with small
+      language models.Proceedings of the ACM on Software Engineering2, FSE (2025), 465–488.
+[26] Jiageng Li, Zhen Dong, Chong Wang, Haozhen You, Cen Zhang, Yang Liu, and Xin Peng. 2025. LLM Based Input
+      Space Partitioning Testing for Library APIs. InProceedings of the 47th IEEE/ACM International Conference on Software
+      Engineering (ICSE).
+[27] ChengjieLu,YizeShi,HuihuiZhang,ManZhang,TiexinWang,TaoYue,andShaukatAli.2022.Learningconfigurations
+      of operating environment of autonomous vehicles to maximize their collisions.IEEE Transactions on Software
+      Engineering49, 1 (2022), 384–402.
+[28] Alberto Martin-Lopez, Sergio Segura, and Antonio Ruiz-Cortés. 2020. RESTest: Black-box constraint-based testing of
+      RESTful web APIs. InInternational Conference on Service-Oriented Computing. Springer, 459–475.
+
+
+
+                                  Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.
+
+===== GV-04 PDF PAGE 22 =====
+
+ISSTA094:22                                                          X. Zhou, Z. Dong, M. Ren, Q. Li, J. Li, S. Wang, X. Yu, C. Sha, and X. Peng
+
+
+[29] AlbertoMartin-Lopez,SergioSegura,andAntonioRuiz-Cortés.2021. RESTest:automatedblack-boxtestingofRESTful
+      webAPIs.InProceedingsofthe30thACMSIGSOFTInternationalSymposiumonSoftwareTestingandAnalysis.682–685.
+[30] Facundo Molina, Pablo Ponzio, Nazareno Aguirre, and Marcelo Frias. 2021.  Evospex: An evolutionary algorithm
+      for learning postconditions. In2021 IEEE/ACM 43rd International Conference on Software Engineering (ICSE). IEEE,
+      1223–1235.
+[31] DavideMolinelli,AlbertoMartin-Lopez,ElliottZackrone,BeyzaEken,MichaelDErnst,andMauroPezzè.2025. Tratto:
+      A Neuro-Symbolic Approach to Deriving Axiomatic Test Oracles.Proceedings of the ACM on Software Engineering2,
+      ISSTA (2025), 1887–1909.
+[32] Paulina SteviaNouwou Mindom, AminNikanjam, and FoutseKhomh. 2023. A comparison ofreinforcement learning
+      frameworks for software testing tasks.Empirical Software Engineering28, 5 (2023), 111.
+[33] MinxuePan,AnHuang,GuoxinWang,TianZhang,andXuandongLi.2020. Reinforcementlearningbasedcuriosity-
+      driventestingofandroidapplications.InProceedings of the 29th ACM SIGSOFT international symposium on software
+      testing and analysis. 153–164.
+[34] Max Schäfer, Sarah Nadi, Aryaz Eghbali, and Frank Tip. 2023. An empirical evaluation of using large language models
+      for automated unit test generation.IEEE Transactions on Software Engineering50, 1 (2023), 85–105.
+[35] SergioSegura,JuanCAlonso,AlbertoMartin-Lopez,AmadorDurán,JavierTroya,andAntonioRuiz-Cortés.2022.
+      Automated generation of metamorphic relations for query-based systems. InProceedings of the 7th International
+      Workshop on Metamorphic Testing. 48–55.
+[36] ZhihongShao,PeiyiWang,QihaoZhu,RunxinXu,JunxiaoSong,XiaoBi,HaoweiZhang,MingchuanZhang,YKLi,
+      Yang Wu,etal.2024. Deepseekmath: Pushingthelimits ofmathematicalreasoning inopenlanguagemodels.arXiv
+      preprint arXiv:2402.03300(2024).
+[37] JinglingSun,TingSu,JunxinLi,ZhenDong,GeguangPu,TaoXie,andZhendongSu.2021. UnderstandingandFinding
+      SystemSetting-RelatedDefectsinAndroidApps.InProceedings of the 30th ACM SIGSOFT International Symposium on
+      Software Testing and Analysis (ISSTA).
+[38] Cody Watson, Michele Tufano, Kevin Moran, Gabriele Bavota, and Denys Poshyvanyk. 2020. On learning meaningful
+      assert statements for unit test cases. InProceedings of the ACM/IEEE 42nd International Conference on Software
+      Engineering. 1398–1409.
+[39] Tianyi Wu, Liwei Shen, Zhen Dong, Xin Peng, and Wenyun Zhao. 2024.  Synthesizing Programmatic Policy for
+      Generalization within Task Domain. InProceedings of the 33rd International Joint Conference on Artificial Intelligence
+     (IJCAI).
+[40] HaozhenYou,JingjingWang,QiangLi,XinPeng,andZhenDong.2026. IndustrialPracticeofLLM-basedTestCase
+      Carving and Assertion Generation. InProceedings of the 35th ACM SIGSOFT International Symposium on Software
+      Testing and Analysis (ISSTA).
+[41] Hao Yu, Yiling Lou, Ke Sun, Dezhi Ran, Tao Xie, Dan Hao, Ying Li, Ge Li, and Qianxiang Wang. 2022. Automated
+      assertion generation via information retrieval and its integration with deep learning. InProceedings of the 44th
+      International Conference on Software Engineering. 163–174.
+[42] ChenxiZhang,ZhenDong,XinPeng,BichengZhang,andMiaoChen.2024. Trace-basedMulti-DimensionalRoot
+      Cause Localization of Performance Issues in Microservice Systems. InProceedings of the 46th IEEE/ACM International
+      Conference on Software Engineering (ICSE).
+[43] ShaohuaZhang,ShuangLiu,JunSun,YuqiChen,Wenzhi Huang,JinyiLiu,JianLiu,andJianyeHao.2021. FIGCPS:
+      Effective Failure-inducing Input Generation for Cyber-Physical Systems with Deep Reinforcement Learning. In2021
+      36th IEEE/ACM International Conference on Automated Software Engineering (ASE).555–567.doi:10.1109/ASE51524.
+      2021.9678832
+
+Received 2026-01-30; accepted 2026-04-16
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Proc. ACM Softw. Eng., Vol. 3, No. ISSTA, Article ISSTA094. Publication date: October 2026.

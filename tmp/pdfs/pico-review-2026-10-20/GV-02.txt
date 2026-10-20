@@ -1,0 +1,674 @@
+
+
+===== GV-02 PDF PAGE 1 =====
+
+RESTestBench: A Benchmark for Evaluating the Effectiveness of
+     LLM-Generated REST API Test Cases from NL Requirements
+
+                 Leon Kogler                                     Stefan Hangler                                Maximilian Ehrhart
+          leon.kogler@casablanca.at                       stefan.hangler@casablanca.at                  maximilian.ehrhart@casablanca.at
+    CASABLANCA hotelsoftware GmbH                    CASABLANCA hotelsoftware GmbH                    CASABLANCA hotelsoftware GmbH
+               Schönwies, Austria                               Schönwies, Austria                                Schönwies, Austria
+            Benedikt Dornauer                                Roland Wuersching                                   Peter Schrammel
+        benedikt.dornauer@uibk.ac.at                       roland.wuersching@tum.de                       peter.schrammel@diffblue.com
+            University of Innsbruck                     Technical University of Munich                                Diffblue Ltd
+               Innsbruck, Austria                                Munich, Germany                              Oxford, United Kingdom
+Abstract                                                                       theymayleadnotonlytoserviceoutagesbutalsotodataintegrity
+ExistingRESTAPItestingtoolsaretypicallyevaluatedusingcode                      violationsandcostlyproductionincidents,therebyreinforcingthe
+coverageandcrash-basedfaultmetrics.However,recentLLM-based                     need for effective and scalable automated API testing.
+approachesincreasinglygeneratetestsfromNaturalLanguage(NL)                        ThisneedisreflectedinthegrowthofresearchonRESTAPItest-
+requirementstovalidatefunctionalbehaviour,makingtraditional                    ing tools between 2017 and 2022 [18]. During this period, fuzzing-
+metricsweakproxiesforwhethergeneratedtestsvalidateintended                     based approaches became predominant, especially black-box tech-
+behaviour.Toaddressthisgap,wepresentRESTestBench,abench-                       niquesthatgeneraterequestsfromOpenAPISpecification(OAS)and
+markcomprisingthreeRESTservicespairedwithmanuallyveri-                         evaluate outcomes using oracles such as server errors (5xx) and
+fied NL requirements in both precise and vague variants, enabling              schemaviolations[6,8,18,29].RecentadvancesinLargeLanguage
+controlledandreproducibleevaluationofrequirement-basedtest                     Models(LLMs)haveshiftedthelandscapeofautomatedAPItesting.
+generation.RESTestBenchfurtherintroducesarequirements-based                    LLMscaninterpretNL artifactsandgeneratedomain-awareasser-
+mutationtesting metricthatmeasures thefault-detectioneffective-                tions, enabling testgenerators to move beyondpurely robustness-
+nessofageneratedtestcasewithrespecttoaspecificrequirement,                     orientedchecksandtowardsvalidatingfunctionalcorrectnessand
+extendingtheproperty-basedapproachofBartoccietal.[12].Us-                      business logic requirements [9, 22].
+ing RESTestBench, we evaluate two approaches across multiple                      Emerging tools generate REST API tests from NL requirements
+state-of-the-art LLMs: (i) non-refinement-based generation, and                or requirement-likescenarios, either directlyfrom human-defined
+(ii) refinement-based generation guided by interaction with the                descriptions (e.g., user stories) or via intermediate NL scenarios
+running Service Under Test (SUT). In the refinement experiments,               derivedfromtheOAS[26,31,34,42],asgiveninTable1.Thereby,
+RESTestBenchassesseshowexposuretotheactualimplementation,                      mosttools rely ontheOASastheprimarysourceforLLM-derived
+validor mutated, affects testeffectiveness.Ourresultsshowthat                  scenariostreatedasfunctionaloracles.Unfortunately,sincetheOAS
+test effectiveness drops considerably when the generator interacts             only specifies endpoints, parameters, and response schemas [5]
+with faulty or mutated code, especially for vague requirements,                whileomittingbehaviouralsemanticsandbusinessconstraints,it
+sometimes negating the benefit of refinement and indicating that               might not reliably serve as a basis for functional requirements.
+incorporatingactualSUTbehaviourisunnecessarywhenrequire-                          Apartfromthat,theshiftinusingLLMstogeneraterequirements-
+ment detail is high.                                                           based tests brings renewed attention to a long-standing challenge
+                                                                               in automated testing:the oracle problem[                     10]. While current LLM-
+CCSConcepts                                                                    based test generation approaches address the challenge of creat-
+•Softwareanditsengineering → API languages;Acceptance                          ing stronger oracles to validate functional requirements, ensuring
+testing;Software testing and debugging.                                        that tests actually reflect the intended requirements remains an
+                                                                               openproblem.Whentestsaimtovalidaterequirementsratherthan
+Keywords                                                                       merelydetectcrashes,traditionalmetricssuchascodecoverageor
+                                                                               5xx servererror countsareinsufficient [12, 21].Consequently,we
+REST API Testing, OpenAPI, Automated Test Generation, Large                    see thatmost approaches stillrely on manualevaluation (Section
+Language Model, Benchmarking                                                   2.1).Mutationtestingoffersastrongeradequacysignalthancode
+                                                                               coverageandcrash-basedmetrics,andhasrecentlybeenappliedto
+1   Introduction                                                               LLM-generatedRESTAPItests[11].Yet,ifmutationsarenottiedto
+Representational State Transfer (REST)APIshave long been essen-                specific requirements, mutation testing cannot determine whether
+tial in enterprise systems, enabling scalable integration between              atestkillsmutantsforthe“rightreason”,i.e.,becauseitenforces
+services and supporting digital transformation. The adoption of                the intended requirement rather than incidental implementation
+API-firstapproacheshasaccelerated,withagrowingnumberofor-                      behaviour. Bartocci et al.[12] introduceProperty-Based Mutation
+ganizationstreatingAPIsasproductsthatdrivebusinessvalueand                     Testing (PBMT), emphasizing that mutants are only meaningful
+foster innovation [30, 35]. If faults in deployed API services occur,          when tied to a specific property: a mutant is considered killed in
+
+===== GV-02 PDF PAGE 2 =====
+
+                                                                                      Kogler L., Hangler S., Ehrhart M., Dornauer B., Wuersching R., and Schrammel P.
+
+Table 1: Overview of LLM-based REST API test generation                                            the SUT. Specifically, we measure whether actual be-
+tools.Ref.=Usesrefinementloop,CC=CodeCoverage,MC                                                   haviour influences test effectiveness, as observed in
+=MutationCoverage.                                                                                 prior work on LLM-generated test oracles [27].
+
+
+ Tool                            OracleSource                   Ref.   Evaluation
+ APITestGenie [34]         Human-defined NL req.    ✗   human                       2   BackgroundandRelatedWork
+ LogiAgent [42]              From OAS (LLM)      ✓  CC + #5xx + human
+ RestTSLLM [11]            From OAS (LLM)      ✗   CC + MC                          2.1   LLM-BasedRESTAPITestGeneration
+ SAINT [31]                    From code (LLM)      ✓  CC + #5xx + human                    Approaches
+ RESTifAI [26]                From OAS (LLM)      ✓  CC + #5xx + human
+                                                                                    Over the past decade, the number of automated approaches for
+                                                                                    testing REST APIs hasincreased substantially [18]. Until roughly
+ameaningfulwayonlyifitsexecutiontriggersaviolationofthat                            2022, most practical automated REST API testing approaches were
+property. Existing collections of services used in REST API testing                 variants ofproperty-basedandmodel-basedtesting. Representative
+research (including thePublic REST API Benchmarkby Decrop et                        tools include EvoMaster [6], RESTest [29], and RESTler [8].
+al. [15]) documentwhich APIshave beenused forevaluation, but                           Despitetheprevalenceofproperty-andmodel-basedtesting,au-
+do not provide verified NL requirements or requirement related                      tomaticallyderivingtestoraclesfromtextualdocumentation(e.g.,
+mutationsthatwouldallowcontrolledmeasurementoftestgenera-                           API descriptions or requirements in natural language) remained a
+tionfromrequirements.Consequently,humanjudgmentremains                              significantchallenge.Ingeneralsoftwaretesting,theoracleproblem
+necessarytoassesswhethergeneratedtestsmeaningfullyvalidate                          haslongbeenrecognizedasdifficultwhenrelyingonunstructured
+intended requirements, limiting reproducibility, and comparability                  text alone, since human interpretation is required to map docu-
+across tools.                                                                       mentation to expected behaviour [10] and existingREST API tools
+   Toaddresstheselimitations,weintroduceRESTestBench,abench-                        predominantlygeneratetestsfrommachine-readablespecifications
+markthatexplicitlyseparatesrequirementengineeringfromtest                           ratherthantextualrequirements[3].Meanwhile,inbroadersoft-
+generation and assesses test adequacy using specific mutations                      ware engineering,Requirements-Based Test Generation (RBTG)has
+relevanttothe requirement,drawinginspirationfromBartocciet                          been shown to align testing closely with user intent and quality
+al. and their PBMT definition. By grounding evaluation in vali-                     assurancegoalsbyconstructingtestcasesdirectlyfromNLrequire-
+datedrequirements,theeffectivenessoftestgenerationapproaches                        ments [41]. Recent advances in LLMs have significantly lowered
+canbeassessedquantitativelywithoutconflatingambiguityinre-                          thebarriertoleveragingNLartifactsforRESTAPItesting.Inthe
+quirement generation with errors in test generation. Assessing the                  following,weexaminecurrent LLM-basedRESTAPItestingtools
+adequacyofgeneratedtestsbyusingPBMTisnotonlyamorechal-                              that derive, interpret, and/or translate NL requirements into exe-
+lengingmetricthannormalmutationtesting[12],italsoallowsusto                         cutable test cases; these approaches are summarized in Table 1.
+evaluateifrequirementbasedtestingapproachesthatinteractwith
+theSUT, are able to distinguish between a valid implementation                      APITestGenie[                34] combines an OAS with human-written NL
+andanalreadymutatedimplementation.Whileregression-based                             requirements and uses single-shot LLM prompting to generate
+toolsassumethecorrectnessofthecurrentSUTimplementation,                             executableJUnittests, treating the provided requirements as the
+requirements-based approaches should distinguish invalid from                       oracle.Theexperimentalevaluationfocusesonexecutabilityand
+valid behaviour, as their oracle is grounded in the requirements                    perceived usefulness, with manual validation recommended.
+rather thanin theimplementation. Therefore,our benchmarken-                         LogiAgent[        42] adopts a multi-agent workflow that derives NL
+ables theevaluation oftest generation approachesthat encounter                      scenarios from the OAS, executes them stepwise, and validates
+theactualbehaviouroftheSUTintwosettings:oneinwhichtests                             responsesusinganLLMasajudge.Effectivenessismeasuredvia
+aregeneratedbasedonthevalidimplementation,andoneinwhich                             code coverage and detected failures, while semantic correctness
+testsaregeneratedbasedonamutatedimplementation.Thisdesign                           relies on manual annotation.
+enables systematic and reproducible comparison of requirements-                     RestTSLLM[                     11] employs a two-stage LLM pipeline: first gener-
+based generation strategies without relying on human judgement                      ating aTest Specification Language (TSL)-based test specification
+as the primary oracle.                                                              fromtheOAS,thentranslatingitintoexecutabletests.Evaluation
+   Overall, this work makes the following contributions:                            includesexecution success,coverage,and mutationscore,but does
+      •  RESTestBench:Arequirements-basedRESTAPItestgen-                            not explicitly assess alignment with intended requirements.
+         eration benchmark comprising three REST services, 106                      SAINT[  31] is a white-box approach that infersendpoints and de-
+         human-validatedNL-requirementsattwodifferentlevels                         pendenciesfromsourcecodeandrefinesthemintotestsusingLLM
+         ofdetail,228manuallydesignedrequirements-basedmuta-                        agents.Oraclesareembeddedimplicitlyingeneratedscenarios,and
+         tions,and aframeworkthatenables straightforwardinte-                       evaluation combines automated metrics with developer feedback.
+         gration and evaluation of new generation approaches.                       RESTifAI[                 26]generateshappy-pathandnegativetestscenarios
+      •TwoexperimentsconductedusingRESTestBench:                                    froman OASusingLLMs,focusingonrobustness.Effectiveness is
+          (1)  Anevaluationofasimplesingle-stepapproachserving                      assessed through coverage and detected server errors, with addi-
+              as a baseline for non-refinement-based tools.                         tional expert-based validation.
+          (2)  An evaluation of a refinement-based approach that                       Acrossthereviewedapproaches,twofundamentalgeneration
+              incorporates knowledge of the actual behaviour of                     strategiescan bedistinguished.Non-refinement approaches(e.g.,
+
+===== GV-02 PDF PAGE 3 =====
+
+RESTestBench
+
+
+APITestGenie,RestTSLLM)generatetestcasesinasingle-stepman-                         Therefore, PBMT proposed by Bartocci et al. [12] aims to bridge
+ner from the OAS and/or NL requirements without interacting                        this gap by evaluating test suites with respect toproperty-based
+withtheSUTduringgeneration.Incontrast,refinement-basedap-                          mutations.Inourcontext,thesepropertiescorresponddirectlyto
+proaches(e.g.,LogiAgent,SAINT,RESTifAI)incorporatefeedback                         formalizedrequirements.Comparedtotheestablishedmetricsin
+loopsinwhichintermediaterequestsareexecutedagainsttheSUT,                          RESTAPItesting,PBMTofferstheadvantageofassessingwhether
+andtheobservedresponsesareusedtoiterativelyrefinescenarios,                        testsvalidatetheintendedsystemrequirementsratherthanmerely
+parameters,orassertions.Thesestrategiesthereforedifferprimarily                    detecting arbitrary output differences. By treating requirements
+inwhethertestgenerationisperformedstaticallyfromthespecifi-                        as explicit constraints during mutant evaluation, PBMT further
+cation or dynamically informed by the runtime behaviour of the                     prevents mutation scores from being inflated by mutants that are
+service. The intention of the experiments in this paper is not to                  irrelevantto therequirement underconsideration. Overall,PBMT
+reportcomprehensivecomparisonresultsforexistingtools,butto                         representsapromisingandmorerequirement-alignedmetricthat
+showhowthebenchmark canbeused tocomparefundamentally                               deserves further attention in this and future work.
+differentgenerationapproachesinacontrolledwayunderuniform
+experimental conditions.                                                           3   RESTestBenchConception
+                                                                                   RESTestBench is designed to evaluate the effectiveness of LLM-
+2.2   MetricsandtheirProblemfor                                                    basedblack-boxapproachesintranslatinga functionalNLrequire-
+       Requirements-BasedTesting                                                   ment, supportedby an OAS, into a singleexecutable test case. To
+                                                                                   thisend,thebenchmarkcomprisesacuratedsetofRESTAPIser-
+In2023,Golmohammadietal.[19]conductedasystematicliterature                         vices(Section3.1)andamanuallydefinedcollectionoffunctional
+review (RQ4) to identify the evaluation metrics commonly used                      NL requirements (Section 3.2). The fault-detection effectiveness
+by predominantly non-LLM-based REST API testing techniques.                        of the generated requirements-based test cases is assessed using
+Based on that, they group these metrics into three main categories:                PBMT [12] with manually defined and validated mutations (Sec-
+coverage metrics (e.g., schema-based and code coverage), fault-                    tion3.3).Figure1illustratestheoverallbenchmarkworkflow,in-
+detectionmetrics(e.g.,HTTP5xxerrors),andperformancemetrics                         cluding the generation of test cases from the requirements and the
+(e.g., response time and latency). Despite the recent advances in                  OAS, their execution against the SUT, and the subsequent eval-
+LLM-basedRESTAPItestgeneration(Section2.1)havenotinflu-                            uation of test outcomes using mutation scores. The benchmark
+encedthechoiceofevaluationstrategies,thefirsttwocategories                         is designed to grow over time: additional services, requirements
+are still predominant, as identifiable in Table 1.                                 and mutationscan easily be integratedinto the currentbenchmark
+   Coverage metricsare reported by all approaches discussed in                     framework.
+Section 2.1, except APITestGenie. Such metrics quantify how ex-                       The repository and guidelines can be accessed here:
+tensivelythe systemis exercised,not whetherthe generatedtests                           https://github.com/casablancahotelsoftware/RESTestBench.
+actually check the intended functionality [39]. Furthermore, the
+correlation between test suite effectiveness and coverage is not
+strongly given, as quantified by Inozemtseva and Holmes [23].
+   Fault-detectionmetrics.LiandOffutt[           28]defineanadequatetest
+caseasone thatnotonlytriggersandpropagatesfaulty behaviour
+butalso includesa testoracle capableof revealingthe fault.Most
+of the tools discussed in Section 2.1 aim to generate increasingly
+sophisticatedoraclestodetectabroaderrangeoffaults.Inpractice,
+however, many of these approaches stillrely on server-side error
+counts (e.g., HTTP 5xx responses) to evaluate test effectiveness.
+Suchmetricsareinsufficientforassessingthetrueeffectivenessof
+testoracleswhen thegoalistovalidate thefunctionalbehaviour
+of the SUT.
+   OnlyRestTSLLM[11]integratesamutationscore,wheresmall,
+faultsknownasmutantsaresystematicallyintroduceddirectlyinto                                        Figure1:RESTestBenchoverview
+thesystemtoevaluatewhetherthetestsuite,particularlyAPItests,
+can detect the resulting behavioural deviations. A higher muta-                    3.1   SelectionofsuitableRESTAPIServices
+tion score therefore serves as an indicator of test effectiveness and
+provides astronger linkto theabilityof thetests todetectmean-                      The benchmark services were selected to support controlled, re-
+ingful defects in REST API implementations [32, 33, 37]. Thereby,                  producibleexperimentationwhileremainingrepresentativeofreal-
+classical mutationevaluation primarilyasks: “Ifa developerintro-                   world REST backends. Practical relevance refers to selecting ser-
+duced a small coding mistake, would our tests detect it?”. It does                 vicesthatresembleproduction-styleRESTbackendsintermsofAPI
+not determine whether the tests genuinely enforce the intended                     surface, security mechanisms, and that include complex operation
+systembehaviour asspecified byrequirements,butratherwhether                        dependencies requiring stateful request sequences.
+they can distinguish the current implementation from syntacti-                        Ataminimum,candidateservicesmustbeopen-sourceandpro-
+cally perturbed variants, as is typically done in regression testing.              videanOAS.Moreover,werequiresufficientprojectmaturityfor
+
+===== GV-02 PDF PAGE 4 =====
+
+                                                                                       Kogler L., Hangler S., Ehrhart M., Dornauer B., Wuersching R., and Schrammel P.
+
+Table2:ServicesusedinRESTestBench.Stars/Forksaretaken                                languagereflectscommonindustrialpractice, where requirements
+from the exact GitHub repositories (accessed on 2026–01–                             arefrequentlydocumentedinformallyandexhibitvaryingdegrees
+29).EndpointcountsandCLOC(countedlinesofcode)are                                     of precision and completeness, often leading to ambiguity and
+computedfromthecorrespondingbenchmarksnapshot.                                       underspecification [38, 43]. As the benchmarked services do not
+                                                                                     providecompleterequirementsdocumentation,requirementsare
+                        GET/POST/PUT                                                 reverse-engineeredfromexistingintegrationtests,whereavailable,
+    Name               PATCH/DELETE    Stars    Forks    CLOC                        or derived through manual inspection of the service source code
+    FastAPI [2]                  6/10/1/3/3            41.2k           8k       8,072and its business logic, ensuring that each requirement reflects the
+    TodoApp [17]              2/3/1/0/1               3.1k         462       1,609   actual behaviour of the evaluated system. To validate this align-
+    RealWorld [25]            7/6/2/0/4               3.3k         701          965  ment, we manually created a golden test for each requirement,
+                                                                                     verifying that it passes on the original implementation. Each re-
+realisticengineeringpracticesandstablebehaviour.Asatranspar-                         quirement is structured so that, in combination with the OAS, it
+ent proxy we report GitHub stars and forks, given in Table 2.                        can be transformed into exactly one REST API test case.
+   Beyondtheseminimumconstraints,weprioritisedserviceswhose                             Tostudyhowrequirementdetailaffectstestgenerationeffective-
+domainlogicisnon-trivialandwhoseendpointsexhibitmeaningful                           ness,weprovidetwovariantsofeachrequirement:onepreciseand
+dependencies (e.g., authentication prerequisites, ownership con-                     onevague.Thisdistinctionisgroundedinestablishedrequirements
+                                                                                     engineering literature differentiating goal-level specifications from
+straints, and state-dependent workflows), because these properties                   operational or scenario-based descriptions [24, 38].
+enable requirements that go beyond endpoint reachability and re-                        Thevaguevariant is a high-level informal statement that cap-
+quire semantically rich assertions.                                                  tures only the essential intent of the requirement, providing the
+   A further prerequisite is that the OAS aligns with the actual                     minimalinformationahumantesterwouldneedtoproduceatest
+serviceimplementationsothattoolscanderivevalidrequestsand                            case witha still clearand verifiable objective.It omits anyprecon-
+create correct test cases. For services where the provided OAS                       ditionsorsetup needed forvalidation,specifyingonlythetesting
+deviated from the observed runtime behaviour (e.g., mismatched                       objective and the expected outcome at a conceptual level. This
+statuscodes,missing/incorrectfields,orparameterconstraints),we                       formulationcorrespondstogoal-orientedorearly-phaserequire-
+performed targeted manual corrections to obtain a specification                      mentsthatintentionallyabstractfromoperationaldetailandmay
+thatmatchestheevaluatedserviceimplementation,ensuringthat                            remain partially incomplete [38, 43]. Such underspecification re-
+alltoolscaninprinciplegeneratecorrecttests.Futureworkcould                           flectsrealistic industrialrequirementsandposes knownchallenges
+investigate how the quality of the OAS influences test quality.                      for automated test generation from NL descriptions [7].
+   Applying theseconstraints, weselected thefollowing threeser-                         Theprecisevariant,incontrast, specifiesallpreconditions re-
+vices asSUTs:                                                                        quired to validate the intended test objective. It details the exact
+FastAPIfull-stacktemplate[               2]isaproduction-oriented,Python-            sequence of operations, their dependencies, and the parameters
+based FastAPI template service with a PostgreSQL-backed data                         relevant for subsequent requests. Additionally, it defines the ex-
+model, JWT-based security components, and multi-entity work-                         pectedresultsconcretely,includingresponsefieldsandvaluesthat
+flows(e.g.,hierarchical resourceownershipand administrative/su-                      must be verified. Compared to the vague variant, this representa-
+peruseroperations).Weselecteditbecauseitiswidelyadoptedin                            tion functions more like a scenario-based description of a test case.
+the FastAPI ecosystem and provides a realistic, dependency-rich                      Its structure is more aligned with use cases and scenario-based
+baseline for business-logic requirements.                                            specifications [13, 24]. By specifying all required preconditions,
+                                                                                     interaction steps, and expected outputs, the precise variant fulfills
+TodoApp[       17]isacompact.NETMinimalAPIservicewithauthen-                         establishedqualitycharacteristicsoftestablerequirements,includ-
+ticationand domain-specificdependenciesthatyields acontrolled                        ing completeness, unambiguity, and verifiability [40]. Listing 1
+                                                                                     shows a concrete example of both variants.
+lower-complexitybaseline.Weselecteditbecauseitenablesdirect                             RESTestBenchcoversawiderangeofrequirementcomplexity
+comparison between simpler CRUD-centric behaviour and more                           to supportdifferentiated evaluation. Scenarios rangefrom single-
+complex multi-entity workflows and was previously used as an                         operationrequirementstomulti-stepsequenceswithintricatede-
+evaluation subject in Barradas et al. [11].                                          pendencies among operations and parameters. Verification tasks
+                                                                                     varyfromsimplestatuscodecheckstodetailedassertionsofnested
+NestJSRealWorldapp[      25]isaNestJSbackend(TypeScript)that                         responsefieldsthatdependonearlieroperations. Thebenchmark
+implements the RealWorld API specification [1], including articles,                  also includes challenging functional contexts, such as complex
+comments, profiles, favourites, and follower relationships, making                   CRUD workflows, authentication and authorization procedures,
+it well-suited for complex requirements-based testing.                               andcascadingstatechanges.Byaddressingbothoperationaland
+                                                                                     verification difficulty, RESTestBenchensures thattest generation
+3.2   NaturalLanguageRequirements                                                    methods are assessed across realistic and representative REST API
+                                                                                     behaviours.
+Inourbenchmark,anNLrequirementisanunstructuredtextual
+statementinhumanlanguagethatspecifiestheexpectedexternally
+observablefunctionalbehaviourofaRESTAPI.Theuseofnatural
+
+===== GV-02 PDF PAGE 5 =====
+
+RESTestBench
+
+listing1JSON Requirement Example from FastAPI                                                 listing2Valid implementation of the get_users operation of the
+
+   1 {                                                                                        FastAPI service
+
+   2     "id":  28,                                                                               1 @router.get(dependencies=[Depends(get_current_active_superuser)],
+   3     "service":  "fastapi",                                                                            response_model=UsersPublic)
+   4     "requirement_vague":  "A  superuser  (admin@example.com  /  password123)                 2 defread_users(session:  SessionDep,  skip:int=  0,  limit:int=  100)  ->  Any
+            creates  2  random  users  and  retrieves  all.  Verify  the  response.",                      :
+   5     "requirement_precise":  "Authenticate  as  the  superuser  (use  admin@example.          3         count_statement  =  select(func.count()).select_from(User)
+            com  /  password123)  to  obtain  an  access  token.  Using  that  superuser          4         count  =  session.exec(count_statement).one()
+            access  token,  create  two  distinct  users  via  the  public  create-user           5         statement  =  select(User).offset(skip).limit(limit)
+            API  (each  with  a  unique  email  and  password).  Store  the  returned  user       6         users  =  session.exec(statement).all()
+              IDs  and  emails.  Then,  using  the  same  superuser  access  token,               7         returnUsersPublic(data=users,  count=count)
+            retrieve  the  list  of  all  users.  Verify  the  response  status  is  200.
+            Verify  the  response  JSON  contains  a  top-level'data'collection  and
+            a  top-level'count'key.  Verify  that  both  created  users  appear  in
+            the'data'collection  by  checking  that  their  emails  are  present.
+            Verify  that  for  each  created  user,  the  email  in  the  list  matches  the  listing3Examplemutationofreturneduserdataensuringthetest
+              email  used  during  creation.",
+   6     "mutants":  [                                                                        notonlychecksthepresenceofemails intheresponse,butalsoif
+   7         ...
+   8     ]                                                                                    each email is correctly assigned to the corresponding user
+   9 }
+                                                                                                  1 -  return  UsersPublic(data=users,  count=count)
+                                                                                                  2 +  emails  =  [u.email  for  u  in  users]
+                                                                                                  3 +  swapped  =  [
+                                                                                                  4 +      {**u.__dict__,'email':  emails[(i  +  1)  %  len(emails)]}
+                                                                                                  5 +      for  i,  u  in  enumerate(users)
+                                                                                                  6 +  ]
+3.3   ManualMutationConstruction                                                                  7 +  return  UsersPublic(data=swapped,  count=count)
+Toassesstheeffectivenessofrequirements-basedtestgeneration,
+we employ manually defined and validated mutations, following
+the principles of Property-Based Mutation Testing [12]. Each re-                              associatedwiththerequirement.Thisdesignchoiceensuresaman-
+quirement is formalized as a property, and for each property we                               ageable benchmark runtime, given the substantial computational
+define a set of mutations that lead to violations of that property.                           cost of test generation and execution.
+   Compared to automated mutation seeding, manual mutation
+design ensures the following:                                                                 3.4   EvaluationProcess
+     (1)  Propagation:AccordingtotheRIPmodel[               4],afaultmust                     We adopt the PBMT [12] definition of mutation score (Defini-
+          propagate to an observable output to be revealed [28] by                            tion III.4) and apply it under a restriction to singleton test sets.
+          anoracle.By explicitlydefining andexecuting mutations,                              In our setting each requirement𝜙𝑖 is evaluated using a test suite
+          we ensurethat violations are observable throughthe REST                             𝑇𝑖 ={𝑡     𝑖} containing a single test case. A mutant is considered𝜙𝑖-
+          API.                                                                                killedaccordingtoDefinitionIII.1ifitiskilledbythecorresponding
+     (2)  Relevance:Mutationsareconstructedtodirectlyimpactthe                                test𝑡𝑖.Wedefine𝑀𝜙𝑖 asthesetofmutationsdefinedfor𝜙𝑖,andlet
+          satisfactionofthetestedproperty[12].Existingautomated                               𝑘𝜙𝑖 denotethenumberofmutations𝜙𝑖-killedbythecorresponding
+          mutationtoolsare,toourknowledge,unabletogenerate                                    test𝑡𝑖. Let𝑀 denote theset of allmutations inthe benchmark and
+          mutants that meaningfully affect NL requirements.                                   𝑘𝜙 denotethenumberofall𝜙𝑖-killedmutationsintotal.Theoverall
+     (3)  Non-equivalency [16]:Sinceidentifyingequivalentmutants                              requirements-based mutation score𝑀𝑆  𝜙 is defined as:
+          isundecidable,mutationsaremanuallydefinedtoensure
+          behaviouraldivergencefromtheoriginalsystemforatleast                                                                    𝑀𝑆𝜙 =  𝑘𝜙
+          one input.                                                                                                                        |𝑀|                                        (1)
+     (4)  Non-subsumption[32]:Mutationsaredesignedtoavoidsub-
+          sumption,wherenon-equivalentmutantsproduceidentical                                 Tocomputethemutationscoreforrefinement-basedapproaches
+          propagatedoutputsandthusprovidenoadditionalevalua-                                  wherethegeneratedtestcasemaydependontheconcreteimple-
+          tion power.                                                                         mentation of the SUT, we define𝑡valid𝑖      as the test case generated
+     (5)  Realism:Commonmutationoperators(e.g.,arithmetic,log-                                from requirement𝜙𝑖 using the valid implementation of the SUT.
+          ical, or syntactic changes [14, 20]) are largely semantics-                         Furthermore,foreachmutant𝑚𝑗 ∈𝑀  𝜙𝑖,wedefine𝑡𝑚𝑗𝑖    asthetest
+          agnostic. In contrast, our manually definedmutants (List-                           case generated based on the𝑗-th mutated SUT of requirement𝜙                    𝑖.
+          ings3)capturerealisticfaultsthatstaticmutationtoolsare                                  Fornon-refinement-basedapproaches, test generation is inde-
+          unlikely to produce.                                                                pendent of the actual implementation. Thus,𝑡valid𝑖     =𝑡   𝑚𝑗𝑖   , and we
+   Listing 2 presents an example endpoint definition from the full-                           evaluate the𝑘𝜙𝑖 basedon𝑡valid𝑖      and calculatetotal mutationscore
+stack-fastapi-template service used in our benchmark. Listing 1                               as defined in Equation 1.
+specifies thecorresponding requirement the endpointin Listing 2                                   Forrefinement-basedapproaches, test generation may depend
+isexpectedtofulfillandthatthegeneratedtestcasemustvalidate.                                   on the implementation, so we assume that 𝑡valid𝑖     ≠𝑡   𝑚𝑗𝑖   . To com-
+Listing3illustratesamanuallydesignedmutationthatconformsto                                    pare fault-detection effectiveness fairly between the single𝑡valid𝑖
+theabovedefinedcriteria.Inaddition,andinaccordancewiththese                                   and possible multiple𝑡𝑚𝑗𝑖   , wecompute the average number ofmu-
+criteria, we deliberately restrict the mutation set to a minimal yet                          tants killed by all𝑡𝑚𝑗𝑖   . Specifically, let𝑘𝑚𝑗𝜙𝑖  denote the number of
+representativesubsetthattargetsthemostcriticaltestassertions                                  mutations𝜙                    𝑖-killed by𝑡     𝑚𝑗𝑖   , and define
+
+===== GV-02 PDF PAGE 6 =====
+
+                                                                                              Kogler L., Hangler S., Ehrhart M., Dornauer B., Wuersching R., and Schrammel P.
+
+
+                                             ∑︁                                            functions 𝑔𝑒𝑛𝑒𝑟𝑎𝑡𝑒_𝑡𝑒𝑠𝑡     and 𝑒𝑥𝑒𝑐𝑢𝑡𝑒_𝑡𝑒𝑠𝑡   , which must be imple-
+                         𝑘𝑚𝜙𝑖 =     1               𝑘𝑚𝑗𝜙𝑖                                  mentedforeachnewapproach.Thisabstractionensuresindepen-
+                                 |𝑀𝜙𝑖| ·   𝑚𝑗∈𝑀 𝜙𝑖                                         dencefromspecifictestlanguagesandframeworks.Toguarantee
+   i.e.,theaveragenumberof𝜙𝑖-killedmutationsacrossallmutant-                               independent test generations (only relevant for refinement-based
+specifictests. Similarly, let𝑘valid                                                        generation approaches) and test executions,the SUT isresetto a
+                                    𝜙𝑖    denote thenumber ofmutations                     well-definedinitialstatepriortoeachgenerationprocessandeach
+killedby𝑡valid𝑖     .Figure2demonstratesthedifferencesbetween𝑘valid𝜙𝑖                      testexecution.Totrackthecostoftestgenerationthe𝑔𝑒𝑛𝑒𝑟𝑎𝑡𝑒_𝑡𝑒𝑠𝑡
+and𝑘       𝑚𝜙𝑖 for a single requirement.                                                   function is required to return the generation cost in USD to the
+                                                                                           caller. To validate the correctness of mutation insertion and bench-
+                                                                                           markexecution, wedeveloped asetof goldentests thatachievea
+                                                                                           full mutation score on the benchmark.
+                                                                                              All results are made publicly available here
+                                                                                             https://github.com/casablancahotelsoftware/RESTestBench/tree/
+                                                                                                                            master/results.
+                                                                                           4   Experiments
+                                                                                           This section presents two controlled experiments evaluating LLM-
+                                                                                           basedRESTAPItestgenerationonRESTestBench.Asdiscussedin
+                                                                                           Section 2.1, existing approaches can broadly be classified as either
+Figure2:Visualizationoftheevaluationof𝑘valid𝜙𝑖     and𝑘𝑚𝜙𝑖 for                             non-refinementorrefinement-based.Wethereforeevaluateonerep-
+asinglerequirement𝜙𝑖 inrefinement-basedtestgeneration                                      resentative strategy for each class under controlled conditions to
+approaches.                                                                                establish a baseline for subsequent comparisons.
+                                                                                              To ensure a fair comparison, both experiments use the same
+   Summing over all requirements, we define                                                core input artifacts (the NL requirement, the OAS, and the ser-
+                            ∑︁                    ∑︁                                       vice base URL), the same target output format (pytesttest cases),
+                    𝑘𝑚𝜙 =       𝑘𝑚𝜙𝑖,    𝑘valid𝜙    =  𝑘valid𝜙𝑖   .                        andthe sameevaluation proceduredefinedin Section 3.4.Across
+                             𝑖                      𝑖                                      both experiments, we measure the mutation score achieved on
+   Basedonthisdistinction,wecomputetwomutationscorevalues                                  RESTestBench as well as the cost of test generation. In addition,
+for refinement-based approaches:                                                           bothpreciseandvaguerequirementvariantsareevaluatedtoassess
+                               𝑘valid                      𝑘𝑚                              how requirement granularity influences test effectiveness.
+                  𝑀𝑆valid        𝜙                           𝜙
+                      𝜙    =    |𝑀|         and𝑀𝑆        m𝜙 =|𝑀|                           Table4:LLMmodelsusedinthebenchmarkwithlicensing
+   By computing both scores for refinement-based approaches,                               type, parameter count, and cost per million tokens (Azure
+RESTestBench extends standard mutation testing by explicitly ana-                          AIFoundrypricing).
+lyzingtheeffectoftheactualimplementationontesteffectiveness.
+In particular, this distinction allows us to investigate whether a                                Model                   Company                 Size   $/1M(In/Out)
+tool that incorporates the concrete behaviour of the SUT can cor-                                 Llama 3.1 8B            Meta                              8B           0.15 / 0.15
+rectly differentiate between valid and mutated implementations                                    Llama 3.3 70B          Meta                            70B           0.71 / 0.71
+for a given requirement, and how differences between the valid                                    Llama 4 Scout         Meta                 109B (17B)           0.25 / 1.00
+andmutatedimplementationsinfluencetheabilityofthegenerated                                        GPT-OSS 120B        OpenAI            117B (5.1B)           0.15 / 0.60
+test cases to detect faults.  Table 3 summarizes, for each service,                               DeepSeek V3.2        DeepSeek         671B (37B)           0.58 / 1.68
+                                                                                                  Kimi K2 Thinking   Moonshot AI        1T (32B)           0.60 / 2.50
+Table3:Requirementsandmutationsperserviceusedinthe                                                GPT-5 Nano            OpenAI                            –           0.05 / 0.40
+benchmark.                                                                                        GPT-5 Mini             OpenAI                            –           0.25 / 2.00
+                                                                                                  Mistral Medium      Mistral AI                        –           0.40 / 2.00
+             Service               #req.    #mut.    avg.mut/req                                  Claude Sonnet 4.5   Anthropic                        –         3.00 / 15.00
+
+             FastAPI [2]             63          141               2.24                       Table 4 lists the ten state-of-the-art LLMs evaluated in both
+             TodoApp [17]         14           22                1.57
+             RealWorld [25]       29           65                2.24                      experiments. Models were selected along the Pareto frontier of
+             Total                    106       228             2.15                       cost versus quality on the Azure AI Foundry model benchmark,
+                                                                                           rangingfromcost-efficientmodels(e.g.,Llama3.18B)tofrontier
+                                                                                           models (e.g., Sonnet 4.5), and spanning six vendors (Anthropic,
+the number of requirements and the total number of associated                              DeepSeek, Meta, Mistral AI, Moonshot AI, and OpenAI) with six
+mutations defined in the benchmark.                                                        open-source (OS) and four closed-source (CS) models.1 Due to the
+   To enable standardized and comparable evaluation of different                           1We usedLlama 3.1 8Binstead ofthe newerLlama 3.3 8Bbecausethe latter wasnot
+approaches,wedefineaminimalPythoninterfaceconsistingofthe                                  deployable in Azure AI Foundry at the time of our experiments.
+
+===== GV-02 PDF PAGE 7 =====
+
+RESTestBench
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure3:Mutationscoresforvagueandpreciserequirementscomparingsingle-step                              𝑀𝑆𝜙 (solidbars)withrefinement-based
+scores𝑀𝑆valid𝜙     (forward-hatched)and𝑀𝑆m𝜙  (cross-hatched).Barsarestackedbyservice(FastAPI,RealWorld,TodoApp);segment
+heightreflectsweightedservicecontributionandsegmentpercentagesareper-servicemutationscores.
+
+
+substantialtimeandcomputationalcostofthefullbenchmark,each                             listing4Shortened zero-shot generation prompt template. Place-
+experiment wasexecuted threetimes; wereport averaged results                           holders are filled per requirement.
+withamaximumobserveddeviationof3   .4percentagepoints(pp)                                 1 You  are  an  expert  API  tester  who  writes  pytest  tests
+in overall mutation score across runs.                                                    2 to  validate  that  API  implementations  follow  their
+                                                                                          3 intended  human-written  requirements.  [...]
+                                                                                          4
+                                                                                          5 ##Requirement:
+                                                                                          6 <REQUIREMENT_TEXT>
+4.1   Experiment1:Single-StepGeneration                                                   7
+                                                                                          8 ##OpenAPI  Specification:
+Thefirstexperimentevaluatesanon-refinement,single-stepstrat-                              9 <OAS_JSON>
+                                                                                         10
+egy. In this setting, the model receives a zero-shot prompt and                          11##Instructions  (must  follow  exactly):
+generates the final test in one inference call, without interacting                      12-  Write  a  complete  pytest  test  function  [...]
+                                                                                         13-  Use  the  requests  library  for  HTTP  calls
+with the running SUT during generation. The prompt (Listing 4)                           14-  The  test  MUST  be  completely  self-contained
+                                                                                         15-  Hardcode  all  required  values
+takesthreeinputs:theNLrequirementdescription,thecomplete                                 16   (API  base  URL  should  be  <SERVICE_BASE_URL>,  ...)
+OAS, and the service base URL. The generator neither executes                            17
+                                                                                         18Generate  ONLY  the  Python  test  code,  no  explanations.
+thetest norcontactsthe SUT.Consequently,the producedtestis
+independent of the actual runtime behaviour of the service and is
+not influenced by potential faults in the current implementation.                      4.2   Experiment2:Refinement-LoopGeneration
+
+                                                                                       Thesecondexperimentevaluatesarefinement-basedstrategythat
+   Results.Thesingle-stepmutationscoresforallmodelsareshown                            extendsthesingle-step approachwithafeedbackloop.Generation
+in Figure 3, using the solid bars (𝑀𝑆𝜙). For precise requirements,                     begins with the same initial prompt used in Experiment 1. The
+scores span a wide range, from 13% (Llama 3.1 8B) to 92% (Sonnet                       generatedtestisthenexecutedagainsttheSUTwhileaRequests-
+4.5),withthreemodelsexceeding80%(Sonnet4.5,GPT-5Nano,and                               Tracercapturesall HTTP request/response exchanges. A judge—a
+DeepSeek V3.2). For vague requirements, scores drop substantially                      secondinferencecalltothesamemodel—receivestherequirement,
+for every model, typically by 26 to 40 percentage points, and the                      theOAS,thegeneratedtestcode,thetestexecutionoutput,andthe
+strongestmodelsconvergetoanarrowerrangeof49%–54%.Sonnet                                HTTPtrace, andreturns oneoftwo verdicts(Listing 5):FINISHif
+4.5performsverystronglyonpreciselydefinedrequirements,while                            thetestisadequate, orREFINEMENTifanotheriterationis needed.
+Llama3.18B nearlyfailsonvaguerequirements,reaching only2%.                             In the latter case, the generator receives the previous test code,
+   Overall,theseresultsshowthatrequirementgranularitystrongly                          the HTTP trace, and the test execution output and produces a
+influencessingle-stepgeneration.Moredetailedrequirementssub-                           revised test, which isthen re-evaluated. This process repeats until
+stantiallyimprovetheeffectivenessofallevaluatedmodels,whereas                          the judge issues FINISH or the maximum number of rounds is
+underspecified requirements remain challenging even for frontier                       reached (three rounds in our experiments). Note that the judge
+models.                                                                                solely issues a binary continue/stop decision and is part of the
+
+===== GV-02 PDF PAGE 8 =====
+
+                                                                                          Kogler L., Hangler S., Ehrhart M., Dornauer B., Wuersching R., and Schrammel P.
+
+listing5Shortenedjudgeprompttemplate.Thejudgereceivestest
+execution results and decides whether refinement is needed.
+
+   1 You  are  a  test  quality  reviewer.  [...]
+   2
+   3 ##Requirement  Being  Tested:
+   4 <REQUIREMENT_TEXT>
+   5
+   6 ##Test  Code:
+   7 <GENERATED_TEST_CODE>
+   8
+   9 ##Test  Execution  Output:
+  10<STDOUT_STDERR>
+  11
+  12##HTTP  Trace  (actual  requests/responses):
+  13<TRACE_JSON>
+  14
+  15##Your  Task:
+  161.  Compare  the  test  case  against  the  requirement
+  172.  Check  if  the  Test  Execution  Output  and  HTTP  Trace
+  18     can  enhance  the  test's  effectiveness
+  193.  Identify  if  failures  are  due  to  test  defects
+  20     OR  correct  detection  of  faulty  service  behaviour                        Figure4:Meantotalgenerationcost(USD)perbenchmark
+  21[...]                                                                              runversusmutationscoreforallmodelsonvaguerequire-
+  22
+  23##Response  Format  (EXACTLY  one  of):                                            ments under single-step (circles) and refinement (squares,
+  24REFINEMENT:  <short  description  of  what  needs  changing>
+  25FINISH:  <short  description  why  test  is  correct>                              scoresandcostaveragedovervalidandmutatedSUTcondi-
+                                                                                       tions).
+
+
+generationapproach,nottheexternalevaluation;usingthesame
+modelisthusadeliberatechoicetoevaluatethemodelperformance.                             makingitabout7×cheaperthanSonnet4.5whilealsooutperform-
+   Results.Figure3showsthatrefinementgenerallyincreasesmuta-                           ing it. More broadly, GPT-5 Nano (+19 pp) and GPT-5 Mini (+17
+tionscoresoversingle-stepgeneration.Theonlynotableexception                            pp)benefitmostfromrefinementonvaguerequirements,whereas
+is Sonnet 4.5 on precise requirements, where the single-step score                     modelssuchasDeepSeekV3.2(+12pp)andLlama4Scout(+10pp)
+alreadyreaches92%andrefinementyieldsnofurtherimprovement.                              improvemoremoderately.Sonnet4.5improvesby13percentage
+In general, the gains from refinement are substantially larger for                     points, but at a 2.3×cost increase (from $4.42 to $10.13 per run).
+vaguerequirementsthanforpreciseones.Forexample,GPT-5Nano
+improvesby29percentagepointsonvaguerequirements,reaching                               5   Discussion
+80%,andGPT-5Miniimprovesby24percentagepoints, reaching                                 RESTestBench was designed to evaluate the ability of REST API
+75%.                                                                                   test generation tools to performrequirements-based test genera-
+   Aconsistentpatternacrossallmodelsisthat𝑀𝑆𝑚𝜙 remainsbelow                            tion.Currentapproachesoftenstartfromthe OASand SUTimple-
+𝑀𝑆valid𝜙    . This indicates that generating tests against a mutated SUT               mentation to generate tests, attempting to implicitly or explicitly
+systematicallyreducestesteffectiveness.Thegapislargerforvague                          reverse-engineerrequirementsfromtheseartifactsaspartofthetest
+requirementsthanforpreciseones,suggestingthatunderspecified                            generation process (Section 2.1). Requirements-based tests should
+requirements make refinement-based generation more susceptible                         correctly differentiatebetween validand faultysystems, whichis
+toadaptingtofaultybehaviour.Notably,forfourmodelsonprecise                             only possible if the requirements are not assumed to correspond
+requirements—Sonnet4.5,GPT-5Nano,MistralMedium,andLlama                                to the SUT’s behaviour — in contrast to regression testing which
+3.370B—the single-stepscore exceeds 𝑀𝑆𝑚𝜙 .In thesecases, single-                       assumes the current implementation to be correct. By having ex-
+step generation without SUT interaction is more effective than                         plicit requirements our framework allows us to measure the effect
+refinement performed against a faulty implementation. A plausible                      ofusinginformationabouttheSUT’sbehaviouronrequirements-
+explanationisthattheLLMadaptsitsassertionstomatchthefaulty                             basedtestgeneration.Accordingly,weexpect𝑀𝑆𝑚𝜙  tobezerofor
+behaviour and thereby treats the defect as correct.                                    pure regressiontest generation approaches,as they wouldclassify
+                                                                                       a faulty system as correct.
+4.3   Costs                                                                               Ingeneral,atestsuiteisconsideredgoodifitachievesamutation
+Figure 4 shows that all refinement configurations achieve higher                       score of 90%or more [4]. In ourresults (Figure 3), only Sonnet 4.5,
+mutationscoresthantheirsingle-stepcounterparts,butatincreased                          GPT-5 Nano, and GPT-5 Mini exceed this threshold on precise
+cost. Across models, refinement increases total cost by roughly 2–                     requirements. Since such detailed requirements are rare in real-
+4×. However, the gains differ substantially by model.                                  worldsettings orlegacycodebases, themutationscoreon vague
+   The strongest cost-effectiveness results are achieved by GPT-                       requirements provides a better indicator of real-world usefulness.
+5 Nano, GPT-OSS 120B, and GPT-5 Mini. In the refinement set-                           Nevertheless, no model achieved more than 90% on vague require-
+ting, GPT-5 Nano reaches a 70% mutation score at $0.41 per run,                        ments,suggesting thatrevealing real bugsremains challengingfor
+surpassingSonnet4.5,whichreaches65%at$10.13perrun.This                                 state-of-the-art models.
+corresponds to a 25× cost reduction while also achieving higher                           Despiteitsstrongsingle-stepperformance,Sonnet4.5’shighcost
+effectiveness.Similarly,GPT-5Minireaches68%at$1.44 perrun,                             often outweighsits benefits. Smallermodels suchas GPT-5Nano
+
+===== GV-02 PDF PAGE 9 =====
+
+RESTestBench
+
+
+orGPT-OSS120B,whenusedinarefinementloop,achievecompa-                                defect, due to the undecidability of non-trivial program proper-
+rableorsuperiorperformanceatminimalcost.Thishighlightsthat                           ties [36]. To mitigate this, we created a golden test set covering
+precise, human-defined requirements can substantially improve                        obvious correct behaviours.
+test quality, and that refinement loops enable smaller models to                        ExternalValidity.Ourbenchmarkincludesonlythreeservices,
+compensate for weaker initial reasoning.                                             which may not represent the full diversity and complexity of in-
+   We observe that, for precise requirements, interacting with the                   dustrial software projects. Additionally, all generated tests were
+SUT onlyslightly increases—orinsome caseseven decreases—the                          implemented in Python; results may differ under other program-
+mutation score, as observed for Sonnet 4.5. One possible explana-                    ming languages, frameworks, or execution environments.
+tion is that exposing the actual behaviour of the SUT encourages                        ConclusionValidity.Eachexperimentwasexecutedonlythree
+modelstovalidateaspectsbeyondthespecifiedrequirement,pro-                            times, limiting the statistical robustness of our findings.
+ducing overly strong oracles that exceed the intended scope and
+consequentlyincreasefalsepositives,therebyreducingcorrectness.                       7   Conclusion
+   Acloserexaminationofthefalsepositiveoutputsrevealsaquali-                         Since the emergence of LLMs, several studies have investigated
+tativegapinhowmodelsfail.WeakmodelssuchasthethreeLlama                               their effectiveness in REST API testing. Unfortunately, their ef-
+variants exhibitconstruction-levelfailures: asserting wrong HTTP                     fectivenesshassofarbeenevaluatedprimarilyusingcode-based
+statuscodes,hallucinatingnon-existentfunctionsorAPIendpoints,                        coverage and fault-detection metrics, whichprovideonly limited
+andleavinghardcoded placeholdervalues.Incontrast, Sonnet4.5                          insightintowhethergeneratedtestsactuallyvalidatetheintended
+producesvirtuallynocodeerrorsbutismorepronetospecification-                          functionalbehaviourofaservice.WithRESTestBench,weprovidea
+interpretationmismatches—assuming standard API response fields                       meanstoclosethisgapbyenablingthesystematicandreproducible
+thatthisimplementationomits,orexpectingconventionalstatus                            evaluationofgeneratedtestsagainsthuman-validatedbehavioural
+codes (e.g.422) where the service returns400. This underscores                       expectationsandmanuallydefined,requirement-alignedmutations,
+thatthequality anddetailoftherequirementspecification playsa                         therebybuildingonandextendingthePBMTframeworkintroduced
+critical role: weak models fail to construct valid tests regardless of               by Bartocci et al. [12]. To illustrate this potential and to revisit
+specificationquality,whilestrongmodelsfailwhentherequirement                         assumptions implicit in earlier tool-oriented approaches, we con-
+leavesroomforinterpretation,causingthemtofallbackongeneral                           ductedtwocontrolledexperimentsshowingthat(1)moreprecise
+RESTconventionsratherthanimplementation-specificbehaviour.                           requirement descriptions lead to substantially more effective tests,
+   Comparing𝑀𝑆valid𝜙     with𝑀𝑆𝑚𝜙  confirms the observation of [27]                  (2) refinement loops can improve effectiveness, especially in un-
+thatLLM testoracle accuracyconsiderably dropsin thepresence                          derspecifiedsettings,(3)interactionwithafaultyimplementation
+of buggycode,suggesting thatpredictions arebiased towardsthe                         may negatively influence the resulting tests by causing genera-
+actualimplementationratherthanthedesiredone.Takingrequire-                           tion to adapt to incorrect behaviour, and (4) while small models
+ment detail into account, we observe that this drop is also larger                   may fail to reach mutated code sections, larger models can over-
+onvaguerequirements.Moreover,testsgeneratedonmutatedcode                             engineertheirtestoracles,verifyingbeyondtherequirementand
+can negatethe benefit ofa refinement approachto such anextent                        reducing overall scores. These findings motivate future work to
+that a non-refinement approach becomes more effective, as seen                       usethebenchmarkforcomparingnewtest-generationstrategies,
+withSonnet4.5, GPT-5Nano,MistralMedium,and Llama3.370B.                              investigatingtheinfluenceofOpenAPIstructureandquality,an-
+This underscores that, for these models, incorporating actual SUT                    alyzingeffectiveness–costtrade-offsacrossLLM-basedapproach
+behaviour is unnecessary when requirement detail is high.                            andalotmore.Inaddition,we aimtoextendthebenchmarkwith
+   While RESTestBench provides a manually validated set of re-                       otherservicesandaddmicroservice-orientedsystems,suchasTrain
+quirements,mosttoolssurveyedinSection2.1deriverequirements                           Ticketin order to evaluate requirement-based test generation in
+automaticallyusingLLMswithoutvalidation,suggestingthattest                           more realistic multi-service settings.
+correctness may further decrease when relying on unverified re-
+quirements.
+                                                                                     Acknowledgments
+6   ThreatstoValidity                                                                This work was supported by and done within the scope of the
+InternalValidity.Severalfactorsinourexperimentalsetupcould                           ITEA4 GENIUSproject, whichwas nationallyfunded byFFGwith
+confound the observed results. First, prompt design can substan-                     grant 921454.
+
+tially influence model behaviour. Second, OpenAPI specification                      References
+mismatches may exist, which can affect reported mutation scores,
+especially for more capable models.                                                   [1]  [n.d.]. Realworld-Apps/Realworld:"TheMotherofAllDemoApps"—Exemplary
+   ConstructValidity.Ourmeasuresrelyonproxiesfortruesoft-                                 FullstackMedium.ComClonePoweredbyReact,Angular,Node,Django,and
+                                                                                          ManyMore. https://github.com/realworld-apps/realworld?tab=readme-ov-file.
+ware correctness and test effectiveness. The mutation operators                       [2]2026. Fastapi/Full-Stack-Fastapi-Template. FastAPI.
+arehuman-defined decisions aboutwhat constitutemeaningful re-                         [3]  JuanC.Alonso,SergioSegura,andAntonioRuiz-Cortés.2023. AGORA:Auto-
+                                                                                          matedGenerationofTestOraclesforRESTAPIs.InProceedingsofthe32ndACM
+quirementviolations, andthe mutation-basedmetrics approximate                             SIGSOFTInternationalSymposiumonSoftwareTestingandAnalysis.ACM,Seattle
+the effectiveness of requirements-based test generation and oracle                        WA USA, 1018–1030.  doi:10.1145/3597926.3598114
+quality.Furthermore,wecannotalgorithmicallydeterminewhether                           [4]  PaulAmmannand JeffOffutt.2017.Introduction to Software Testing(2ndeded.).
+                                                                                          Cambridge university press, Cambridge.
+afailingrequirements-based testreflectsaninvalid testoralatent                        [5]Henry Andrews. 2026. OpenAPI Specification.
+
+===== GV-02 PDF PAGE 10 =====
+
+                                                                                                              Kogler L., Hangler S., Ehrhart M., Dornauer B., Wuersching R., and Schrammel P.
+
+
+ [6]  AndreaArcuri.2021. AutomatedBlack-andWhite-BoxTestingofRESTfulAPIs                                   [30]  MohammedMudassirandMohammedMushtaq.2024. TheRoleofAPIsinMod-
+      WithEvoMaster.IEEE Software38,3(May2021),72–78. doi:10.1109/MS.2020.                                        ern Software Development.World Journal of Advanced Engineering Technology
+      3013820                                                                                                     and Sciences13, 1 (Oct. 2024), 1045–1047.  doi:10.30574/wjaets.2024.13.1.0515
+ [7]  ChetanArora,TomasHerda,andVerenaHomm.2024. GeneratingTestScenarios                                   [31]  Rangeet Pan, Raju Pavuluri, Ruikai Huang, Rahul Krishna, Tyler Stennett,
+      fromNLRequirementsUsingRetrieval-AugmentedLLMs:AnIndustrialStudy.In                                         Alessandro Orso, and Saurabh SInha. 2025.  SAINT: Service-level Integration
+      2024 IEEE 32nd International Requirements Engineering Conference (RE).240–251.                              TestGenerationwithProgramAnalysisandLLM-basedAgents. doi:10.48550/
+      arXiv:2404.12772 [cs] doi:10.1109/RE59067.2024.00031                                                        ARXIV.2511.13305
+ [8]  Vaggelis Atlidakis, Patrice Godefroid, and Marina Polishchuk. 2019. RESTler:                         [32]  Mike Papadakis, Marinos Kintis, Jie Zhang, Yue Jia, Yves Le Traon, and Mark
+      StatefulREST APIFuzzing. In2019 IEEE/ACM 41st International Conference on                                   Harman.2019. MutationTestingAdvances:AnAnalysisandSurvey. InAdvances
+      Software Engineering (ICSE).IEEE,Montreal,QC,Canada,748–758. doi:10.1109/                                   in Computers. Vol. 112. Elsevier, 275–378.  doi:10.1016/bs.adcom.2018.03.015
+      ICSE.2019.00083                                                                                      [33]  Mike Papadakis, Donghwan Shin, Shin Yoo, and Doo-Hwan Bae. 2018.  Are
+ [9]  Cristian Augusto, Antonia Bertolino, Guglielmo De Angelis, Francesca Lonetti,                               Mutation Scores Correlated with Real Fault Detection?: A Large Scale Empirical
+      andJesúsMorán.2025. LargeLanguageModelsforSoftwareTesting:AResearch                                         Study on the Relationship between Mutants and Real Faults. InProceedings of
+      Roadmap. doi:10.48550/ARXIV.2509.25043                                                                      the 40th International Conference on Software Engineering. ACM, Gothenburg
+[10]  Earl T. Barr, Mark Harman, Phil McMinn, Muzammil Shahbaz, and Shin Yoo.                                     Sweden, 537–548.  doi:10.1145/3180155.3180183
+      2015. TheOracle Problemin SoftwareTesting:A Survey.IEEE Transactions on                              [34]  AndréPereira,BrunoLima,andJoãoPascoalFaria.2024. APITestGenie:Auto-
+      Software Engineering41, 5 (May 2015), 507–525.  doi:10.1109/TSE.2014.2372785                                mated API Test Generation through Generative AI. doi:10.48550/ARXIV.2409.
+[11]  ThiagoBarradas,AlinePaes,andVâniadeOliveiraNeves.2025. CombiningTSL                                         03838
+      andLLM toAutomateREST APITesting: AComparative Study. doi:10.48550/                                  [35]Postman. [n.d.].State of the API Report. Technical Report.
+      ARXIV.2509.05540                                                                                     [36]  H. G. Rice. 1953. Classes of Recursively Enumerable Sets and Their Decision
+[12]  Ezio Bartocci, Leonardo Mariani, Dejan Ničković, and Drishti Yadav. 2023.                                   Problems.Trans.Amer.Math.Soc.74,2(1953),358–366. doi:10.1090/S0002-9947-
+      Property-Based Mutation Testing. In2023 IEEE Conference on Software Test-                                   1953-0053041-6
+      ing, Verification and Validation (ICST). IEEE, Dublin, Ireland, 222–233.  doi:10.                    [37]  Ana B. Sánchez, José A. Parejo, Sergio Segura, Amador Durán, and Mike Pa-
+      1109/ICST57152.2023.00029                                                                                   padakis.2024. MutationTestinginPractice:InsightsFromOpen-SourceSoftware
+[13]  Alistair Cockburn. 2012.Writing Effective Use Cases(24. print ed.).  Addison-                               Developers.IEEE Transactions on Software Engineering50, 5 (May2024), 1130–
+      Wesley, Boston.                                                                                             1143.  doi:10.1109/TSE.2024.3377378
+[14]  HenryColes,Thomas Laurent,ChristopherHenard,MikePapadakis, andAn-                                    [38]  A.VanLamsweerde.2000. Goal-OrientedRequirementsEngineering:AGuided
+      thonyVentresque. 2016. PIT:A PracticalMutationTestingTool forJava(Demo).                                    Tour.InProceedings Fifth IEEE International Symposium on Requirements Engi-
+      InProceedings of the 25th International Symposium on Software Testing and Anal-                             neering. IEEE Comput. Soc, Toronto, Ont., Canada, 249–262.  doi:10.1109/ISRE.
+      ysis. ACM, Saarbrücken Germany, 449–452.  doi:10.1145/2931037.2948707                                       2001.948567
+[15]  Alix Decrop, Sara Eraso, Xavier Devroey, and Gilles Perrouin. 2025. A Public                         [39]  DriesVanoverberghe,JonathanDeHalleux,NikolaiTillmann,andFrankPiessens.
+      BenchmarkofRESTAPIs.In2025 IEEE/ACM 22nd International Conference on                                        2012. StateCoverage:SoftwareValidationMetricsbeyondCodeCoverage. In
+      Mining Software Repositories (MSR).IEEE, Ottawa,ON, Canada,421–433.  doi:10.                                SOFSEM 2012: Theory and Practice of Computer Science, Mária Bieliková, Ger-
+      1109/MSR66628.2025.00072                                                                                    hardFriedrich,GeorgGottlob,StefanKatzenbeisser,and GyörgyTurán(Eds.).
+[16]  SergeDemeyer,AliParsai,StenVercammen,BrentVanBladel,andMehrdadAbdi.                                         Vol. 7147.SpringerBerlinHeidelberg, Berlin,Heidelberg,542–553. doi:10.1007/
+      2020. Formal Verification of Developer Tests: A Research Agenda Inspired by                                 978-3-642-27660-6_44
+      MutationTesting. InLeveraging Applications of Formal Methods, Verification and                       [40]  KarlE.Wiegers,JoyBeatty,andKarlE.Wiegers.2013.Software Requirements(3.
+      Validation: Engineering Principles,TizianaMargariaandBernhardSteffen(Eds.).                                 ed. [fully updated and expanded] ed.). Microsoft Press, Redmond, Wash.
+      Vol. 12477. Springer International Publishing, Cham, 9–24.  doi:10.1007/978-3-                       [41]  ZhenzhenYang,Rubing Huang,Chenhui Cui,NanNiu,andDave Towey.2025.
+      030-61470-6_2                                                                                               Requirements-Based Test Generation: A Comprehensive Survey. doi:10.48550/
+[17]David Fowler. 2026. Davidfowl/TodoApp.                                                                        ARXIV.2505.02015
+[18]  Amid Golmohammadi, Man Zhang, and Andrea Arcuri. 2024. Testing RESTful                               [42]  KeZhang,ChenxiZhang,ChongWang,ChiZhang,YaChenWu,ZhenchangXing,
+      APIs: A Survey.ACM Transactions on Software Engineering and Methodology33,                                  YangLiu,QingshanLi,andXinPeng.2025.LogiAgent:AutomatedLogicalTesting
+      1 (Jan. 2024), 1–41.  doi:10.1145/3617175                                                                   forRESTSystemswithLLM-BasedMulti-Agents.doi:10.48550/ARXIV.2503.15079
+[19]  Amid Golmohammadi, Man Zhang, and Andrea Arcuri. 2024. Testing RESTful                               [43]  Didar Zowghi and Vincenzo Gervasi. 2004.   Erratum to “On the Interplay
+      APIs: A Survey.ACM Transactions on Software Engineering and Methodology33,                                  between Consistency, Completeness, and Correctness in Requirements Evo-
+      1 (Jan. 2024), 1–41.  doi:10.1145/3617175                                                                   lution”.   Information and Software Technology46, 11 (Sept. 2004), 763–779.
+[20]  Alex Groce, Josie Holmes, Darko Marinov, August Shi, and Lingming Zhang.                                    doi:10.1016/j.infsof.2004.03.003
+      2018. An Extensible, Regular-Expression-Based Tool for Multi-Language Mu-
+      tant Generation. InProceedings of the 40th International Conference on Soft-                         Received 02 March 2026; accepted 21 April 2026
+      ware Engineering: Companion Proceeedings. ACM, Gothenburg Sweden, 25–28.
+      doi:10.1145/3183440.3183485
+[21]  SoneyaBintaHossainandMatthewB.Dwyer.2022. ABriefSurveyonOracle-
+      based Test Adequacy Metrics. doi:10.48550/ARXIV.2212.06118
+[22]  Linghan Huang, Peizhou Zhao, Huaming Chen, and Lei Ma. 2024.   On the
+      Challenges of Fuzzing Techniques via Large Language Models. doi:10.48550/
+      ARXIV.2402.00350
+[23]  Laura Inozemtseva and Reid Holmes. 2014. Coverage Is Not Strongly Correlated
+      withTestSuiteEffectiveness.InProceedings of the 36th International Conference
+      on Software Engineering. ACM, HyderabadIndia,435–445.  doi:10.1145/2568225.
+      2568271
+[24]  Ivar Jacobson. 2005.Object-Oriented Software Engineering: A Use Case Driven
+      Approach. Addison-Wesley Pub, Reading, Mass.
+[25]Lukas Jakob. 2026. Lujakob/Nestjs-Realworld-Example-App.
+[26]  Leon Kogler, Maximilian Ehrhart, Benedikt Dornauer, and Eduard Paul Enoiu.
+      2025. RESTifAI:LLM-BasedWorkflowforReusableRESTAPITesting. doi:10.
+      48550/ARXIV.2512.08706
+[27]  MichaelKonstantinou,RenzoDegiovanni,andMikePapadakis.2024. DoLLMs
+      Generate Test Oracles That Capture the Actual or the Expected Program Be-
+      haviour? doi:10.48550/ARXIV.2410.21136
+[28]  Nan Li and Jeff Offutt. 2017.  Test Oracle Strategies for Model-Based Testing.
+      IEEE Transactions on Software Engineering43, 4 (April 2017), 372–395.  doi:10.
+      1109/TSE.2016.2597136
+[29]  Alberto Martin-Lopez, Sergio Segura, and Antonio Ruiz-Cortés. 2021. RESTest:
+      AutomatedBlack-BoxTestingofRESTfulWebAPIs.InProceedings of the 30th
+      ACM SIGSOFT International Symposium on Software Testing and Analysis. ACM,
+      Virtual Denmark, 682–685.  doi:10.1145/3460319.3469082

@@ -1,0 +1,68 @@
+{
+  "pages_read": [
+    1,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "factors": {
+    "P": {
+      "sign": "·",
+      "reason": "§5.1.2 mô tả traffic từ nền tảng nội bộ ByteDance: hơn1500 APIs/246services, test229 traces. Đây là SUT/dữ liệu nội bộ, không RESTestBench hoặc bộ REST public chạy/mutate được.",
+      "locator": "§3.1.1/PDF6; §5.1.1–5.1.2/PDF10",
+      "confidence": "high"
+    },
+    "I": {
+      "sign": "·",
+      "reason": "Phương pháp sinh assertion từ một request-response và GRPO. Ba valid/invalid variants mỗi key field ở Table1 là RESPONSE bodies để huấn luyện oracle; không phải EP/BVA hay domain-based REQUEST input generator.",
+      "locator": "§3.1.3/Table1/PDF6–7; §3.2/PDF7–9",
+      "confidence": "high"
+    },
+    "C": {
+      "sign": "·",
+      "reason": "Baselines là Doubao-Seed-1.6-flash chưa fine-tune và DeepSeek-V3.1-Terminus, cùng prompt/input. Random train/test split hoặc sampling policy không phải nhánh random/fuzz input generator.",
+      "locator": "§5.1.2–5.1.3/PDF10–11",
+      "confidence": "high"
+    },
+    "O": {
+      "sign": "·",
+      "reason": "KillRate ở Eq5 là thành phần reward trên response variants. Các outcome thực nghiệm là key-field P/R/F1, expert categories của assertion và adoption rate; không báo program mutant score hoặc distinct SUT bugs/failure detection yield.",
+      "locator": "§3.2.2/Eq5/PDF9; §5.1.4/PDF11; Figs3–4/PDF12; §5.3/PDF14–15; §5.4/Fig7/PDF16",
+      "confidence": "high"
+    }
+  },
+  "notes": [
+    "Giữ cả bốn dấu· sau đọc trực tiếp; không suy từ việc nghiên cứu oracle rằng O phải đạt.",
+    "Sửa locator: Fig3 và Fig4 thực tế ở PDF12; PDF11 là đoạn phân tích F1."
+  ],
+  "visual_checks": [
+    {
+      "page": 7,
+      "file": "tmp\\pdfs\\pico-review-2026-10-20\\root-renders\\GV-04-p7.png",
+      "finding": "Table1 là valid/invalid RESPONSE values."
+    },
+    {
+      "page": 12,
+      "file": "tmp\\pdfs\\pico-review-2026-10-20\\root-renders\\GV-04-p12.png",
+      "finding": "Fig3 P/R/F1 và Fig4 expert assertion categories; không mutant outcomes."
+    }
+  ],
+  "id": "GV-04",
+  "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\46-GV-04-RESTOR.pdf",
+  "old_signs": {
+    "P": "·",
+    "I": "·",
+    "C": "·",
+    "O": "·"
+  },
+  "changes": []
+}

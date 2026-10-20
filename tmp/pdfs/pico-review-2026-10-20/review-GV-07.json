@@ -1,0 +1,71 @@
+{
+  "id": "GV-07",
+  "pdf": "Paper-source/49-GV-07-ArrayDiff.pdf",
+  "pages_read": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "factors": {
+    "P": {
+      "sign": "·",
+      "reason": "Đánh giá năm cặp phiên bản triển khai của các framework mảng NumPy, CuPy và Octave; chuỗi API là lời gọi thư viện mảng, không phải dịch vụ REST hoặc RESTestBench.",
+      "locator": "§4.2 Subjects and Table 3/PDF13; §3/PDF6–11",
+      "confidence": "cao"
+    },
+    "I": {
+      "sign": "◐",
+      "reason": "Can thiệp là sinh lời gọi có nhận biết yêu cầu đầu vào: ràng buộc dtype/shape, miền giá trị vô hướng hợp lệ và bộ lọc ngữ nghĩa, sau đó sinh chuỗi bằng thuật toán ngẫu nhiên có phản hồi hoặc thuật toán di truyền. Đây là xử lý miền đầu vào, chưa phải EP/BVA là phương pháp chính.",
+      "locator": "§3.1 and Table 1/PDF6–7; §3.2 and Algorithm 3/PDF8; §3.3/PDF10–11",
+      "confidence": "cao"
+    },
+    "C": {
+      "sign": "✓",
+      "reason": "Thuật toán RA thực sự sinh test ngẫu nhiên có phản hồi và được so với các biến thể có ngữ nghĩa cùng GA dưới cùng ngân sách tìm kiếm 10 giờ, lặp năm lần. Cùng thời gian đáp ứng rubric rộng; RA không lấy mẫu đồng đều trên các request REST. Bằng chứng cùng ngân sách áp dụng cho các biến thể ArrayDiff, không áp dụng cho ngân sách riêng theo từng API của TitanFuzz/Ghostwriter.",
+      "locator": "§3.3.1/PDF10 and Algorithm 4/PDF9; §4.2 Evaluated Approaches/PDF13; §4.2 Methodology/PDF15",
+      "confidence": "cao"
+    },
+    "O": {
+      "sign": "◐",
+      "reason": "Hiệu quả được đo bằng số khác biệt giữa các triển khai sau khử trùng, rồi kiểm chứng thủ công để phân biệt bug, thay đổi API và dương tính giả. Đây là khác biệt quan sát được và bug thực đã xác minh, không phải program mutant bị giết. 19 bug đã xác minh trong Table 7 thuộc nhóm khác biệt với đầu vào hợp lệ; hai bug với đầu vào không hợp lệ được xác nhận ở phần trước không được tự ý cộng vào Table 7.",
+      "locator": "§4.2 Evaluation Metrics/PDF15–16; §4.3/PDF18–19 and Table 7/PDF19; invalid-input confirmations/PDF17",
+      "confidence": "cao"
+    }
+  },
+  "old_signs": {
+    "P": "·",
+    "I": "◐",
+    "C": "✓",
+    "O": "◐"
+  },
+  "changes": [],
+  "notes": [
+    "Cả bốn dấu được kiểm chứng độc lập từ phương pháp và đánh giá, không chỉ kế thừa điểm cũ.",
+    "Bổ sung locator C đến PDF15, nơi nêu rõ ngân sách 10 giờ và năm lần chạy. Các baseline bên ngoài nhận ngân sách theo từng API (400 giây/API), vì vậy không khẳng định mọi phương pháp được đánh giá có cùng tổng ngân sách.",
+    "O phân biệt 47 khác biệt với đầu vào hợp lệ/39 khác biệt với đầu vào không hợp lệ do ArrayDiff phát hiện, 19 bug với đầu vào hợp lệ đã xác minh, và cách diễn đạt rộng hơn về bug/vấn đề tài liệu được xác nhận trong abstract."
+  ],
+  "visual_checks": [
+    {
+      "page": 19,
+      "file": "GV-07-p19.png",
+      "checked": "Table 7: 19 bug đã xác minh, 8 thay đổi API, 10 dương tính giả, 37 khác biệt với đầu vào hợp lệ đã rà soát. Phân biệt các nhóm này với mutant bị giết."
+    }
+  ]
+}

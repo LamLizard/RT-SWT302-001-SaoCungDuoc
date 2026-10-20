@@ -1,0 +1,41 @@
+{
+  "id": "GV-06",
+  "pdf": "Paper-source/48-GV-06-METFORD.pdf",
+  "pages_read": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  "factors": {
+    "P": {
+      "sign": "·",
+      "reason": "Đối tượng thực nghiệm là sáu ứng dụng Android native Java có Android instrumented tests; không phải REST APIs hay RESTestBench. Việc ứng dụng có source mở không đủ đạt P◐ khi đơn vị kiểm thử là Android UI/application.",
+      "locator": "§4.1, PDF13–14; Table 7, PDF14",
+      "confidence": "high"
+    },
+    "I": {
+      "sign": "·",
+      "reason": "Can thiệp so sánh cách biểu diễn/thực thi program mutants: mutant schemata và traditional mutation. Dùng cùng bộ Android instrumented tests có sẵn; không có can thiệp sinh test input theo EP/BVA, phân hoạch hay miền. Các operator có randomness tạo mutant ở mã nguồn, không phải phương pháp random test-input generation.",
+      "locator": "§3.1, PDF4; §3.4/Table 6, PDF8–9; §3.6.1, PDF11–13; §4.2, PDF15–17",
+      "confidence": "high"
+    },
+    "C": {
+      "sign": "·",
+      "reason": "Đối chứng là traditional mutation với cùng test suite và các mutant tương ứng để so behavior/time/space; không có nhánh random-generation comparator. Random seed của ba mutation operators dùng để tạo cùng program mutants giữa hai strategy, không tạo random tests đối chứng.",
+      "locator": "§3.4/Table 6, PDF9; §4.2, PDF15–17; §4.3/Table 13, PDF17",
+      "confidence": "high"
+    },
+    "O": {
+      "sign": "✓",
+      "reason": "Có thực thi test trên program mutants, ghi killing matrix, số dead mutants và mutation score. Table 12 báo SC/TR average mutation scores 15.6%/17.5%; discrepancy do flakiness được rerun và phân tích, không phải response/input mutation.",
+      "locator": "§3.6.1/Figures 8–12, PDF11–13; §4.2/Table 12, PDF16–17",
+      "confidence": "high"
+    }
+  },
+  "old_signs": {"P": "·", "I": "·", "C": "·", "O": "✓"},
+  "changes": [],
+  "notes": [
+    "Giữ P· I· C· O✓ sau kiểm chứng độc lập; căn cứ từng yếu tố khác nhau, không suy C/O từ việc ngoài REST.",
+    "15.6% và 17.5% là average scores của hai cách thực thi cùng test suite; không phải EP/BVA và random hay chênh lệch chất lượng hai generator.",
+    "Locator §5/PDF18–19 đang có trong map không bao hết threats: §5 bắt đầu cuối PDF18 rồi tiếp tục sau các trang hình. Với PICO nên trỏ trực tiếp method/case-study locators ở trên."
+  ],
+  "visual_checks": [
+    {"page": 16, "file": "tmp/pdfs/pico-review-2026-10-20/GV-06-p16.png", "checked": "Table 12 headers, generated/alive/dead counts, SC/TR scores, flakiness footnote and full two-column explanation; confirms O✓."}
+  ]
+}

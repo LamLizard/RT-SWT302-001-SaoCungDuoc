@@ -1,0 +1,838 @@
+
+
+===== GV-08 PDF PAGE 1 =====
+
+YATE:TheRoleofTestRepairinLLM-BasedUnitTestGeneration
+
+          Michael Konstantinou                                  Renzo Degiovanni                                       Jie M. Zhang
+        michael.konstantinou@uni.lu                           renzo.degiovanni@list.lu                              jie.zhang@kcl.ac.uk
+          University of Luxembourg                     Luxembourg Institute of Science and                        King’s College London
+                   Luxembourg                                          Technology                                     United Kingdom
+                                                                      Luxembourg
+                                          Mark Harman                                      Mike Papadakis
+                                     mark.harman@ucl.ac.uk                             michail.papadakis@uni.lu
+                                   University College London                           University of Luxembourg
+                                          United Kingdom                                       Luxembourg
+ABSTRACT                                                                          testcasegeneratedmight haveprovedvaluable,butthispotential
+Recent advances in automated test generation utilises language                   value is lost simply because the test case syntax is not quite right
+modelstoproduceunittests.Whileeffective,languagemodelstend                       (although it is almost right). Such near-miss syntactic errors in-
+to generate many incorrect tests with respect to both syntax and                  clude missing imports, and incorrect method invocations. We aim
+semantics.Althoughsuchincorrecttestscanbeeasilydetectedand                        at repairing these near-miss tests and propose four techniques to
+discarded, they constitute a “missed opportunity” – if fixed, they                repairrelativelyminorsyntacticissues,usingacombinationofrule-
+areoftenvaluableastheydirectlyaddtestingvalue(theyeffectively                     basedstaticanalysistechniquesandre-promptingwithadditional
+targettheunderlyingprogramlogictobetested)andindirectlyform                       information to guide the model towards correct syntax.
+goodseedsforgeneratingadditionaltests.Tothisend,weproposea                           However, even when the generated test is syntactically correct,
+simpletechniqueforrepairingsomeoftheseincorrectteststhrough                       there might remain semantic inadequacies to repair. In the case
+acombinationofrule-based staticanalysisandre-prompting.We                         of unit tests, there are two primary semantic aspects of concern:
+evaluate this simple approach, named YATE, on a set of 6 open-                    the paths traversed by the test cases execution, which achieves
+source projects and show that it can effectively produce tests that               a certain degree of coverage; and the assertions included as part
+coveronaverage32.06%morelinesandkill21.77%moremutantsthan                         ofthe testoracle[6]to determinewhetherthe observed software
+a plain LLM-based method.We alsocompareYATEwithfourother                          behavior is the expected or not.
+LLM-basedmethods,namelyHITS,SYMPROMPT,TESTSPARKand                                   Many execution paths can be easily covered by arbitrary test
+COVERUPandshowthatitproducesteststhatcoversubstantially                           method callinvocations,making thema straightforwardtarget for
+more code. YATE achieves 22% higher line coverage, 20% higher                     testgenerationengines.However,somespecificexecutionpathscan
+branch coverage and kill 20% more mutants at a comparable cost                    onlybereachedunderparticularconditionsinvolvingobjects/meth-
+(number of calls to LLMs).                                                        ods other than the class under test, which need to be appropriately
+                                                                                  instantiatedthrough relevantclassesandmethod callinvocations
+                                                                                 (aka test dependencies) [16]. To cover such cases, LLM-based test
+1   INTRODUCTION                                                                  generationrequirescontextualinformationthatresidesoutsidethe
+Recent advances in automated test generation have shown that                      method/class under test.
+language models can be effectively embedded into Software Engi-                      In the case of the test assertion(s), they may simply be seman-
+neering workflows to produce unit tests [1, 13, 40, 46]. Although                 tically incorrect, leading toa test case that passeswhen it should
+languagemodelsarepronetohallucinationwithdetrimentalaffects                       failorfailswhenitshouldpass.However,determiningwhethera
+on software engineering applications [12], Assured LLM Based                      passingassertionshouldfailisknown tobe difficult[20],known
+Software Engineering (Assured LLMSE) approaches [4] provide                       as the oracle problem [6]. On the contrary, when applied in the
+assurances that the tests generated by the overall process are im-                contextof‘regressiontesting’[3],itiseasiertofixanassertionthat
+mediatelydeployable intoproduction. Thisapproachhas already                       currentlyfailstomakeitpass,justbyobservingtheactualprogram
+found effective industrial deployment at scale for both coverage                  outputs. Such an assertion fix is a relatively simple process that
+based [1] and mutation based [13] test generation.                                doesnotrequirefurtherpromptingtotheLLM, andcanproducea
+   AlthoughsuboptimalLLMperformance(suchashallucination),                         semantically correct test from a semantically incorrect test.
+can be mitigated using Assured LLMSE, the overall effectiveness                      Evenwhen thetest issyntacticallyand semanticallycorrect, i.e.,
+and efficiency of test generation can be dramatically improved by                 a test that compiles and passes, the coverage and fault-detection
+tacklingtheseissuesusingre-prompting(suchasChainofThought                         achievedcanstillbeweak.Itisthereforenaturaltoalsoconsider
+and Self-Consistency) [39, 41], retrieval augmentation (RAG) [17],                re-prompting, retrieval augmentation and coverage feedback for
+andhybridsoftraditionalSoftwareEngineering,e.g.,syntacticcode                     improvingtheoverallsemanticsofthetestsuitegeneratedsothat
+analysis, and LLM-based test generation [46].                                     it maximally covers code and oracle aspects.
+   LLMs may generate unit tests that are discarded by the assur-                     In this paper, we empirically study YATE, an LLM-based test
+ance process due to either incorrect syntax or incorrect semantics.               generationtechniquethatreliesonfourindependentoptimization
+When the syntax is incorrect, this can lead to a ‘near miss’; the
+
+===== GV-08 PDF PAGE 2 =====
+
+                                                                                                                                              Konstantinouetal.
+
+
+componentsaimingattacklingtheaforementionedsyntacticand                            higherthanthatachievedbythepreviousmethods,whilerequiring
+semantic shortcomings. The four components studied are:                            19,569 fewer LLM calls than them.
+    (1)  Initialtestgenerationwithchain-of-thought:Wein-                              In summary, the key scientific conclusions of this paper are:
+         structthe LLMtoidentify thetestsrequired tocover100%                            •  Fixing ’near-miss’ broken tests pay-off: YATE imple-
+         of the code (list the number of tests and their respective                         ments four test-repair components that, when combined,
+         summaryperclassmethodtargeted).Incasethecodeun-                                    achieve a branch coverage of 51%, on average, surpassing
+         der test depends on other classes, as well as on private or                        state-of-the-art tools.
+         protected methods, YATE includes all this relevant infor-                       •  Class-level prompting is more cost-effective: our re-
+         mation in the prompt in a follow-up step to ensure their                           sults reveal that promptingat the classlevel is surprisingly
+         consideration. Before actual test generation, the LLM is                           effective and efficient. Compared to the state-of-the-art,
+         further challenged to reason on whether this set of tests                          classlevelpromptingachievedupto73.22%effectiveness
+         will achieve 100% branch coverage.                                                 improvement combined with 82% efficiency improvement.
+    (2)  CompilationerrorFixing:Whenthegeneratedtestclass                                •  ConsistentobservationsthroughdifferentLLMs:Al-
+         does not compile, YATE identifies and fixes missing im-                            though certainlysome models performbetter than others,
+         portsandconstructors.Ifcompilationerrorsremain,YATE                                we can observe that YATE’s performance is consistently
+         recursively walksoverthe method callgraph (up toa cer-                             improved when the test-repair components are activated.
+         tain depth, similar to observation-based test generation                           Thissuggeststhateachoftheindividualtest-repaircompo-
+         [5])to fetchclassesand sub-typesdependencies whichare                              nents by itself is effective, and can help to improve other
+         included in the prompt. Thus, YATE’s compilation fixing                            tools effectiveness as well.
+         usesre-promptingandretrievalaugmentedgenerationto                               •  Compilation-relevantfeedbackisimperative: We also
+         fix incorrect method invocations.                                                  findthatprovidingLLMswithcompilation-relevantfeed-
+    (3)  OracleFixing:Whenthetestedassertion(s)currentlyfail(s),                            back, such as class dependencies, is more important, wrt
+         YATE uses a simple rule-based approach to fix assertions                           test effectiveness, than coverage feedback.
+         thatcan bemade topass bysimple substitutions,such as
+         expected/actual values and exception raising behaviours.                  2   RELATEDWORK
+         Additionally,YATE’s oraclefixing uses re-promptingwith                    ChatTester is one of the first studies that used LLMs to generate
+         test failure logs to seek to regenerate the test assertions               unittests[46].ChatTestersimplyasksLLMstogeneratetestsfora
+         with a further call to be LLM.                                            given class and then iteratively improves them by providing feed-
+    (4)  Coverage-Based Test Augmentation: To improve test                         back (the compiler error message) every time an error is thrown,
+         effectiveness,YATEre-promptstheLLMwithinformation                         i.e., whenthe test is notcompiling. This schemeimproves the test
+         about uncovered branches.                                                 suitesbygenerating34.30%morecompilingtestsand18.7%more
+   WeempiricallyevaluateYATE’stesteffectivenesson6real-world                       passingtests.Thisfeedback-drivenrepairloopwaslateradopted
+Javaprojects,using4differentLLMS,leadingtoatotalof393test                          by many LLM-based unit test generators, implementing variations
+generationproblemsatboththemethodlevelandtheclass-level                            offeedback-drivenrepair[28][21][42][43][34][2][24][25]using
+granularity.Thesubjectsusedinourevaluationaretakenfromthe                          compilererrormessagestomakeLLMsfixtheteststheygenerate.
+previous test generation studies of ChatUniTest [8], and of HITS                   YATEgoesastepfurtherinthecompilationfixingbyprovidingrele-
+[40],togetherwiththeGitbugJavabugdataset[35].Wecontrolfor                          vantcontext,testdependencies,anddirectlyfixingassertedvariable
+dataleakage,andselectthebenchmarksandLLMsaccordinglytheir                          values, imports, constructors, and incorrect method invocations.
+generationandtrainingdates.WealsoincludefourLLM-basedtest                             TestSpark [33] aimed to improve the prompts that were used by
+generationtools (HITS [40],SymPrompt [32],TestSpark[33]and                         enrichingthemwithsomecontext,i.e.,includedtheclassundertest
+Coverup [31]) that we use as baselines in our experiments.                         together with the relevant parent classes. CoverUp [31] introduced
+   OurresultsshowthatYATEachievesanoverallbranchcoverage                           the idea of providing coverage feedback, i.e., uncovered code, to
+of51%,whichissubstantiallyhigherthanthe30%,27%,17%and25%                           LLMssothattheycaneffectivelygeneratetestsforuncoveredcode.
+coverageachievedbyHITS,SymPrompt,TestSpark,andCoverup.                             Similarly to the aforementioned approaches, CoverUp identifies
+We also investigate the individual contribution of each YATE’s                     the code segments (function or class), that require testing, uses
+components by performing an ablation study. By excluding each                      the LLM to generate tests and provides the error messages and the
+one of the four optimization components listed above, YATE drops                   uncovered codeas feedback(re-prompts theLLMs) for anumber
+its branch coverage to 35%, 35%, 34% and 40%, respectively. These                  of iterations. ChatUniTest [8] includes a test repair mechanism for
+resultsshowthatevenwithoutoneofthefourcomponentsofYATE,                            simple syntactic errors such as imports and missing semicolons,
+it still outperforms all the state of the art methods studied.                     which are taken from the compilation error message. Although
+   Our results also show that class level test generation offers a                 conceptually similar to YATE, the test fixing phase of ChatUniTest
+surprisinglyfavorabletrade-offbetweentesteffectivenessandef-                       remains relatively weak because it does not aim at providing rele-
+ficiency; coverage is only 5% lower with class level prompting                     vantcontent,anddoesnotaccountfortestdependenciessuchas
+(compared to method level prompting), yet consumes dramatically                    incorrect method invocations and calls.
+fewerresources(5xfewerLLM calls).Furthermore,thebranch cov-                           SymPrompt [32] prompts LLMs with information drawn from
+erageachievedwhenpromptingtheLLMattheclasslevelis15.20%                            traditionalpath-basedcodeanalysis.SymPromptstaticallyanalyzes
+
+===== GV-08 PDF PAGE 3 =====
+
+YATE:TheRoleofTestRepairinLLM-BasedUnitTestGeneration
+
+
+amethodtoidentifyallfeasibleexecutionpaths,andthenprompts                            3   THEYATEAPPROACH
+alargelanguagemodel(LLM)togenerateacorrespondingtestcase                             3.1   Overview
+foreachpath.PANTA[19]identifiesuncoveredcodesegmentsand                              The main strategy followed in LLM-based test generation is to
+iteratively prompts the LLMs with candidate execution paths as                       provide the code of the class (or a method) under test based on
+the target. Although it’s repairing mechanism doesn’t differ much                    which the LLM will generate the tests. When the initial attempt
+from other approaches, it does keep a list of failed tests that are                  fails,asequenceoffeedback-basedrefinementprompts(witherror
+provided as feedback to the next test generation.                                    messages or uncoveredcode) is typically used toguide the model
+   HITS[40]isatoolthatgoesdeeperintoamethodbeforegenerat-                            toward a correct solution.
+ingteststhroughslicing.Usingthe"ChainofThought"prompting                                Although to some extent successful, the key problem with the
+strategy, it instructs the language model to decompose a given                       aboveschemeisthatclasses(andtheirrespectivetests)havedepen-
+methodintosmaller,logicallycoherentcodeblocksknownasslices.                          dencies outside the class under test. Therefore, it is unlikely that
+The tool then prompts the model to generate a corresponding test                     an LLM will manageto generate valid tests that effectivelyutilize
+class for each slice.                                                                those dependencies without any prior knowledge of them.
+   TELPA [44] performs amethod invocation analysis toidentify                           Considertheexamplebelow(listing1)wheretheclassundertest
+methodcallsequences.Themethodsinvolvedinthesesequences                               (Pay.java) instantiates object RequestHandler in the constructor.
+are then used as context in the prompt that asks for test gener-                     Inthisexample, theconstructorof Pay.javarequirestwo String
+ation. In parallel to YATE, these approaches aim at reducing the                     variables,onebooleanandtwoobjects,namelySignatureGenerator
+contextthatisgiventotheLLM(asa0-shotgeneration)andnotto                              and ProxyAuth. Both objects belong to the project under test, but
+iterativelyguidethemtowardsfixingandimprovingtheteststhey                            arestoredunderdifferentnamespaces,whereasSignatureGenerator
+generate as done by YATE.                                                            isaninterface.IftheLLMhasnotbeenprovidedwiththedefinition
+   There are also some approaches aiming to generate unit tests to                   of ProxyAuth and a class that implements SignatureGenerator,
+killmutants[36][38].Notably,Mutap[10],ACH[14],PRIMG[7]are                            itisunlikelytofigureouthowtocorrectlyinstantiateanobjectof
+someof theapproachesthat havebeenused togenerateunit tests                           suchatype.Therefore,YATEanalyzestherepositoryofthecode
+toimprovethemutationscoreofgeneratedtests.Theseapproaches                            under test inorder to provide to the modelinformation about the
+differ from the above ones by providing mutation feedback (live                      constructorsof ProxyAuthandtheconstructorsoftheclassesthat
+mutants) instead of code coverage.                                                   implement the interface SignatureGenerator.
+   Perhaps the closest approach to ours is TestART [18], that uses
+template-basedand re-promptingto performtestcompilation fix-
+ing. It relies on five templates to fix common compilation issues.                 1   package com.binance.connector.client.impl.spot;
+                                                                                   2
+However, while YATE aims at both test and oracle fixing and re-                    3   /**
+promptingwithtestdependencies,TestARTfocusesonincorrect                            4     *Oneofthe two constructors of class Pay
+oracles only, and its fix templates are too specific to Junit4.                    5     *SignatureGenerator isan interface
+   Overall, each of the above approaches focuses on different as-                  6   **/
+                                                                                   7   public Pay(String   baseUrl,
+pects involved in the LLM unit test generation process. ChatTester                 8                    String   apiKey,
+and ChatUniTest focus on making tests to compile by iteratively                    9                    SignatureGenerator   signatureGenerator,
+repairingthegeneratedtests,buttheirfixingstrategiesaresuperfi-                    10                    boolean showLimitUsage,
+cial, as theyare solely based oncompiler error messages living out                11                    ProxyAuth   proxy)  {
+                                                                                  12            this.baseUrl  =  baseUrl;
+vital contextual information that the LLMs lack, such as relevant                 13            this.requestHandler  =new RequestHandler(apiKey,
+constructors, classes, method declarations, and method call signa-                          signatureGenerator,  proxy);
+tures. Studies like Hits orSymPrompt focus on effective zero-shot                 14            this.showLimitUsage  =  showLimitUsage;
+testgenerationby tyringtomaketheirpromptscoherentand rele-                        15   }
+vant by includinginformation such as slices andtarget execution                      Listing1:ConstructorofclassPay.javainrepositorybinance-
+paths thereby leaving out the test repair and the coverage guid-                     connector-client
+ance/feedback aspects of the test generation process. Approaches
+like TestART aim to fix the generated assertions, and CoverUp
+tocovermorecode throughcoverage feedback. YATEshows that
+although all phases (relevant information in the prompt, test and                    3.2   Workflow
+assertion fixing, coverage guidance) are important, a general re-                    Overall,theYATE’sapproachistomimicthedeveloper’sworkflow
+pairing mechanism that allows one to fix the generated tests is                      and its workflow consists of the following four key components.
+vitalandlargelyoverlookedbypreviousstudies.YATEoutperforms
+all previous approaches by using syntactic checks and incremen-                            •  Generation of initial test code through chain-of-thought.
+tally providing the LLM the relevant content needed to fix its tests                       •  Fixingcompilationerrors.Thisstepinvolvestheautomatic
+through dependence analysis.                                                                  debugging of compile errors, the analysis of the project
+                                                                                              under test, the fetching of relevant content, the finding
+                                                                                              of possible fixes to compile errors and the iterative and
+                                                                                              incremental re-prompting with relevant content to the en-
+                                                                                              countered compiler errors.
+
+===== GV-08 PDF PAGE 4 =====
+
+                                                                                                                                                Konstantinouetal.
+
+
+
+
+
+
+
+
+
+
+
+                                            Figure1:YATEworkflow,basedonthefourcomponents
+
+
+      •  Fixing of incorrect oracles based on the actual program                    withirrelevantornon-existentimportstatements,i.e.,theimport
+         behavior, i.e.,the actualruntimeprogram statesuch asthe                    statements are a product of hallucinations.
+         actual program variable values of the program.                                Todealwiththesecases,YATEidentifiesthetestclasseswithout
+      •  Coveragefeedback.Lookingforuncoveredbranchesand                            theproperimportsandstaticallyanalysestherepositoryoftheclass
+         basedonthe generatedtestclass,the LLMisinstructedto                        under test to find the import statements that are relevant to the
+         generate tests for the missing branches.                                   classesusedbythetestsanddirectlyimportsthem.Tofiximports
+   It should be noted, that YATE is extensible, meaning that one                    that are hallucinations, YATE analyzes the import statements by
+can replace each component with a different implementation to                       checkingwhetherthereferenceexists,e.g.,checkingiftheimported
+enhance the unit test generation process.                                           class exists in the project repository or relevant classpath space.
+
+3.3   Initialtestgenerationphase                                                    3.4.2    Retrieving the implementation of classes other than the class
+Beforegeneratinganytestcases,YATEpromptsthelanguagemodel                            under test. The generated test class often constructs objects the
+to analyze the code under test (class or method) with the objective                 code of which are in a different file/class. YATE searches for the
+ofachieving 100%codecoverage andtoproduce acorresponding                            required classes and collects all constructor signatures. In case a
+report that includes a list with the description of the test cases                  requiredobjectisaninterfaceoranabstractclass,YATEretrieves
+requiredpermethod,andthetotalnumberofrequiredtests.This                             theircodeclasses.YATEthenprovidesthisinformationtotheLLM
+initialstepfunctionsasasummarisationoftherequiredtestcases                          and instructs it to fix its tests based on a new content.
+andguidesthemodeltoreasonmoreeffectivelyabouttherequired                            3.4.3    Wrong method invocations. LLMs often generate test code
+tests,assuggestedbytheChainofThought[41]promptingstrate-                            with method callsthat donot exist,or methodswith wronginput
+gies.Iftheclassundertestincludesprivateorprotectedmethods,                          parameters. This may well extend to incorrectly mocking method
+YATE issues an additional prompt to inform the model of these                       calls,ortheirreturnedvalue.Ifamethodcallregardsamethoddoes
+methods,subsequently updatingthe reporttoreflect thisinforma-                       not exist, YATE points this out to the LLM. If the method exists
+tion.Beforeinstructingthe modeltogeneratetests,anadditional                         but is incorrectly invoked, the LLM is provided with the method
+prompt is used, asking the LLM to verify whether the current re-                    signatures ofthose methods. Note thatthis step applies only to the
+port will achieve branch coverage 100%, to further challenge the                    wrong test invocations appearing in the generated test classes.
+LLM.Thisadditionalpromptdrivesthemodeltoreasonmoreeffec-
+tively about the required tests as suggested by several prompting                   3.4.4    Method calls outside the class under test. If errors persist,
+guidelines. Once the report phase is completed, YATE proceeds to                    YATEusestheproject’smethodcallgraphandsearchesformethod
+instruct the model to generate the corresponding test code.                         invocations in the scope of the method under test that belong to
+3.4   Fixingcompilationerrors                                                       otherfiles/classes.Thebodiesofthesemethods(methodsinvoked
+In this phase YATE executes the generated tests and examines the                    outside the class under test) along with their signatures are then
+errorlog.Ifthetestsdonotcompile,YATEattemptstoincremen-                             includedinafollow-upprompt.Additionally,thepromptexplicitly
+tally fix the generated tests by providing fixes for some simple                    informs thelanguage modelabout therelationships between the
+compilation error cases and by providing relevant content to guide                  methodsundertestandtheexternalmethodstheyinvoke.Notethat
+the LLMsto fix theerrors. YATE’s compilation fixingis based on a                    this step retrieves code from the methods called by the methods
+breadth-first approach. It begins with issues that affectthe whole                  of the class under test, not the generated test class(es). This step
+file, then incrementally fixes issues that affect all test cases, and               provides the LLM information on the functionality of methods
+focuses on the content of the broken tests.                                         undertestbyflatteningtherelated codethatisshowntotheLLMs.
+
+3.4.1    Missing imports. Typically, the class under test and its re-               3.4.5    Error log as feedback between the previous steps. After every
+spectiveunittestsuselibrariesorotherclassesfromtherepository.                       one ofthe previoussteps, if LLMshave madeany changes totheir
+These need to be imported into the test class in order to compile.                  tests but failed to compile them, YATE provides the complete error
+Relatedworkprimarilyoperatesatthemethodgranularityandthus                           log.Duringourexperiments,wefoundthatunambiguousconstruc-
+providestheLLMsonlytheimplementationofthemethodunder                                tor calls are a recurrent issue, which can be solved by providing
+test. This causes many issues with missing import statements or                     stricter-typed variables, e.g., providing the object instead of null.
+
+===== GV-08 PDF PAGE 5 =====
+
+YATE:TheRoleofTestRepairinLLM-BasedUnitTestGeneration
+
+
+Therefore,in these cases,YATE prompts theLLMs to fix the gener-                     4   EXPERIMENTALDESIGN
+atedtestsbyprovidingtherelatedobject(insteadofnull).Similarly,                      4.1   ResearchQuestions
+other recurrent compilation errors can be fixed.                                    We startour analysis by investigating the ability of YATEto gener-
+3.5   Oraclefixing                                                                  ateteststhat compile.Wecontrastthe compilationandpassrates,
+                                                                                    aswellastheactualnumberofthetestsgeneratedbyYATEwith
+In the oracle fixing phase, YATE makes the following three steps:                   those generated by a simple (plain) call to an LLM, to show the
+3.5.1    Correctingincorrectvalues. Initially,YATEattemptstofixthe                  improvements introduced by YATE. Therefore, our first research
+oracles (test assertions)based on the executionoutcome (runtime                     question can be formulated as follows.
+programstate).Thisprocess isinlinewiththeprocessfollowedby                             RQ1.SyntacticallyvalidTests: How does YATE compare to a
+both LLM-based, e.g., TestART [18], and traditional, e.g., Evosuite                 plain LLM-based test generation in terms of the number of syntacti-
+[15] test generation approaches.                                                    cally valid tests generated and the test compilation and pass rates?
+   YATEattemptstofixprimitivevalues,likenumbers,text,boolean                           Toanswerthis question,weselectaset ofprojects,entire repos-
+adn etc., simply by recording the variable values involved in the                   itories, where we apply the plain LLM-based and YATE test gen-
+generated assertions. The rules used to fix the oracles are:                        eration methods and contrast the number of tests that compile
+                                                                                    andpass.SincetheplainmethodformsthefirststepofYATE,the
+      •  Explicitvaluessuchasstringsornumbers,areimmediately                        difference in these numbers is attributed to the YATE compilation
+         replaced with the test execution’s outcome.                                andoraclefixingsteps.Wedistinguishbetweenclassandmethod
+      •  Non-explicit values such as assertTrue, or assertNotNull,                  granularity levels, by providing theLLM the entire classunder test
+         are reversed to reflect the execution outcome.                             oronlythemethoddefinition.Thereasoningbehindthisdistinction
+                                                                                    istocheckwhethertheclassundertestincludesadditionalcontent
+3.5.2    Generating or inverting exception oracles. Incase theoracle                that could be useful to LLMs.
+isfailingduetothefactthatthetestisthrowinganexception,then                             Afterverifyingcompilationandpassratesontheselectedprojects
+YATEwillreplacethelastoraclewithanexceptiononethatverifies                          in RQ1, we check whether the generated test suites have signifi-
+the thrown exception. It is possible that sometimes the thrown                      cant differences in terms of test effectiveness. Theeffectiveness is
+exception is occurring due to the wrong implementation of the                       measured based on typically used test adequacy metrics [47], such
+unit test. To avoid such issues, YATE has a configurable list with                  asline andbranchcoverage andmutationtesting [29].Hence, our
+exception oracles to avoid. More specifically, by default, YATE will                second research question can be formulated as follows.
+notgenerateanexceptionoracleiftheexceptiontypeisrelatedto                              RQ2. YATE Test Effectiveness:How does YATE compare to a
+incorrectmockusage.Similarly,YATEwillcheckforexceptionora-                          plain LLM-based test generation in terms of test effectiveness?
+clesthatdidnotthrowexceptionintheirexecutions,andinvertthe                             Similarly to RQ1 we measure test effectiveness and contrast it
+exception oracle. For instance, in Java’s Junit5 testing framework,                 to that of a plain LLM-based method on the selected projects by
+an assertThrows oracle will become assertDoesNotThrow.                              distinguishing between class and method granularity levels.
+   Thisstep isalsorule-based, butifthecurrent (exception) oracle                       Answering the first two questions provides evidence related
+is complicated enoughto parse, YATE willprovidethe oracle line                      to the overall effectiveness of YATE but does not ensure that all
+to the LLM and instruct it to make the desired modifications.                       its steps contribute effectively to its performance. We therefore
+                                                                                    investigatethroughanablationstudywhetherall4optimizations
+3.5.3    Fixing complex values using an LLM. If none of the above                   weconsider areuseful, i.e.,wecheck whethertheyhelp theYATE
+steps were enough to fix the oracles, YATE will provide to the                      testgenerationmethodproducestrongerteststhanthoseitwould
+LLM the error log and instruct it to fix the oracles based on the                   produce if any of those optimizations were absent. Thus, we ask:
+testexecution.Thisprocesscanberepeatedforaconfigurable N                               RQ3.Ablationstudy: Do all considered optimizations (chain-of-
+number of iterations or until the oracles are fixed. By default, the                thought prompt, Compilation Fixing, Oracle Fixing, and Coverage-
+maximum number of iterations is 3.                                                  based Test Augmentation) contribute to YATE’s performance?
+   If any of the aforementioned changes stops the test case from                       Answeringthisquestionhelpsusunderstandthecontributionof
+compiling, then the last change that caused this issue is reverted.                 eachofthe4optimizationsinYATE’sperformance.However,since
+                                                                                    all of them are strongly coupled with the abilities/performance of
+3.6   Coverage-basedtestaugmentation                                                the considered LLMs to perform the requested tasks, we further
+Once the test generation process is complete, YATE executes the                     investigatethesensitivityofYATEtodifferentLLMs.Thus,weask:
+test cases and measures their coverage. In case YATE finds any                         RQ4.SensitivitytoLLMsused: How effective is the YATE test
+uncoveredbranches, thenitaskes theLLMs togeneratea newtest                          generation method when using different LLMs?
+class to generate unit tests that cover the missed branches.                           ToanswerthisquestionweuseGPT-4o-mini[26],GPT4.1,[27]
+   YATEdoesthisbystartinganewprocessinwhichitprovides                               Deepseek V3 [11] and Codestral [23], which are the most recent
+totheLLMtheclassimplementation,thegeneratedtestclassim-                             LLMs to date. After checking YATE’s performance, we compare
+plementation, and the missed branches. The repairing mechanism                      YATE against existing methods.Thus, we contrast YATE’s perfor-
+ofthetwocomponents"Compilationfixing"and"Oraclefixing"is                            mancewiththatofHITS[40],SYMPROMPT[32],TESTSPARK[33],
+thenincorporatedaspresentedabove.Theprocessstopsattheend                            and COVERUP [31] and ask:
+of this (second) generation cycle.
+
+===== GV-08 PDF PAGE 6 =====
+
+                                                                                                                                                                  Konstantinouetal.
+
+                                        Table1:Projectsused                                           study on LLM-based unit test generation, we used the TestSpark’s
+                                                                                                      LLM-basedapproach.TestSparkinstructstheLLMtogenerateunit
+                                                                                                      tests to achieve 100% branch coverage and is the only approach
+                                                                                                      that provides also the parent class(es) of the class under test.
+                                                                                                         Coverup [31]attemptstoimprovetheinitialLLM-basedtestgen-
+                                                                                                      eration, by identifying uncovered lines and generating additional
+                                                                                                      tests to cover them.
+                                                                                                         Unfortunately, we could not find anyworking implementations
+                                                                                                      for the ASTER[28], PANTA [19] and TELPA [44] approaches, and
+                   RQ5.ComparisonwithSOTA:HowdoesYATEcomparetoSOTA                                    thuswedidnotconsiderthem.Nevertheless,aswediscussinthe
+                approaches in terms of test effectiveness and execution performance?                  related work, these approaches are somehow orthogonal to ours
+                   Weanswerthisquestionbymeasuringboththecostandtheef-                                as they do not aim at fixing tests using contextual information.
+                fectivenessofthemethodsstudied.Effectivenessismeasuredbased                           TestART [18] could not be used as it does not supports Junit5 that
+                on coverage andmutation testing,while costis measuredbasedon                          is used by our projects.
+                thenumberofLLMcallsmadebyYATE,whichconstitutesthekey                                  4.4   Metrics
+                costcontributingfactorofLLM-basedtestgenerationmethods[46].
+                                                                                                      Toevaluatetesteffectiveness,weusedstandardtestadequacymetrics
+                4.2   Projectsused                                                                    (akaCodecoveragemetrics)[47],suchaslineandbranchcoverage
+               Toevaluateourapproach,weselectedasetofprojectsalsousedby                               measured using the Jacoco1 framework. We also calculated the
+                previousstudiesforevaluatingChatUniTest[8]andHITS[40],as                              Mutation Score achieved by the generated test suites using the
+               well as the Gitbug java bug dataset [35].                                              default PiTest configuration [9].
+                   We also selected some projects previously seen by LLMs and                            Tomeasureefficiencyandapproximatethecost ofthestudiedtest
+                some others on which LLMs have not been trained to check for                          generations methods, we countthe numberof requests thateach
+                performancedifferences. Todistinguish betweenseenand unseen                           approachmakes tothe LLMsemployed. Weconsider thisnumber
+                data,wefollowastrictcutoffdate:anyprojectcreatedafterOctober                          asagoodcostmeasurementsincetheLLMqueriesformthemost
+               1,2023,isconsideredunseen,undertheassumptionthatsuchdata                               expensive (computationally) part of the studied approaches [46].
+               werenotincludedinthepre-trainingcorpusofGPT-4o-mini,which                              Moreover,theLLMqueriesalsoformanactualcostfactor,specially
+               was the primary model used across all research questions due to                        for the commercial ones.
+                its superior performance. All other projects are labeled as seen.                        It is noted that the model queries may fail due to unexpected
+                However, it should be noted that for the last research question,                      errors, such as server exception, API errors etc. To account for
+                some LLMs may have seen different sets of projects.                                   these factors, inour experiments we repeated those queriesfor a
+                   Noticethatwerunourevaluationonallclassesfromtheselected                            numberoftimesbutonlycountedthemasonerequest,i.e.,without
+                projectstoavoidfavoringanymethodduetodataselection.Thisis                             counting repetitions due to such errors.
+                in contrast to what was done in previous work that was evaluated                         Excludinginvalidtests:Non-compiling or non-passingtests
+                on self-selected sets of classes or methods.                                          are filteredout in order to be ableto calculate the coverage of each
+                                                                                                      approach. All the approaches studied attempt to filter out invalid
+                4.3   Baselines                                                                       tests. However,in some errorcases we maynot be ableto filterall
+                                                                                                      invalidtests,suchasthecaseswherewecannotparsethegenerated
+               TostudytheeffectivenessofYATE,weevaluateditagainstasimple                              test code. Therefore, invalid test code was filtered as follows:
+                LLM-based plain baseline.Thisbaselineconsistsofonepromptthat                                •  Allnon-compilingtestsormethods areremoved.Thisap-
+                aimstogenerateunittests,followedbyamaximumoffiveiterations                                     plies also to assistant methods generated in the test class
+               with the LLM using the error logs in the prompts so that the LLM                                and not only non-compiling tests.
+                can attempt to fix the tests that do not compile. It is also equipped                       •  Ifatestclassdoesnotcompileasawhole(regardlessofthe
+               with arule-based fixof the importstatements in order to eliminate                               test cases), then the whole file is removed.
+                any advantage attributed to such trivial cases.                                          Comparisons: To compare whether the differences between
+                   WealsocompareYATEwiththefollowingstate-of-the-artLLM-                              theresultsarestatisticallysignificant,weapplytheMann-Whitney
+                basedtestgeneration methods.Eachbaselineand YATEwereexe-                              U test [22], a non-parametric test for comparing two independent
+                cutedusing GPT-4o-mini [26]toensure aconsistentandfair com-                           samples.Inouranalysis,weconsidereachclassundertestasadata
+                parison.                                                                              point and compare the distributions of line and branch coverage.
+                   HITS [40] uses LLMs to cut methods into smaller code blocks                        We report the corresponding p-value, considering the results sta-
+                beforetestingaclass.Afterwards,HITSusesthe LLMtogenerate                              tisticallysignificantwhenp<0.05.Toevaluatethemagnitudeof
+                unit tests for each sliced code block.                                                difference between observed groups, we also calculate the Vargha
+                   SymPrompt [32]mimicssymbolicexecution.Identifiesallpossi-                          and Delaney (VDA) effect size [37].
+                bleexecutionpathsandinstructstheLLMtogenerateunittestsfor                                Alongsidestatisticalsignificance,wereporttwoadditionalmet-
+                each execution path.                                                                  rics to compare coverage results. We use coverage difference
+                   TestSpark [33] contains an LLM-based implementation and an
+                Evosuite-based implementation. Since we conduct an empirical                          1https://www.jacoco.org/jacoco/
+
+
+
+
+
+
+
+
+
+          Project               Abbr  JDK  #CUT  #MUT  Previouslyused  Seen
+Binance/Binanceconnector2.0.0    BC     8       46       481       ChatUniTest     Yes
+    bhlangonijr/Chesslib          CH     11      43       538        GitbugJava     Yes
+     AuthMe/ConfigMe           CM     8       75       541        GitbugJava     Yes
+      AWS/Event-ruler            ER      8       53       656           HITS         No
+    Flmelody/Windward           W      8       78       400           HITS         No
+Apple/Batch-processing-gateway   BPG    17      98      1041          HITS         No
+          TOTAL                               393     3657
+
+===== GV-08 PDF PAGE 7 =====
+
+                YATE:TheRoleofTestRepairinLLM-BasedUnitTestGeneration
+
+                      Table2:CompilationRatesofYATEandLLM-Plain                                             5.2   RQ2:TestEffectiveness
+                                                                                                           Table4presentsthecoverageachievedbytheLLMPlainandYATE
+                                                                                                            methodsinallthestudiedprojects.The tableincludesbothclass-
+                                                                                                            level and method-level configurations, and additionally reports the
+                                                                                                            overallcoveragewhenclass-levelandmethod-leveltestsgenerated
+                                                                                                            by YATE are combined into a single test suite.
+                                                                                                               Weobservethatmodelsperformbetterwheninstructedtogener-
+                                                                                                            atetestspermethodratherthangeneratingtestsperclass.Thishap-
+                                                                                                            pensbecausethemodelsseemtogeneratemoretestspermethod,
+                          Table3:PassingRatesofYATEandLLM-Plain                                             allowing to test a method deeper. This is also shown in tables 2
+                                                                                                            and3wherebothapproachesgeneratedmoretestsatthemethod
+                                                                                                            level. Table 5 records the results of the statistical analysis of the
+                                                                                                            effectiveness values obtained per class involved.
+                                                                                                               Weobservethatthedifferencesbetweenclassandmethodlevels
+                                                                                                            oftheplainandYATEapproachesarestatisticallysignificantinall
+                                                                                                            casesexceptfromthecaseYATEclassvsYATEmethod.TheVargha
+                                                                                                            and Delaney effect size show that YATE (class) achieved higher
+                                                                                                            line coverage in approximately 61.6% of the classes under test,
+                                                                                                            and higherbranch coverage inabout 69.6% ofthe cases. Asimilar
+                which is the absolute percentage point increase in coverage and                             trendisobservedwhencomparingYATE(method)toLLM-Plain
+                the coverage improvement.                                                                  (method),indicatingthatYATE(method)alsoachievesconsistently
+                                                                                                            better coverage.
+                5   RESULTS
+                5.1   RQ1:CompilationandPassrates
+                Tables 2 and 3 report the compilation and passing rates of tests
+                generatedbyLLM-PlainandYATE,forbothclassandmethodgran-
+                ularitylevels.Inbothcases,YATEshowsasubstantialimprovement                                     Figure2showstheimprovementincoveragewhenusingYATE
+                in compilation and passing rates compared to LLM-Plain. At the                              and the average difference in coverage compared to LLM-Plain.
+                class-level, YATE achieved a compilation rate of 94.60%, which is                          When used at class granularitylevel YATE improved line coverage
+                5.96%higher thanthe compilationrate ofLLM-Plain. Formethod-                                 by 131.45%, branch coverage by 143.02%, and mutation score by
+                leveltests,theYATEcompilationratewas90.02%,surpassingthe                                    156.07%.Onaverage,thistranslatesto32.06%higherlinecoverage,
+                LLM-Plain by 5.68%.                                                                         28.69%higherbranchcoverageand21.77%highermutationscore
+                    When looking at the passing rate of YATE’s tests, we observe                            compared to LLM-Plain. Although the improvements are smaller
+                thatthesameconclusionscanbedrawn,andthedifferenceismuch
+                higher.AlthoughLLM-Plain’spassingrateshoveredjustabove50%
+                forboth configurations,YATEachieved 90.18%for class-leveland
+                82.96% for method-level testing in total.
+                    In terms of actual numbers, LLM-Plain (class-level) generated
+                3,232tests,ofwhich2,865compiledand1,633passed.Incontrast,
+                YATE (class-level) generated 4,948 tests, with 4,681 compiling and
+                4,462 passing.This means that YATEgenerated1,716 more syntac-
+                ticallyvalidtestsand2,829morepassingteststhanLLM-Plain.For
+                method-level testing, both approaches generated a larger number
+                oftests. LLM-Plain generated12,158tests, with10,254compiling
+                and 6,492 passing. YATE generated fewer tests in total (11,534) but
+                achieved better compilation and passing rates, with 10,383 tests
+                compiling and 9,569 passing.
+                    To summarize these results demonstrate that YATE generates
+                a larger number of syntactically valid and passing tests, making
+                YATE’stestoutputsmorereliableonbothgranularitylevelsstudied.
+
+
+
+                                                                                                            Figure2:CoverageimprovementofYATEoverLLM-Plainfor
+                                                                                                            the6projects(BPG,ER,BC,W,CM,CH)usedandthethree
+                                                                                                            effectivenessmetrics(Line,Branch,andMutationScore)
+
+
+
+
+
+ Finding1: YATE significantly improves the compilation and passing
+Project        PLAIN-C             PLAIN-M              YATE-C               YATE-M
+Project       PLAIN-C             PLAIN-M              YATE-C                YATE-MratesofLLM-Plain.Itgenerates5.96%morecompilingtestsand39.64%Finding2: LLM’s generate more syntactically valid tests and cover
+BPG       87.19%(640/734)     87.77%(2714/3092)   93.68%(1097/1171)   92.36%(2551/2762)BPG       71.25%(523/734)    76.13%(2354/3092)   87.45%(1024/1171)   88.38%(2441/2762)more code when they are instructed to focus on each method sepa-morepassingtests,ultimatelyyieldingalargernumberofpassingtest
+ER         77.66%(431/555)     69.91%(1705/2439)    95.09%(871/916)    73.91%(1904/2576)ER         42.70%(237/555)     37.39%(912/2439)    92.36%(846/916)    65.84%(1696/2576)cases in both configurations.rately rather than generate tests for the whole class.
+BC         98.83%(509/515)     93.91%(1572/1674)    99.05%(832/840)    99.43%(1754/1764)BC         14.17%(73/515)     19.83%(332/1674)    98.21%(825/840)    79.88%(1409/1764)
+W         87.13%(474/544)     83.01%(850/1024)     98.31%(641/652)    96.00%(1079/1124)W          61.76%(336/544)     47.95%(491/1024)    92.48%(603/652)    93.68%(1053/1124)
+CM        86.89%(444/511)     80.54%(1291/1603)    86.90%(776/893)    90.75%(1462/1611)CM        42.07%(215/511)     47.72%(765/1603)    83.54%(746/893)    84.48%(1361/1611)
+CH       98.39%(367/373)    91.23%(2122/2326)     97.48%(464/476)     96.23%(1633/1697)
+CH         66.76%(249/373)    70.42%(1638/2326)    87.82%(418/476)    94.81%(1609/1697)
+Total     88.64%(2865/3232)  84.34%(10254/12158)  94.60%(4681/4948)  90.02%(10383/11534)
+Total      50.53%(1633/3232)  53.40%(6492/12158)  90.18%(4462/4948)  82.96%(9569/11534)
+Average        89.35%                84.39%               95.08%               91.45%
+Average         49.79%               49.91%               90.31%               84.51%
+
+===== GV-08 PDF PAGE 8 =====
+
+                                                                                                                                                                            Konstantinouetal.
+
+                            Table4:ComparisonofLLMPlain(PL-C,PL-M)andYATE(Y-C,Y-M)in6projects(BPG,ER,BC,W,CM,CH).
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   Table5:StatisticalcomparisonofYATEwithLLM-Plain                                                   Table6:AblationstudyonYATEcomponents
+
+
+
+
+
+
+
+
+
+
+                                                                                                            YATE achieved the lowest line coverage when the generation com-
+                 underthemethod-levelconfiguration,YATEstilloutperformsLLM-                                 ponentwasremoved,indicatingitsroletoexploremorepartsofthe
+                 Plainacrossallmetrics.Onaverage,YATEachieved18.36%more                                     code.Onthecontrary,theabsenceofthecoverageaugmentation
+                 line coverage, 22. 03% more branch coverage, and 16. 98% more                              component had minimal impact on line coverage. However, for
+                 mutants killed.                                                                            branchcoverage, itsabsenceledtoamorepronounceddecline:a
+                                                                                                            reduction of 11.09% in total, and a decrease of 5.38% on average.
+                                                                                                               When the compilation fixing component was replaced, YATE
+                                                                                                            scoredthe lowestbranch coverage andmutation scorethan anyof
+                                                                                                            the other variations of the ablation study. Specifically, the absence
+                                                                                                            ofthiscomponentresultedina19.30%dropintotalbranchcoverage
+                    Interestingly,thecombinationofYATE’sclass-andmethod-level                               and 15.10% on average, and a 10.45% reduction in total mutation
+                 tests into a single test suite (Y-Comb column of Table 4) leads to                         score and 11.91% on average.
+                 much better results. In nearly all projects, the combined cover-
+                 ageexceedsthatofeitherpartalone.Thissuggeststhatdifferent
+                 contextual information (class and method) leads to better testing.
+
+
+
+                                                                                                            5.4   RQ4:SensitivitytoLLMsused
+                                                                                                            Figure 3 shows the results of YATE and LLM-Plain when applied
+                 5.3   RQ3:AblationStudy                                                                    withdifferentLLMs.WeobserveminordifferencesamongtheLLMs.
+                 Table6recordsthecoveragescoresofYATE(Classlevel)andthe                                     Although certain models perform better than others, YATE outper-
+                 respective coverage when each component is removed or replaced                             forms LLM-Plain in all but one project, for all models.
+                 bythecomponentsofLLM-Plain.Noticethatwegetsimilarresults                                      Specifically we observe that YATE outperformed LLM-Plain
+                 when examining the method level but do not present them here                               in 5/6 projects when ran on GPT4.1. LLM-Plain obtained 9.49%
+                 dueto spaceconstraint.Thefourcomponents thatwereplaceare:                                  higher line coverage and 15.34% higher mutation score in binance-
+                                                                                                            Connector. We also see that YATE outperformed LLM-Plain in all
+                      (1)  Generation component: LLM-Plain prompting to generate                            projectswhenranonDeepSeek-V3.Theonlyexceptionisthemuta-
+                           tests (no Chain-of-Thoughts).                                                    tionscoreoftheprojectbatch-processing-gateway,whereLLM-Plain
+                      (2)  Compilingfixingcomponent:LLM-Plainfeedback-driven                                killed 0.9% more mutants. When ran on Codestral, YATE outper-
+                           fixing with a maximum of five iterations.                                        formedLLM-Plainin5/6projects.Onevent-ruler projectLLM-Plain
+                      (3)  Oraclefixingcomponent:LLM-Plainfeedback-drivenfixing                             scored better in all metrics.
+                          with a maximum of five iterations.                                                   Table 7 shows the total coverage and average coverage of 6
+                      (4)Coverage augmentation: Completely removed.                                         studied projects. We can see that when YATE used GPT-4o-mini,
+                    As shown in Table 6, only when all four components are com-                             it achieved the highest code coverage, surpassing even GPT 4.1
+                 bined together, YATE achieved its highest coverage. Specifically,                          which is alarger and newer modelin the GPT family. Followed by
+
+
+
+
+Project                        LineCoverage                                         BranchCoverage                                        MutationScoreFinding5:Allfour componentsofYATEareimportant. Thegenera-
+Comparison                          Metric   p-value   Significant   VDAPL-C     PL-M      Y-C       Y-MY-CombPL-C     PL-M      Y-C       Y-MY-CombPL-C     PL-M      Y-C       Y-MY-Comb
+Plain(Class)vs.Plain(Method)        Line       0.0075          Yes         0.451Finding 4: While method-level testing generates test suites withtion componentis essential fora broader linecoverage, thecoverageFinding3: YATE consistently achieves significantly higher code cov-LineCoverage   BranchCoverage  MutationScore
+YATE(Class)vs.YATE(Method)     Line      0.874          No        0.497Configuration                Total    Avg.    Total     Avg.     Total    Avg.BPG         36.47%   45.13%   44.71%   50.88%augmentationforbranchcoverage,whereasthemostimportantcom-erage than LLM-Plain, under both class-level and method-level testhigher coverage than class-level testing, the combination of the two54.34%22.88%   32.60%   32.84%   41.30%46.00%29.33%   41.21%   34.25%   45.71%45.71%
+YATE(Class)vs.Plain(Class)          Line      1.78e-10         Yes         0.616YATE–AllComponents      60.71%  64.94%  51.06%   52.26%   41.39%  43.98%ER            35.58%   45.55%   58.00%   58.98%generation settings.consistently yields significantly higher coverage.ponent is the compilation fixing.67.44%23.36%   32.10%   44.20%   46.18%53.87%23.03%   31.53%   43.17%   42.07%50.30%
+YATE(Method)vs.Plain(Method)      Line      9.51e-06         Yes         0.581PlainTestGeneration          44.88%   44.62%   34.64%    37.17%    32.40%   32.29%BC           15.21%   49.91%   82.10%   86.85%90.62%36.20%   49.77%   80.82%   84.47%86.30%7.85%    15.93%   51.76%   41.10%44.73%
+Plain(Class)vs.Plain(Method)      Branch     0.0012          Yes         0.414PlainCompilationFixing      47.63%   49.39%   31.76%    37.16%    30.94%   32.07%W            37.14%   36.96%   63.54%   66.02%71.49%24.90%   27.49%   55.18%   61.55%67.73%30.48%   32.81%   50.86%   58.94%63.61%
+YATE(Class)vs.YATE(Method)   Branch    0.263          No        0.470PlainOracleFixing             49.33%   51.63%   34.29%    39.18%    31.89%   33.27%CM          41.62%   65.39%   75.58%   82.40%88.77%25.56%   48.89%   63.52%   81.48%88.33%28.50%   53.24%   52.72%   72.67%76.94%
+YATE(Class)vs.Plain(Class)        Branch    1.67e-13         Yes         0.696NoCoverageAugmentation   57.59%   61.84%   39.97%    46.88%    38.39%   40.53%CH           31.24%   61.86%   65.69%   69.82%73.99%8.57%    39.10%   37.02%   47.12%51.28%14.11%   30.00%   31.14%   46.13%48.35%
+YATE(Method)vs.Plain(Method)    Branch    7.31e-08         Yes         0.644Total        33.53%   49.95%   60.71%   64.82%70.13%21.05%   35.33%   44.27%   51.06%57.01%22.08%   33.82%   41.39%   47.99%52.04%
+Average   32.88%   50.80%   64.94%   69.33%            74.44%     23.58%   38.33%   52.26%   60.35%         65.59%     22.22%   34.12%   43.98%   51.10%         54.94%
+
+===== GV-08 PDF PAGE 9 =====
+
+                 YATE:TheRoleofTestRepairinLLM-BasedUnitTestGeneration
+
+                        Table7:YATEVsLLM-PlainacrossdifferentLLMs                                                A similartrend is observedin both branchcoverage and muta-
+
+                                                                                                             tionscore.WhileHITSoutperformsotherbaselines,ithassignifi-
+                                                                                                             cantlylesscoveragethanbothofYATE’sconfigurations.Specifically,
+                                                                                                             YATE’s method level configuration covered 21.57% more branches
+                                                                                                             and killed 19.97% more mutants than HITS.
+                                                                                                                 Notably,weobservethatYATE’sclass-levelconfigurationalso
+                                                                                                             outperformed all previous approaches. It achieved the highest per-
+                                                                                                             formance in 5 out of 6 repositories for line coverage, 4 out of 6
+                                                                                                             repositoriesforbranchcoverage,and5outof6repositoriesformu-
+                                                                                                             tationscore.Intotal,YATE(class)covered18.29%morelines,14.80%
+                                                                                                             more branches, and killed 13.62% more mutants compared to HITS.
+                                     Table8:Statisticalcomparison                                            UsingtheMann–WhitneyUtest,wefoundthattheperformance
+                                                                                                             improvements of YATE over all baseline methods are statistically
+                                                                                                             significant across all metrics and configurations. Table 8 reports
+                                                                                                             the corresponding p-values for each pairwise comparison.
+
+
+
+
+
+
+
+
+                                                                                                                 Table10 reportsthecost ofeach approachasa numberofLLM
+                                                                                                             queries. Lower values indicate that the approach is less costly.
+                                                                                                             Amongall approaches,YATE (class)isconsistently themostcost-
+                                                                                                             efficientapproach,asitrequires622.27fewerrequestsonaverage
+                                                                                                             thanthenextbestcost-efficientapproach,TestSpark.Incontrast,
+                                                                                                             YATE (method) and HITS are the two most expensive approaches
+                                                                                                             compared to the other baselines. HITS requires the highest num-
+                 GPT-4o-mini, YATE had slightly worse results using Deepseek V3                              ber of requests, with a total of 23,865 requests, averaging 3,977.5
+                 whereas the results of LLM-Plain improved. Finally, we observe                              requests perproject, whichis 436 morethan YATE (method)and
+                 that Codestral, although optimized for code, it scored the worse                            3,261.5 more than YATE (class).
+                 results for both YATE and LLM-Plain. In all the four models used
+                 though, YATE outperformed the LLM-Plain.
+
+
+
+
+
+                 5.5   RQ5:ComparisonwithOthermethods
+                 Table 9 records the average coverage achieved by YATE and pre-
+                 vious approaches.Figure 4showsthe distributionof theline and
+                 branch coverage achieved, per studied class, by each of the tools.
+                 To ensure fair comparison, we have included YATE’s method-level
+                 resultssincethebaselinesalsooperateatthemethodlevel.Wein-
+                 tentionally exclude results from YATE’s combined test suite, as no
+                 existing baseline supports a comparable combination mechanism.
+                 In the table, we have highlighted the highest score for each metric
+                 and underlined the second-best result.
+                    WecanobservethatYATE(method-level)outperformedallprior
+                 approaches, in all code coverage metrics and in all projects. The
+                 onlyexceptionwasthatYATE(class)outperformedYATE(method)
+                 on the mutation score of two repositories. Specifically, for method
+                 leveltesting,YATEachievedonaverage64.69%linecoveragewhich
+                 is37.07%higherthanTestSparkwhichcoveredthesmallernumber
+                 of lines. Compared to HITS which had the highest performance
+                 after YATE, we see that YATE covered in total 22.36% more lines.                                  Figure3:PlainVsYATEwhenusingdifferentLLMs.
+Comparison                          Metric   p-value   Significant   VDA
+YATE(Class)vs.Hits                     Line     8.94e-21         Yes         0.673
+YATE(Class)vs.Symprompt           Line     1.05e-20         Yes         0.672Finding7: YATE outperforms priorstudies inall evaluationmetrics.LineCoverage   BranchCoverage   MutationScore
+YATE(Class)vs.Testspark              Line     4.01e-48         Yes         0.768Itsmethod-level configurationachieves upto21.57%higher branch
+YATE(Class)vs.Coverup               Line     1.69e-22         Yes         0.680Model                   Total    Avg.    Total      Avg.      Total     Avg.coverage and 19.97% higher mutation score thanthe best-performing
+YATE(Method)vs.Hits                  Line     4.24e-21         Yes         0.674GPT-4o-mini(YATE)   60.71%   64.94%   44.27%     52.26%     41.39%   43.98%baseline (HITS). Eventhe class-level configurationof YATEsurpasses
+YATE(Method)vs.Symprompt       Line     5.74e-21         Yes         0.673GPT-4o-mini(Plain)    33.53%   32.88%   21.05%     23.58%     22.08%   22.22%Finding6: YATE significantly improves over theLLM-Plain method
+ allbaselines,demonstratingitseffectivenessacrosspriorapproaches.
+YATE(Method)vs.Testspark          Line     1.19e-47         Yes         0.766GPT-4.1(YATE)         50.75%   52.61%   38.97%     45.49%     39.72%   41.20%in all models studied.
+YATE(Method)vs.Coverup            Line     9.25e-23         Yes         0.681GPT-4.1(Plain)          44.72%   47.30%   32.09%     35.51%     32.55%   34.91%
+YATE(Class)vs.Hits                   Branch   1.28e-05         Yes         0.616
+YATE(Class)vs.Symprompt         Branch   1.86e-07         Yes         0.639DeepseekV3(YATE)   56.69%   59.17%   48.71%     53.45%     44.05%   44.65%
+YATE(Class)vs.Testspark            Branch   2.23e-25         Yes         0.775DeepseekV3(Plain)    47.02%   48.80%   33.19%     38.04%     34.41%   35.16%
+YATE(Class)vs.Coverup             Branch   5.41e-10         Yes         0.666Codestral(YATE)       43.14%   45.78%   27.32%     37.05%     28.66%   30.83%
+YATE(Method)vs.Hits                Branch   2.35e-07         Yes         0.637Codestral(Plain)        31.21%   30.83%   20.35%     23.26%     21.79%   21.88%
+YATE(Method)vs.Symprompt      Branch   1.26e-09         Yes         0.662
+YATE(Method)vs.Testspark        Branch   8.05e-28         Yes         0.788
+YATE(Method)vs.Coverup          Branch   2.89e-12         Yes         0.686
+
+===== GV-08 PDF PAGE 10 =====
+
+                                                                                                                                                                             Konstantinouetal.
+
+                                                         Table9:ComparisonbetweenYATEandstate-of-the-artapproaches
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                             Table10:Cost(NumberofLLMRequests)                                                  Whenitcomestopassingrates,LLM-Plainhadatotalpassing
+                                                                                                            rateof53.40%.Comparedtotheotherbaselines,LLM-Plainhadthe
+                                                                                                            lowest passing rate of all. Hits had a total passing rate of 67.07%,
+                                                                                                            SymPrompthadatotalpassingrateof65.43%,TestSparkhadatotal
+                                                                                                            passing rate of 77.19% and CoverUp 67.47%.
+                                                                                                                LLM-Plain (method) generated a total of 12,158 tests, which
+                                                                                                            is more than 8 times more than TestSpark (1,482 tests), nearly
+                                                                                                            4.5 times more than SymPrompt (2,719 tests), and 4 times more
+                                                                                                            than CoverUp (3,034 tests). HITS, the baseline with the highest
+                                                                                                            numberofgeneratedtestsamongthestate-of-the-artapproaches,
+                                                                                                            produced only 8,599 tests, which is 3,559 fewer tests than LLM-
+                                                                                                            Plain.Althoughthegapinthenumberofteststhatpassissmaller,
+                                                                                                            LLM-Plainstillproducesmoretests.Itproduced6,492passingtests,
+                                                                                                            compared to 5,767 from the second HITS.
+                                                                                                                The above results suggest that LLM-Plain is effective because
+                                                                                                            itgenerates moresyntactically validtests thanthe othermethods.
+                                                                                                            However, LLM-Plain performs worse in branch coverage largely
+                                                                                                            due to the fact that it does not optimise for coverage.
+
+                 Figure4:Distributionoflineandbranchcoverageachieved,
+                 perstudiedclass,bythestudiedmethods.                                                       7   THREADSTOVALIDITY
+                                                                                                            ExternalValidity: A potentialthread tothe validity ofthis study
+                    Theseresultshighlightatrade-offbetweencostandperformance.                               lies to the tools that have been used and the implementations of
+                 WhileYATE(method-level)achievedsignificantlyhighercodecov-                                 thealgorithmsofcomparison.Tomitigatethisthreat,weemploy
+                 eragethanallapproaches,YATE(class-level)managed toachieve                                  oneofthestate-of-the-artcommercialLLM,GPT4o-mini,which
+                 slightly less code coverage with significantly less cost.                                  has been used in previous work [19]. To mitigate the threat of tool
+                                                                                                            implementations, we use ChatUniTest, a widely used plugin with
+                                                                                                            theimplementationofallalgorithmswecomparewith.Ithasalso
+                                                                                                            been widely used in previous work. [40] [18] [45].
+                                                                                                                Internal Validity: YATE’s effectiveness is influenced by the
+                                                                                                            capabilities of the underlying model. To mitigate this threat, we
+                                                                                                            evaluatedYATEusingmultipleLLMswithdifferentarchitectures,
+                                                                                                            including a model specifically optimized for code generation. In
+                 6   DISCUSSION                                                                             addition,YATE’sjavaimplementationusesSpoon[30]forcodeanal-
+                 Interestingly, we found a relatively low performance by previous                           ysisandforconstructingtherequiredmethodcallgraphbeforethe
+                 approacheswhencomparedtotheLLM-Plainimplementation.LLM-                                    compilationfixingphase.Anybugs,inaccuraciesorlimitationsin
+                 Plain outperformed all previous approaches in line coverage for                            Spooncouldpotentiallyimpactthecorrectnessofourexperimental
+                 3outof6projects.However,forbranchcoverage,itachievedthe                                    results.Tomitigatethisthreatwemanuallyverifiedtheaccuracyof
+                 highestcoverageinonlyoneproject,whileHITSwassuperiorin4                                    the generated call graphs and ensured that the core analysis steps
+                 out of 6 projects we study.                                                                performed as expected.
+                    Similarly,SymPromptachievedthehighestbranchcoverageonly                                     ConstructValidity: One potential threat to construct validity
+                 intheWindwardproject.Whenexaminingthemutationscore,LLM-                                    isdataleakage,wherethelanguagemodelmayhavebeenexposed
+                 Plainagainledin3outof6projects.Wealsoexaminedthepassing                                    totheevaluationdataduringtraining.Tomitigatethis,weselected
+                 rates of the baselines and the number of generated tests.                                  repositoriesfrompriorLLM-basedtestgenerationstudies[40][8],
+
+
+
+Project                        LineCoverage                                      BranchCoverage                                          MutationScore
+Project    HITS  SYMPROMPT  TESTSPARK  COVERUP  YATE(C)  YATE(M)Finding8: YATE (class-level) is the most cost-efficient approach, re-HITS   SYMP    TSP     CUP     Y-C      Y-MHITS   SYMP    TSP     CUP     Y-C      Y-MHITS   SYMP    TSP     CUP      Y-C      Y-M
+  quiringsignificantlylessrequestsyetstilloutperformingallbaselines
+BPG         3,985                994             967          2,047        1,032         5,154
+BPG        35.5%    28.0%    17.1%   25.2%   44.7%in code coverage. Although YATE (method-level) delivers the most50.9%35.9%30.4%    19.0%   25.4%   32.8%   41.3%27.4%    23.8%    14.3%   19.6%    34.3%45.7%
+ER           2,530              1,081            1,100          1,579         755         4,980
+ER            9.0%    13.2%    15.8%   10.7%   58.0%effective tests, it does so at a higher cost.59.0%5.0%     8.7%    10.1%    7.5%    44.2%46.2%6.6%    10.6%    11.4%    9.1%    43.2%    42.1%
+BC          9,167              2,693            1,404          3,545         476         2,794
+BC          71.5%    83.0%    18.4%   84.1%     82.1%   86.9%     79.5%    65.8%    36.1%   70.3%   80.8%      84.5%    45.3%    49.3%    10.8%   50.1%     51.8%    41.1%
+W           3,216              1,381            2,189          1,916         789         2,412
+W           45.3%    48.8%    18.0%   38.7%   63.5%     66.0%     41.8%    44.0%    6.0%    31.1%   55.2%      61.6%    32.4%    39.6%    6.8%    27.1%    50.9%     58.9%
+CM          3,703              1,493            1,597          2,222         816         4,035
+CH          1,264                771              706            955         428         1,874
+CM          62.4%    54.7%    34.6%   54.2%   75.6%     82.4%     51.5%    44.1%    27.8%   44.8%   63.5%      81.5%    44.7%    43.0%    21.4%   43.1%    52.7%     72.7%
+Total      23,865              8,413            7,963         12,264       4,296       21,249CH          65.4%    59.5%    44.1%   60.6%   65.7%69.8%44.3%38.3%    21.9%   39.6%   37.0%   47.1%40.6%36.2%    17.6%   36.8%    31.1%   46.1%
+Average    3,978              1,402            1,327          2,044         716         3,542
+Total        42.4%    41.0%    23.7%   38.9%   60.7%    64.8%     29.5%    27.2%    16.5%   25.1%   44.3%      51.1%    28.0%    28.4%    13.9%   26.3%    41.6%     47.9%
+Average   48.2%    47.9%    24.7%   45.6%   64.9%       69.2%     42.9%    38.5%    20.2%   36.4%   52.3%      60.2%    32.8%    33.7%    13.7%   31.0%    44.0%     51.1%
+
+===== GV-08 PDF PAGE 11 =====
+
+YATE:TheRoleofTestRepairinLLM-BasedUnitTestGeneration
+
+
+as well asfrom thepublicly availableGitbug-Java dataset[35]. We                                              Huang,KuaiYu,LeanWang,LecongZhang,LeiXu,LeyiXia,LiangZhao,Litong
+manually inspected the creation date of each project to determine                                            Wang, Liyue Zhang, Meng Li, Miaojun Wang, Mingchuan Zhang, Minghua
+whether the primary model of our experiments could have been                                                 Zhang, Minghui Tang, Mingming Li, Ning Tian, Panpan Huang, Peiyi Wang,
+                                                                                                             Peng Zhang,Qiancheng Wang,Qihao Zhu, QinyuChen, QiushiDu, R. J.Chen,
+exposedtothemornot.Forclarity,welabeledrepositoriesaseither                                                  R. L. Jin, Ruiqi Ge, Ruisong Zhang, Ruizhe Pan, Runji Wang, Runxin Xu, Ruoyu
+seen or unseen based on this analysis.                                                                       Zhang, Ruyi Chen, S. S. Li, Shanghao Lu, Shangyan Zhou, Shanhuang Chen,
+                                                                                                             ShaoqingWu,ShengfengYe, ShengfengYe, ShirongMa, ShiyuWang,Shuang
+                                                                                                             Zhou, Shuiping Yu, Shunfeng Zhou, Shuting Pan, T. Wang, Tao Yun, Tian Pei,
+8   CONCLUSION                                                                                               Tianyu Sun, W. L. Xiao, and Wangding Zeng. 2024.  DeepSeek-V3 Technical
+                                                                                                             Report. CoRR abs/2412.19437 (2024).
+Inthispaper,westudiedtheroleoftestrepair intheLLM-driven                                              [12]  Angela Fan, Beliz Gokkaya, Mitya Lyubarskiy, Mark Harman, Shubho Sengupta,
+testgenerationprocess. Ourresultsshowedthatfocusingonmak-                                                    ShinYoo,andJieZhang.2023. LargeLanguageModelsforSoftwareEngineering:
+                                                                                                             SurveyandOpenProblems.In ICSE Future of Software Engineering (FoSE 2023).
+ing tests syntactically and semantically valid leads to significant                                   [13]  ChristopherFoster,AbhishekGulati,MarkHarman,InnaHarper,KeMao,Jillian
+improvements in both the number of generated tests and test ef-                                              Ritchey,HervéRobert,andShubhoSengupta.2025. Mutation-GuidedLLM-based
+fectiveness, leading to substantially higher coverage (more than                                             Test Generation at Meta. In 2025 ACM Conference on Foundations of Software
+                                                                                                             Engineering (FSE 2025).ACM. Also availableas arXivpreprintarXiv:2501.12862.
+20%)andmutationscores(killingapproximately20%moremutants)                                             [14]  ChristopherFoster,AbhishekGulati,MarkHarman,InnaHarper,KeMao,Jillian
+than basic prompting and state-of-the-art methods. We also find                                              Ritchey,HervéRobert,andShubhoSengupta.2025. Mutation-GuidedLLM-based
+                                                                                                             Test Generation at Meta. CoRR abs/2501.12862 (2025).
+thatprovidingLLMswithcompilation-relevantfeedback,suchas                                              [15]  Gordon Fraser and Andrea Arcuri. 2011.  Evolutionary Generation of Whole
+classdependencies,toguidethemonhowtofixtheirtests,ismore                                                     Test Suites. In 2011 11th International Conference on Quality Software. 31–40.
+important than coverage feedback, suggesting that coverage feed-                                             https://doi.org/10.1109/QSIC.2011.19
+                                                                                                      [16]  GordonFraserandAndreasZeller.2011. ExploitingCommonObjectUsagein
+backalonecanbemisleadingontheactual reasonswhycoverage                                                       TestCaseGeneration.InFourthIEEEInternationalConferenceonSoftwareTesting,
+is not obtained.                                                                                             Verification and Validation, ICST 2011, Berlin, Germany, March 21-25, 2011.IEEE
+                                                                                                             Computer Society, 80–89.  https://doi.org/10.1109/ICST.2011.53
+                                                                                                      [17]  Yunfan Gao, Yun Xiong, Xinyu Gao, Kangxiang Jia, Jinliu Pan, Yuxi Bi, Yixin
+REFERENCES                                                                                                   Dai,JiaweiSun,HaofenWang,andHaofenWang.2023. Retrieval-augmented
+                                                                                                             generationforlargelanguagemodels:Asurvey. arXiv preprint arXiv:2312.10997
+ [1]  NadiaAlshahwan,JubinChheda,AnastasiaFinegenova,MarkHarman,Alexan-                                      2, 1 (2023).
+      dru Marginean,Shubho Sengupta, andEddy Wang. 2024. Automated unit test                          [18]  Siqi Gu, Chunrong Fang, Quanjun Zhang, Fangyuan Tian, Jianyi Zhou, and
+      improvement using Large Language Models at Meta. In ACM International Con-                             Zhenyu Chen.2024. TestART: ImprovingLLM-basedUnit Test viaCo-evolution
+      ference on the Foundations of Software Engineering (FSE 2024) (Portode Galinhas,                       of Automated Generation and Repair Iteration.  CoRR abs/2408.03095 (2024).
+      Brazil, Brazil).                                                                                       https://doi.org/10.48550/ARXIV.2408.03095 arXiv:2408.03095
+ [2]  Nadia Alshahwan, Jubin Chheda, Anastasia Finogenova, Beliz Gokkaya, Mark                        [19]  Sijia Gu,Noor Nashid, and AliMesbah. 2025. LLM Test Generation viaIterative
+      Harman,InnaHarper,AlexandruMarginean,ShubhoSengupta,andEddyWang.                                       Hybrid Program Analysis. CoRR abs/2503.13580 (2025).
+      2024. AutomatedUnitTestImprovementusingLargeLanguageModelsatMeta.                               [20]  MarkHarman,PeterO’Hearn,andShubhoSengupta.2025. HardenandCatchfor
+      In SIGSOFT FSE Companion. ACM, 185–196.                                                                Just-in-Time Assured LLM-Based Software Testing: Open Research Challenges
+ [3]  Nadia Alshahwan, Mark Harman, and Alexandru Marginean. 2023. Software                                  (keynotepaper).In 2025 ACM Conference on Foundations of Software Engineering
+      TestingResearchChallenges:AnIndustrialPerspective(keynotepaper).In 2023                                (FSE 2025). ACM. Also available as arXiv preprint arXiv:2504.16472.
+      IEEEConferenceonSoftwareTesting,VerificationandValidation(ICST2023).IEEE,                       [21]  Runlin Liu, Zhe Zhang, Yunge Hu, Yuhang Lin, Xiang Gao, and Hailong
+      1–10.                                                                                                  Sun. 2025.    LLM-based Unit Test Generation for Dynamically-Typed Pro-
+ [4]  Nadia Alshahwan, Mark Harman, Alexandru Marginean, Shubho Sengupta, and                                grams. CoRR abs/2503.14000 (2025).  https://doi.org/10.48550/ARXIV.2503.14000
+      EddyWang.2024. AssuredLLM-BasedSoftwareEngineering (keynote paper).                                    arXiv:2503.14000
+      In 2𝑛𝑑. ICSE workshop on Interoperability and Robustness of Neural Software                     [22]  Henry B Mann and Donald R Whitney. 1947.   On a test of whether one of
+      Engineering (InteNSE) (Lisbon, Portugal).                                                              two random variables is stochastically larger than the other.  The annals of
+ [5]  Nadia Alshahwan, MarkHarman, Alexandru Marginean, and EddyWang. 2024.                                  mathematical statistics (1947), 50–60.
+      Observation-basedunittestgenerationatMeta.In Foundations of Software Engi-                      [23]  MistralAI.2024. MeetCodestral:Apowerfulandefficientopen-weightmodelfor
+      neering (FSE 2024).                                                                                    code. https://mistral.ai/news/codestral. Introduces Codestral, a 22B-parameter
+ [6]  Earl T. Barr, Mark Harman, Phil McMinn, Muzammil Shahbaz, and Shin Yoo.                                open-weightcodegenerationmodelsupportingover80programminglanguages.
+      2015. TheOracleProblemin SoftwareTesting:ASurvey. IEEE Transactions on                          [24]  Zifan Nan, Zhaoqiang Guo, Kui Liu, and Xin Xia. 2025. Test Intention Guided
+      Software Engineering 41, 5 (May 2015), 507–525.                                                        LLM-Based Unit Test Generation. In ICSE. IEEE, 1026–1038.
+ [7]  Mohamed Salah Bouafif, Mohammad Hamdaqa, and Edward Zulkoski. 2025.                             [25]  Chao Ni, Xiaoya Wang, Liushan Chen, Dehai Zhao, Zhengong Cai, Shaohua
+      PRIMG  :  Efficient  LLM-driven  Test  Generation  Using  Mutant  Prioritiza-                          Wang, and Xiaohu Yang. 2024. CasModaTest: A Cascaded and Model-agnostic
+      tion. CoRR abs/2505.05584(2025).  https://doi.org/10.48550/ARXIV.2505.05584                            Self-directed Framework for Unit Test Generation. CoRR abs/2406.15743 (2024).
+      arXiv:2505.05584                                                                                [26]  OpenAI. 2024.  GPT-4o-mini: advancing cost-efficient intelligence.  OpenAI
+ [8]  Yinghao Chen, Zehao Hu, Chen Zhi, Junxiao Han, Shuiguang Deng, and Jian-                               blogpost,July182024.  https://openai.com/index/gpt-4o-mini-advancing-cost-
+      wei Yin. 2024.  ChatUniTest: A Framework for LLM-Based Test Generation.                                efficient-intelligence IntroducesGPT-4o-mini,asmallmultimodalmodelwith
+      In Companion Proceedings of the 32nd ACM International Conference on the                               superiorreasoning, coding,andmath performanceat substantiallyreducedcost.
+      Foundations of Software Engineering (Porto deGalinhas,Brazil) (FSE 2024). As-                   [27]  OpenAI. 2025. Introducing GPT-4.1 in the API. OpenAI Blog.  https://openai.
+      sociation for Computing Machinery, New York, NY, USA, 572–576.    https:                               com/index/gpt-4-1/  Announces GPT-4.1 model series with improvements in
+      //doi.org/10.1145/3663529.3663801                                                                      coding, instruction following, and long-context capabilities.
+ [9]  HenryColes,Thomas Laurent,ChristopherHenard,MikePapadakis, andAn-                               [28]  RangeetPan,MyeongsooKim,RahulKrishna,RajuPavuluri,andSaurabhSinha.
+      thony Ventresque. 2016. PIT:a practical mutation testingtool for Java(demo).                           2024. Aster: Natural and multi-language unit test generation with llms. arXiv
+      In ISSTA. ACM, 449–452.                                                                                preprint arXiv:2409.03093 (2024).
+[10]  Arghavan Moradi Dakhel, Amin Nikanjam, Vahid Majdinasab, Foutse Khomh,                          [29]  Mike Papadakis, Marinos Kintis, Jie Zhang, Yue Jia, Yves Le Traon, and Mark
+      andMichelC.Desmarais.2024. Effectivetestgenerationusingpre-trainedLarge                                Harman. 2019.  Chapter Six - Mutation Testing Advances: An Analysis and
+      LanguageModelsandmutationtesting. Inf. Softw. Technol.171(2024),107468.                                Survey. Adv. Comput. 112 (2019), 275–378.  https://doi.org/10.1016/BS.ADCOM.
+      https://doi.org/10.1016/J.INFSOF.2024.107468                                                           2018.03.015
+[11]  DeepSeek-AI, Aixin Liu, Bei Feng, Bing Xue, Bingxuan Wang, Bochao Wu,                           [30]  RenaudPawlak,MartinMonperrus,NicolasPetitprez,CarlosNoguera,andLionel
+      Chengda Lu, Chenggang Zhao, Chengqi Deng, Chenyu Zhang, Chong Ruan,                                    Seinturier.2016. SPOON:Alibraryfor implementinganalysesandtransforma-
+      DamaiDai,DayaGuo,DejianYang,DeliChen,DongjieJi,ErhangLi,Fangyun                                        tions of Java source code. Softw. Pract. Exp. 46, 9 (2016), 1155–1179.
+      Lin,FucongDai,Fuli Luo,GuangboHao,GuantingChen,Guowei Li,H.Zhang,                               [31]  JuanAltmayerPizzornoandEmeryD.Berger.2024. CoverUp:Coverage-Guided
+      HanBao, HanweiXu,HaochengWang, HaoweiZhang,Honghui Ding,Huajian                                        LLM-Based Test Generation. CoRR abs/2403.16218 (2024).  https://doi.org/10.
+      Xin, Huazuo Gao, Hui Li, Hui Qu, J. L. Cai, Jian Liang, Jianzhong Guo, Jiaqi                           48550/ARXIV.2403.16218 arXiv:2403.16218
+      Ni, Jiashi Li, Jiawei Wang, Jin Chen, Jingchang Chen, Jingyang Yuan, Junjie
+      Qiu, Junlong Li, Junxiao Song, Kai Dong, Kai Hu, Kaige Gao, Kang Guan, Kexin
+
+===== GV-08 PDF PAGE 12 =====
+
+                                                                                                                                                                                      Konstantinouetal.
+
+
+[32]  Gabriel Ryan, Siddhartha Jain, Mingyue Shang, Shiqi Wang, Xiaofei Ma, Mu-                            [40]  ZejunWang,KaiboLiu,GeLi,andZhiJin.2024. HITS:High-coverageLLM-based
+      rali Krishna Ramanathan, and Baishakhi Ray. 2024.    Code-Aware Prompt-                                    UnitTestGenerationviaMethodSlicing.InProceedingsofthe39thIEEE/ACMIn-
+      ing: A Study of Coverage-Guided Test Generation in Regression Setting us-                                  ternationalConferenceonAutomatedSoftwareEngineering,ASE2024,Sacramento,
+      ing LLM.    Proc. ACM Softw. Eng. 1, FSE, Article 43 (July 2024), 21 pages.                                CA, USA, October 27 - November 1, 2024, Vladimir Filkov, Baishakhi Ray, and
+      https://doi.org/10.1145/3643769                                                                            MinghuiZhou(Eds.).ACM,1258–1268.  https://doi.org/10.1145/3691620.3695501
+[33]  Arkadii Sapozhnikov, Mitchell Olsthoorn, Annibale Panichella, Vladimir Ko-                           [41]  Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Ed H. Chi, Quoc
+      valenko, and Pouria Derakhshanfar. 2024. TestSpark: IntelliJ IDEA’s Ultimate                               Le, and Denny Zhou. 2022.  Chain of Thought Prompting Elicits Reasoning
+      Test Generation Companion. In Proceedings of the 2024 IEEE/ACM 46th Interna-                               in Large Language Models.   CoRR abs/2201.11903 (2022).   arXiv:2201.11903
+      tional Conference on Software Engineering: Companion Proceedings. 30–34.                                   https://arxiv.org/abs/2201.11903
+[34]  Max Schäfer, Sarah Nadi, Aryaz Eghbali, and Frank Tip. 2024.  An Empirical                           [42]  Wei Wei. 2025.  Static Analysis and LLM for Comprehensive Java Unit Test
+      EvaluationofUsingLargeLanguageModelsforAutomatedUnitTestGeneration.                                        Generation.In20258thInternationalConferenceonAdvancedElectronicMaterials,
+      IEEE Trans. Software Eng. 50, 1 (2024), 85–105.                                                            Computers and Software Engineering (AEMCSE).87–92.  https://doi.org/10.1109/
+[35]  André Silva, Nuno Saavedra, and Martin Monperrus. 2024.   GitBug-Java: A                                   AEMCSE65292.2025.11042526
+      Reproducible Benchmark of Recent Java Bugs. In MSR. ACM, 118–122.                                    [43]  QinghuaXu,GuanchengWang,LionelC.Briand,andKuiLiu.2025.Hallucination
+[36]  PhilippStraubinger,MarvinKreis,StephanLukasczyk,andGordonFraser.2025.                                      toConsensus:Multi-AgentLLMsforEnd-to-End Test GenerationwithAccurate
+      Mutation Testing via Iterative Large Language Model-Driven Scientific Debug-                               Oracles. CoRR abs/2506.02943 (2025).
+      ging.InIEEEInternationalConferenceonSoftwareTesting,VerificationandValida-                           [44]  ChenYang,JunjieChen,BinLin,JianyiZhou,andZiqiWang.2024. Enhancing
+      tion, ICST 2025 - Workshops, Naples, Italy, March 31 - April 4, 2025. IEEE, 358–367.                       LLM-basedTest Generationfor Hard-to-CoverBranches viaProgramAnalysis.
+      https://doi.org/10.1109/ICSTW64639.2025.10962485                                                           CoRR abs/2404.04966 (2024).
+[37]  András Vargha and Harold D. Delaney. 2000.  A Critique and Improvement                               [45]  Xin Yin, Chao Ni, Xinrui Li, Liushan Chen, Guojun Ma, and Xiaohu Yang.
+      of the "CL" Common Language Effect Size Statistics of McGraw and Wong.                                     2025. Enhancing LLM’s Ability to Generate More Repository-Aware Unit Tests
+      Journal of Educational and Behavioral Statistics 25, 2 (2000), 101–132.    http:                           ThroughPreciseContextualInformationInjection. CoRR abs/2501.07425(2025).
+      //www.jstor.org/stable/1165329                                                                       [46]  Zhiqiang Yuan, Mingwei Liu, Shiji Ding, Kaixin Wang, Yixuan Chen, Xin
+[38]  GuanchengWang,QinghuaXu,LionelC.Briand,andKuiLiu.2025.OnMutation-                                          Peng, and Yiling Lou. 2024. Evaluating and Improving ChatGPT for Unit Test
+      Guided Unit Test Generation. CoRR abs/2506.02954 (2025).                                                   Generation.   Proc. ACM Softw. Eng. 1, FSE, Article 76 (July 2024), 24 pages.
+[39]  XuezhiWang,JasonWei,DaleSchuurmans,QuocV.Le,EdH.Chi,SharanNarang,                                          https://doi.org/10.1145/3660783
+      Aakanksha Chowdhery, and Denny Zhou. 2023.  Self-Consistency Improves                                [47]  Hong Zhu, Patrick A. V. Hall, and John H. R. May. 1997.  Software Unit Test
+      Chain of Thought Reasoning in Language Models. In The Eleventh International                               Coverage and Adequacy.  ACM Comput. Surv. 29, 4 (1997), 366–427.    https:
+      ConferenceonLearningRepresentations,ICLR2023,Kigali,Rwanda,May1-5,2023.                                    //doi.org/10.1145/267580.267590
+      OpenReview.net.  https://openreview.net/forum?id=1PL1NIMMrw

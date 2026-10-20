@@ -1,0 +1,926 @@
+
+
+===== GV-14 PDF PAGE 1 =====
+
+                       2025 40th IEEE/ACM International Conference on Automated Software Engineering (ASE)
+
+
+
+          Multi-dimensional Assessment of Crowdsourced
+                                          Testing Reports via LLMs
+
+                Yue Wang                             Yuan Zhao∗                            Shengcheng Yu                         Zhenyu Chen
+       State Key Laboratory for          Laboratory of Data Intelligence               School of Computation,              State Key Laboratory for
+      Novel Software Technology          and Interdisciplinary Innovation           Information and Technology           Novel Software Technology
+            Nanjing University                    Nanjing University              Technical University of Munich               Nanjing University
+             Nanjing, China                        Nanjing, China                         Munich, Germany                       Nanjing, China
+      yue   wang@smail.nju.edu.cn               zhaoyuan@nju.edu.cn                    shengcheng.yu@tum.de                   zychen@nju.edu.cn
+
+
+
+
+        Abstract—Crowdsourced  testing  can  markedly  enhance  test                   Traditionalassessmentapproachesfacemultiplelimitations.
+     coverage and the discovery rate of potential defects compared                  Manual assessment suffers from subjectivity, inconsistency,
+     to traditional software testing, making it increasingly popular.               and scalability issues when handling  large volumes of re-
+     However,  with  the  widespread  use  of  crowdsourced  testing,               ports [8]–[10]. Existing automated methods, while improving
+     more and more crowdworkers from various backgrounds are                        efficiency  [11]–[13],  often  lack  comprehensive  assessment
+     submitting a large number of testing reports to crowdsourced
+     testing  platforms,  which  hinders  developers  from  effectively             dimensions and effective feedback mechanisms. Specifically,
+     reviewing  the  reports.  Facing  a  vast  amount  of  reports  with           current approaches overlook guidance from test requirement
+     varying  quality,  manual  review  is  not  only  time-consuming               documentation for functional coverage assessment and neglect
+     and labor-intensive but also increases costs. Therefore, how to                the competitive value of unique defect discoveries in crowd-
+     efficiently  review  crowdsourced  testing  reports  has  become  a            sourced environments [14].
+     major challenge. To address this challenge, we propose a multi-
+     dimensional assessment method for crowdsourced testing reports                    The emergence of large language models (LLMs) and the
+     basedonlargelanguagemodels.Thismethodnotonlyinheritsthe                        LLM-as-a-Judge (LLM-J) paradigm [15] offers new opportu-
+     textuality dimension widely used in traditional report assessment              nities for automated assessment. Unlike traditional rule-based
+     but also innovatively introduces two new dimensions: adequacy                  approaches, LLM-J leverages sophisticated natural language
+     and competitiveness. It comprehensively assesses the quality of                understanding to perform nuanced assessments with detailed
+     crowdsourced testing reports from multiple perspectives, aiming
+     to better screen for high-quality crowdsourced testing reports.                rationales [16]–[18]. Recent studies demonstrate LLM-J’s ef-
+     Through  experimental  analysis  conducted  on  three  different               fectiveness across various software engineering tasks, includ-
+     applications,  we  have  proven  the  consistency  of  our  method             ing code generation evaluation [19], [20], code summariza-
+     with human raters across various dimensions, and we have also                  tion assessment [21], and automated grading [22]–[25]. The
+     observed an enhancement in the efficiency of report assessment.                paradigm’s ability to process heterogeneous information and
+
+        Index   Terms—Crowdsourced   Testing   Report   Assessment,                 generate structured feedback makes it particularly suitable for
+     LLM-as-a-Judge, Large Language Models, Autograding                             crowdsourced testing report assessment [26].
+                                                                                       Inspired by the promising potential of LLM-J and moti-
+                            I.  INTRODUCTION                                        vated by the critical need for comprehensive assessment of
+                                                                                    crowdsourced testing reports, this paper proposes an LLM-
+        With the increasing scale and complexity of software sys-                   based  framework  for  crowdsourced  testing  reports  assess-
+     tems, traditional software testing methods are facing chal-                    ment.  Our  approach  introduces  three  complementary  as-
+     lengesinachievingsufficienttestcoverageandeffectivedefect                      sessment dimensions—textuality, adequacy, and competitive-
+     detection. To address these limitations, crowdsourced testing                  ness—implemented through specialized agents. The textuality
+     has emerged as an effective approach to enhance test coverage                  agent  employs  dual  LLM  assessment  with  checklist-based
+     and defect discovery by leveraging the collective intelligence                 assessment  across  morphological,  relational,  and  analytical
+     of distributed testers [1], [2]. As a critical outcome of the                  categories.Theadequacyagentconstructshierarchicalrequire-
+     crowdsourced  testing  process,  the  quality  of  crowdsourced                ment trees and uses semantic analysis to assess functional
+     testing reports, which are detailed records of test cases and                  coverage.  The  competitiveness  agent  leverages  LLM-based
+     discovered defects, directly determines the effectiveness of the               hierarchicalclusteringtoassessdefectdiscoveryvaluethrough
+     entire testing process [3]–[5]. However, the explosive growth                  rarity-based scoring. Unlike traditional approaches that assess
+     in report volume and varying quality across diverse tester                     reports in isolation, our framework considers the competitive
+     backgrounds poses significant challenges for effective report                  context of crowdsourced testing environments and provides
+     assessment and filtering [6], [7].                                             comprehensive coverage analysis against requirement specifi-
+                                                                                    cations. Our framework operates through parallel processing,
+       ∗Yuan Zhao is the corresponding author.                                      aggregating specialized assessments into comprehensive qual-
+
+
+
+2643-1572/25/$31.00 ©2025 IEEE                                                 1794
+DOI 10.1109/ASE63991.2025.00150
+    Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 2 =====
+
+ity scores with detailed feedback. Experiments across three                      a descriptive case name, appropriate priority settings for the
+crowdsourced testing tasks demonstrate substantial agreement                     login  functionality,  well-defined  preconditions,  and  clearly
+with human assessments (QWK>70%) while achieving 5 to                            specifiedexpectedresults.Itsteststepsarelogicallystructured
+90-fold efficiency improvements.                                                 and easy to execute. In contrast, TC2 represents a low-quality
+   The main contributions of this paper include:                                 testcasecharacterizedbyambiguousdescriptions,misassigned
+   •  We propose three novel assessment dimensions (textual                      priority levels, and insufficient environmental specifications,
+      quality, coverage adequacy, and competitive value) that                    which significantly hampers test reproducibility.
+      comprehensively assess the quality of crowdsourced test-                      TherightsideofFigure1presentstwocontrastingexamples
+      ing reports from multiple perspectives.                                    of defect reports. While many fields are common to both test
+   •  We develop an LLM-based framework employing spe-                           cases and defect reports, defect reports include two distinctive
+      cializedassessmentagentstoautomaticallyassesscrowd-                        fields: Case ID for traceability to the corresponding test case,
+      sourced testing reports across the proposed dimensions.                    and Type for defect classification.DE1 demonstrates an effec-
+   •  We   conduct   comprehensive   experimental   validation                   tive defect report with clear descriptions, logical structure, and
+      demonstrating high consistency with human expert as-                       reproducible steps. In contrast, DE2 exemplifies a problematic
+      sessments while significantly improving assessment effi-                   report characterized by ambiguous descriptions that impede
+      ciency compared to manual review.                                          developers’ understanding and resolution of the issue.
+           II.  BACKGROUND AND MOTIVATION                                        B. Motivation
+A. Crowdsourced Testing Report                                                      Effective  assessment  of  crowdsourced  testing  reports  is
+                                                                                 crucial  for  identifying  high-quality  submissions  and  opti-
+                                                                                 mizing testing resources [14]. However, manual assessment
+                                                                                 faces significant challenges: large report volumes with varying
+                                                                                 quality  [6],  complex  multi-modal  content  requiring  careful
+                                                                                 examination [3], [27], and inconsistent reporting styles across
+                                                                                 diverse crowdworkers, leading to time-consuming and subjec-
+                                                                                 tive assessment processes [7].
+                                                                                    The LLM-as-a-Judge (LLM-J) paradigm offers promising
+                                                                                 solutions by leveraging sophisticated natural language under-
+                                                                                 standing for scalable and consistent assessment [15]. Recent
+                                                                                 studies  demonstrate  LLM-J’s  effectiveness  across  software
+                                                                                 engineering  tasks,  achieving  high  consistency  with  human
+                                                                                 evaluators while significantly reducing assessment time and
+                                                                                 cost [19]–[21].
+                                                                                    However, existing LLM-based approaches like LLMPrior
+                                                                                 [28]  underutilize  LLM  capabilities  by  focusing  primarily
+                                                                                 on  ranking  rather  than  comprehensive  quality  assessment.
+                                                                                 They  lack  multi-dimensional  assessment  perspectives,  de-
+                                                                                 tailed reasoning mechanisms, and actionable feedback genera-
+                                                                                 tion—missing opportunities to fully exploit LLM-J’s potential
+                                                                                 for both assessment and guidance.
+                                                                                    This motivates our comprehensive LLM-based framework
+       Fig. 1: Example of Crowdsourced Testing Report.                           that addresses these limitations through: (1) multi-dimensional
+                                                                                 assessment covering textual quality, functional adequacy, and
+   Crowdsourced testing reports are essential deliverables gen-                  competitive value, (2) detailed reasoning and transparency in
+erated by testers through crowdsourcing platforms [2]. Each                      assessment processes, and (3) actionable feedback to guide
+reportconsistsoftwomaincomponents:testcasesdesignedby                            continuous improvement in crowdsourced testing report qual-
+testers and defects discovered during test execution. Although                   ity.
+report formats may differ across platforms, certain core fields                                III.  ASSESSMENT DIMENSIONS
+remain consistent, consisting mainly of testing environment
+specifications, step-by-step test procedures, and actual results                    To assess multiple aspects of report quality, we propose
+[3], [6], [7]. For this study, we use a report template from a                   three  distinct  assessment  dimensions  based  on  current  re-
+crowdsourcedtestingplatforminChinaforqualityassessment.                          search practices and the characteristics of LLM-as-a-Judge:
+Figure  1  illustrates  the  contrast  between  well-written  and                textuality dimension, adequacy dimension, and competitive-
+poorly-written test case and defect report through examples.                     ness dimension. These dimensions assess report quality from
+   As shown on the left side of Figure 1, TC1 exemplifies a                      different perspectives. The textuality dimension focuses on
+high-quality test case with comprehensive attributes, including                  the normativity, readability, and logic of individual test cases
+
+
+
+
+
+
+                                                                            1795
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 3 =====
+
+TABLE I: The Relationship Between Desirable Properties and                           demonstrating  how  each  indicator  specifically  impacts  the
+Quantitative Indicators                                                              various desired qualities.
+
+    Category         Indicator                 Desirable Property*                   B. Adequacy Dimension
+                                       Aa      Cb      Cpc      Ud      Re
+                    Text Length        •       ×                •                       While the textuality dimension assesses individual report
+  Morphological      Readability                                ×                    quality, it fails to address how well submitted reports cover
+                    Punctuation                ×                •
+                     Itemization               •        •       ×       ×            required functionalities. This motivates our adequacy dimen-
+                    Environment                        ×                ×            sion, which assesses the extent to which test reports align with
+    Relational      Preconditions                      ×                ×
+                  Expected Results                     ×                ×            and cover specified testing requirements.
+                  Extra Information                    ×                                Test requirement documents serve as the authoritative spec-
+                     Screenshot                        ×        ×       ×
+                 Interface Elements            •                ×       ×            ification in crowdsourced testing scenarios [6], yet existing
+    Analytical     User Behavior                        •       ×       ×            approachesoftenoverlookthiscrucialguidance.Testcoverage
+                  Defect Response                       •               ×
+       *Desirable Properties are abbreviated in the header.      aA: Atomicity;      measures how thoroughly test cases examine software func-
+         bC: Conciseness;         cCp: Completeness;           dU: Understandability;
+    eR: Reproducibility.         ’†’’×’ represents a direct influence and ’•’ denotes antionality [29], with high coverage increasing the likelihood of
+         indirect influence between the indicator and the desirable property.        detecting defects.
+                                                                                        The  adequacy  dimension  assesses  how  well  each  report
+or defects. The adequacy dimension assesses how well the                             contributes to overall testing coverage by considering func-
+report  covers  the  required  functionalities  specified  in  the                   tional point coverage, requirement traceability, and alignment
+test requirement documents. The competitiveness dimension                            between test cases and testing objectives. By incorporating
+primarily focuses on defect reports of crowdsourced testing                          requirement documents as reference standards, this dimension
+reports, which considers each crowdsourced testing report’s                          ensureshigh-qualityreportsarestrategicallyvaluableforcom-
+abilitytouncoversystemdefectsandthenoveltyofthedefects                               prehensive testing coverage.
+found. By combining these dimensions, we can provide a                                  Formally, we define the adequacy score for a crowdsourced
+more comprehensive and accurate assessment of the quality                            testing report Ri as:
+
+of crowdsourced testing reports.                                                                                    (R                              i)|
+A. Textuality Dimension                                                                 Adequacy(R   i)= |CoveredRequirements|TotalRequirements|                        ×100%   (1)
+
+   The textuality dimension focuses on assessing the quality of                      C. Competitiveness Dimension
+individual test cases and defect reports at a fine-grained level.                       While textuality and adequacy dimensions assess individual
+DrawinginspirationfromChenetal.’sworkonTERQAF[11],                                   report quality and requirement coverage, they do not capture
+we identified five key properties that characterize high-quality                     the competitive value of defect discovery in crowdsourced
+test reports: atomicity, completeness, conciseness, understand-                      testing. Multiple testers often uncover overlapping defects,
+ability,  and  reproducibility.  However,  in  the  definition  of                   necessitating our competitiveness dimension, which assesses
+TERQAF, these five properties are considered as desired prop-                        each report’s unique contribution to defect discovery.
+erties,whichcannotbedirectlyassessedandneedtobefurther                                  The competitiveness dimension focuses on defect reports,
+refined into quantitative indicators. Based on existing research                     recognizing that testing’s ultimate goal is identifying previ-
+in indicator taxonomy and according to direct and indirect                           ously unknown software defects [1]. It addresses: (1) How
+relationships, TERQAF defines four categories of quantitative                        effectively  does  a  report  contribute  to  uncovering  hidden
+assessment indicators. As shown in Table I, to better adapt to                       system defects? and (2) How novel are the discovered defects
+the characteristics of LLM-as-a-Judge, we streamlined these                          compared to those found by other testers?
+four categories of assessment indicators and finally derived                            Unlike traditional approaches assessing reports in isolation,
+our textuality dimension assessment indicators.                                      this dimension requires comparative analysis across all reports
+   Table I illustrates the relationship between different quan-                      within a testing task. It considers defect severity, uniqueness,
+titative  indicators  and  their  corresponding  desirable  prop-                    discovery  difficulty,  and  potential  system  impact.  Reports
+erties,  which  are  abbreviated  as  Atomicity,     Conciseness,                    uncoveringcritical,previouslyunknowndefectsreceivehigher
+Completeness,           Understandability,  and    Reproducibility.  The             scores, while duplicate or trivial issues receive lower scores.
+indicators in the table are categorized into three main types:                          Formally, we define the competitiveness score for a crowd-
+Morphological indicators (e.g., text length, readability, punc-                      sourced testing report Ri as:
+tuation) primarily focus on the surface features of the text;                                     Competitiveness(R         i)= X      Rarity(d,       D)          (2)
+Relational indicators (e.g., itemization, environment, precon-
+ditions) emphasize the structured features and content format                                                                   d∈D      i
+standardization of the report; and Analytical indicators (e.g.,                         where Di represents defect reports in testing report Ri, d
+interfaceelements,userbehavior,defectresponse)areusedfor                             denotesanindividualdefectreport,andD representsalldefect
+in-depth analysis of test steps. The table uses the symbol ’•’                       reports in the testing task. The rarity function Rarity(d,       D)∈
+to denote an indirect influence of an indicator on a desirable                       [0,  +∞)        measures  defect d’s  scarcity  relative  to  all  other
+property,while’×  ’signifiesadirectinfluence,therebyclearly                          defects, with higher values indicating rarer discoveries.
+
+
+
+
+
+
+                                                                                1796
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 4 =====
+
+                        Fig. 2: Framework of the proposed method, which consists of three assessment agents.
+
+
+                         IV.  FRAMEWORK                                          tree from the test requirement document, where leaf nodes
+A. Overview                                                                      represent specific functional points. Second, it maps test cases
+                                                                                 from  each  crowdsourced  testing  report  to  these  functional
+   Figure 2 presents our comprehensive framework for multi-                      points, establishing connections between test cases and the
+dimensional assessment of crowdsourced testing reports using                     requirements they address. Finally, based on this mapping,
+LLM-basedagents.Theframeworkfollowsasystematicwork-                              the agent identifies covered and uncovered functional points,
+flow that transforms the traditional manual review process into                  calculates  coverage  percentages,  and  generates  actionable
+an automated, multi-agent assessment system.                                     feedback highlighting areas lacking sufficient test coverage.
+   The assessment process begins with the General Crowd-                            Competitiveness Dimension Assessment Agent first ag-
+sourced Testing Workflow, where the app under test and test                      gregatesalldefectreportssubmittedbytesterswithinthesame
+requirement documents are provided to crowdworkers through                       testing task, then constructs a hierarchical defect clustering
+a crowdsourced testing platform. The crowdworkers conduct                        tree  to  organize  similar  defects.  The  agent  calculates  the
+testingactivitiesandgeneratecrowdsourcedtestreports,which                        competitiveness score for each defect based on the number of
+serve as the primary input for our assessment framework.                         reportscontainedintheleafnodesoftheclusteringtree,where
+   Our framework consists of three specialized LLM-based                         defects appearing in fewer reports receive higher competitive-
+agents working in coordination:                                                  ness scores due to their rarity. Finally, the agent computes the
+   TextualityDimensionAssessmentAgentassessestheindi-                            overall competitiveness score for each crowdsourced testing
+vidualqualityoftestcasesanddefectreportsusingquantitative                        report by aggregating the competitiveness scores of all defects
+indicators across three categories: morphological (e.g., text                    contained within that report.
+length, readability), relational (e.g., itemization, environment                    The assessment workflow operates as follows: First, the
+specifications), and analytical (e.g., interface elements, user                  defect clustering agent processes all submitted reports and re-
+behavior). This agent generates detailed checklists based on                     quirement documents to establish the competitiveness context.
+the textual quality assessment criteria defined in Section III-A.                Then, the three assessment agents work in parallel, each as-
+To  ensure  assessment  consistency  and  stability,  the  agent                 sessingreportsfromtheirrespectivedimensions.Thetextuality
+employs two LLMs to independently examine the checklist.                         agent focuses on individual report quality, the adequacy agent
+When disagreements arise between the two LLMs, the agent                         assesses requirement coverage using the requirement tree, and
+performs a ”thinking and judgment” process to reconcile the                      thecompetitivenessagentassessestheuniquenessandvalueof
+differences and produce a unified checklist result. Finally, the                 discovered defects. Finally, the framework aggregates scores
+agent calculates a score based on the unified checklist.                         from all dimensions and generates detailed feedback reports.
+   Adequacy Dimension Assessment Agent operates in three                            This  architecture  provides  several  advantages:  (1)  Com-
+sequential steps. First, it extracts a hierarchical requirement                  prehensive assessment - each dimension addresses different
+
+
+
+
+
+
+                                                                            1797
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 5 =====
+
+           TABLE II: Quantitative Indicators Defination                                   Dual  LLM  Assessment  and  Disagreement  Resolution
+
+ Cat.        Indicator                 ID      Description                                                Scoremechanisms are also adopted to further ensure scoring sta-
+          Length                    RM1   Text length is within the preset range.           3bility.  It  implements  a  sophisticated  consistency  assurance
+ Morph.   Readability             RM2   Concise, fluent, and easy to understand.        2mechanism where two independent LLMs simultaneously as-
+          Punctuation             RM3   Punctuation is used correctly.                        3sess the same report against the generated checklist. Each
+
+          Itemization             RR1    Numbered operational steps.                          5LLM receives an identical assessment prompt containing the
+          Environment           RR2    Detailed environment information.                 3formatted  report  content  and  the  applicable  checklist  with
+ Relat.   Precondition           RR3    Preconditionsaredescribedandcomplete.      2
+          Expected Results    RR4    Expected results are filled in standardly.        2detailed checkpoint descriptions. The models perform inde-
+          Extra Information   RR5    All other important fields are filled.               2pendent assessment, determining for each checkpoint whether
+          Screenshot∗            RR6    Screenshot provided for defects.                    3
+          User Interface         RA1   Clear and enough UI-element description.      5 the report meets the specified quality criteria and providing
+ Analyt.  User Behavior        RA2   Interactive behavior explained.                      5reasoningfortheirjudgments.WhenthetwoLLMassessments
+          Defect Feedback∗   RA3   Defect feedback included.                             3produce  conflicting  judgments  on  specific  checkpoints,  the
+    *Applicable only to defect reports.                                                agentitselfperformsa”thinkingandjudgment”processwhere
+                                                                                       it analyzes the disagreement context, reviews the evidence and
+aspects of report quality; (2) Scalability - agents can process                        reasoning presented by both initial assessments, and makes a
+multiple dimensions simultaneously; (3) Consistency - LLM-                             final determination based on the quality criteria.
+based assessment reduces subjective biases inherent in manual                             This mechanism tackles the inherent variability in LLM
+reviews; and (4) Actionable feedback - detailed assessments                            responses and potential biases that might arise from single-
+help testers improve future submissions.                                               model assessment. By using two independent assessments and
+                                                                                       integrating  a  conflict  resolution  mechanism,  the  agent  can
+B. Textuality Dimension Assessment                                                     systematically pinpoint and address areas of uncertainty or
+                                                                                       inconsistency in applying assessment criteria. This boosts the
+    The Textuality Dimension Assessment Agent focuses on                               overall reliability of the assessment process. Furthermore, the
+assessing the individual quality of test cases and defect reports                      agent provides detailed justifications for its final decisions,
+at a fine-grained level, which implements a comprehensive                              creating transparency in the conflict resolution process and
+assessment framework based on five key desirable properties.                           upholding the integrity of the assessment framework.
+However, since these properties cannot be directly assessed,                              Score Calculation synthesizes the unified checklist results
+the agent operationalizes them through quantitative indicators                         into quantitative quality scores. The scoring mechanism di-
+organized into three distinct categories as shown in Table I. To                       rectly sums up all the checkpoints that pass (i.e., those marked
+facilitate LLM-based assessment, we developed an indicator                             asTrue)inthechecklisttoobtainthefinaltextualitydimension
+definition table that assigns identifiers and definitions to each                      score. For each test case or defect report, the final textuality
+indicator. Following the practice of Zhang et al.’s work [13],                         dimension score is calculated using the formula:
+we defined score upper limits for each indicator based on the
+direct and indirect relationships between desirable properties                                                                  NX  |C i|X
+and quantitative indicators, as detailed in Table II.                                              TextualityScore=                      I(c  i,j = True)              (3)
+    Checklist Generation addresses a fundamental limitation of                                                                 i=1  j=1
+LLM-as-a-Judge approaches. It is well understood that LLM-                                where N represents the total number of indicators, Ci de-
+as-a-Judge  cannot  provide  accurate  scoring  in  continuous                         notes the set of checkpoints for indicatori, and I(c  i,j = True)
+ranges, usually only output integer scores [16]. Therefore, to                         is an indicator function that equals 1 when checkpoint j of
+ensure scoring stability, we follow the design principles of                           indicator i passes and 0 otherwise. This approach provides a
+RocketEval [30] and use checklists to guide LLM judgments.                             cumulative score reflecting the total number of quality criteria
+InsteadofaskingLLMstodirectlyassignnumericalscores,we                                  satisfied by the report.
+decompose the assessment task into a series of binary check-                              The assessment results include not only numerical scores
+point assessments, where each quality indicator corresponds                            but also qualitative feedback derived from the LLM reasoning
+to multiple checkpoints.                                                               processes,enablingtesterstounderstandspecificstrengthsand
+    TheagentgeneratesassessmentchecklistsbasedonTableII.                               weaknesses in their submissions and facilitating continuous
+For  each  quantitative  indicator,  the  agent  creates  specific                     improvement in crowdsourced testing report quality.
+checkpoints according to the indicator’s description, where the                        C. Adequacy Dimension Assessment
+numberofcheckpointscorrespondstotheassignedscorevalue
+(e.g., a 3-point indicator generates 3 binary checkpoints, a 5-                           The Adequacy Dimension Assessment Agent addresses a
+point indicator generates 5 checkpoints). To ensure the quality                        fundamental challenge in crowdsourced testing: assessing how
+of textuality dimension assessment, the generated checklists                           comprehensively test reports cover the specified functional
+may require manual review and refinement by domain ex-                                 requirements. Unlike approaches that assess reports in iso-
+perts  to  validate  that  each  checkpoint  accurately  captures                      lation,  this  agent  ensures  that  high-quality  reports  are  not
+the  intended  quality  criterion  and  maintains  objectivity  in                     only well-written but also strategically valuable for achieving
+assessment.                                                                            comprehensive  testing  coverage  as  defined  in  requirement
+
+
+
+
+
+
+                                                                                  1798
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 6 =====
+
+documents. The core principle is that test adequacy should                        each crowdsourced testing report R, the agent calculates the
+be measured against explicit functional requirements, ensuring                    functional coverage percentage using the formula:
+that crowdsourced testing efforts collectively address all crit-
+ical system functionalities rather than focusing on redundant                       Coverage(R        )= |STi∈R  CoveredLeafNodes(T                        i)|
+or less important areas.                                                                                             |LeafNodes|                       ×100%
+   Requirement Tree Construction systematically transforms                                                                                                (4)
+unstructured  requirement  documents  into  hierarchical  trees                      whereRrepresentsacrowdsourcedtestingreportcontaining
+where  leaf  nodes  represent  atomic  functional  points.  This                  multiple test cases, Ti denotes an individual test case within
+phase operates through three sub-steps: First, the agent per-                     report R, CoveredLeafNodes(T                        i) represents the set of atomic
+forms structural analysis using LLM-based document under-                         functional points (leaf nodes) covered by test case Ti, and
+standing  to  identify  main  functional  modules,  hierarchical                  |LeafNodes|                   denotes the total number of atomic functional
+relationships, and logical groupings within the requirement                       points in the requirement tree. The union operation ensures
+text. The LLM analyzes document structure, utilizing explicit                     that if multiple test cases within the same report cover the
+numbering systems when available, or inferring logical group-                     same functional point, it is counted only once.
+ings based on semantic relationships when the structure is                           The assessment phase generates detailed coverage reports
+implicit. Second, the agent implements requirement decompo-                       for each crowdsourced testing report that include: (1) Overall
+sition to break down complex, compound requirements into                          coverage percentage indicating the proportion of functional
+atomic functional points. The LLM identifies requirements                         requirements addressed by all test cases within the report, (2)
+that describe multiple independent functionalities connected                      Lists of covered functional points with their corresponding
+by  conjunctions  such  as  ”and,”  ”or,”  or  ”as  well  as.”  For               test cases, providing traceability between requirements and
+example, a requirement stating ”users can login and register                      validation efforts, and (3) Identification of uncovered func-
+accounts” would be decomposed into two atomic functional                          tional points, highlighting gaps in testing coverage that require
+points: ”users can login to the system” and ”users can register                   additional test cases.
+new  accounts.”  This  decomposition  ensures  that  each  leaf                      For individual report assessment, the agent calculates ade-
+node represents a single, independently testable functionality.                   quacy scores based on the coverage percentage achieved by
+Third,theagentconstructsthehierarchicalrequirementtreeby                          each report. Reports with higher functional coverage receive
+establishing parent-child relationships between decomposed                        higher adequacy scores, as they demonstrate more compre-
+nodes.  Each  node  in  the  tree  contains  a  unique  identifier,               hensive testing of the specified requirements. This scoring
+functional description, parent reference, children list, and a                    mechanism encourages testers to design diverse test cases that
+path from root to the current node. Leaf nodes specifically                       collectively  address  a  broader  range  of  functional  require-
+represent atomic functional points that can be directly mapped                    ments rather than focusing on redundant testing scenarios.
+to  test  cases,  while  internal  nodes  serve  as  organizational               The  agent  also  generates  actionable  feedback  highlighting
+categories.                                                                       specific uncovered functional areas, suggesting potential test
+   Test  Case  Mapping establishes connections between in-                        scenarios  for  gaps,  and  providing  requirement  traceability
+dividual test cases and the atomic functional points in the                       information to help testers understand the broader functional
+requirementtree.Foreachtestcase,theagentextractscompre-                           context of their testing efforts. This feedback mechanism not
+hensive information including test case ID, name, description,                    only supports immediate assessment but also guides future
+test steps, and expected results. This information is then for-                   testing activities toward more comprehensive coverage of the
+matted into a structured prompt that presents both the test case                  software’s functional requirements.
+details and the complete list of available leaf nodes with their                  D. Competitiveness Dimension Assessment
+pathsanddescriptions.TheagentemployssophisticatedLLM-
+based semantic analysis to determine which functional points                         The  Competitiveness  Dimension  Assessment  Agent  ad-
+each test case addresses. The LLM analyzes the test case                          dresses the unique challenge of assessing defect discovery
+content, considering not only explicit functional references                      value in crowdsourced testing environments where multiple
+but also implicit coverage through test steps and validation                      testers  independently  work  on  the  same  software.  Unlike
+criteria. The mapping process produces a list of requirement                      traditional assessment approaches that assess reports in isola-
+paths that the test case covers, ensuring that each test case                     tion, this agent performs comparative analysis to identify the
+contributes to specific functional coverage rather than generic                   rarityanduniquenessofdiscovereddefects,therebypromoting
+testing efforts. This semantic mapping approach is particularly                   innovation and thoroughness in testing strategies. The core
+effective because it can identify coverage relationships that                     principle underlying this assessment is that defects discovered
+might be missed by keyword-based or rule-based approaches.                        by fewer testers are more valuable and should receive higher
+   Coverage Assessment synthesizes the mapping results to                         competitiveness scores, as they represent unique insights or
+producecomprehensiveadequacyassessmentsforeachcrowd-                              innovative testing approaches that uncover hidden software
+sourced testing report. The core goal is to assess how well                       issues.
+the  collection  of  test  cases  within  a  single  crowdsourced                    Defect  Aggregation collects all defect reports submitted
+testing report covers the specified functional requirements. For                  by different testers within the same testing task. Each defect
+
+
+
+
+
+
+                                                                             1799
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 7 =====
+
+report contains essential information including defect ID, title,                                         V.  EXPERIMENTS
+reproduction  steps,  and  actual  results.  This  comprehensive                    To comprehensively evaluate the effectiveness of our pro-
+aggregation  ensures  that  the  subsequent  clustering  process                 posed method, we conduct extensive experiments addressing
+has access to the complete defect landscape for comparative                      three key research questions.
+analysis.                                                                           RQ1: Human Evaluator Subjectivity and Consistency:
+   LLM-based Hierarchical Clustering leverages the natural                       How significant are the subjectivity and inconsistency issues
+language understanding capabilities of large language models                     in manual assessment of crowdsourced testing report quality
+to automatically organize similar defects into a hierarchical                    by human evaluators?
+clustering tree. The agent constructs a detailed prompt that                        RQ2: Consistency with Human Evaluators: How consis-
+instructs the LLM to analyze defect reports based on their                       tent is our LLM-based multi-dimensional assessment method
+root  causes,  observable  symptoms,  and  functional  impact.                   comparedtohumanexpertassessmentsacrossdifferentassess-
+The LLM generates a multi-level tree structure where similar                     ment dimensions?
+defects are grouped together, with the tree depth typically                         RQ3: Assessment Efficiency: How significantly does our
+ranging  from  3  to  4  levels  to  ensure  fine-grained  differ-               automated LLM-based assessment method improve the effi-
+entiation. This approach is particularly effective because it                    ciency of crowdsourced testing report review compared to
+can identify semantic similarities that traditional clustering                   manual assessment processes?
+algorithms might miss, such as defects with different surface
+manifestations but identical underlying causes.                                  A. Experimental Setup
+   The clustering prompt specifically instructs the LLM to                          1) Dataset:   We  collected  crowdsourced  testing  reports
+pursue fine-grained categorization, considering factors such                     from three different mobile applications through a leading
+as specific error messages, user operation sequences, affected                   crowdsourced  testing  platform  in  China.  The  applications
+modules, preconditions, and symptom variations. Each unique                      represent diverse domains: a financial management app, an
+defect variant ideally becomes a separate leaf node or small                     online community platform, and a utility application. For each
+cluster,  ensuring  that  genuinely  different  issues  are  distin-             application, we gathered the corresponding test requirement
+guished while grouping truly similar reports.                                    documents and collected all submitted crowdsourced testing
+   Defect Scoring implements a rarity-based scoring mecha-                       reports from participating crowdworkers. The dataset com-
+nism where defects appearing in fewer reports receive higher                     prises crowdsourced testing reports from 64 different crowd-
+competitiveness scores. For each leaf node in the clustering                     workers,resultingin1,588individualtestcasesand235defect
+tree, the agent calculates the competitiveness score using the                   reports.
+formula:                                                                            2) LLM Configuration: Considering API calling cost fac-
+
+                           Score(d)=     Smax                                    tors, we made strategic choices in our LLM configuration.
+                                           |N d|                             (5) Since the textuality dimension assessment involves high token
+                                                                                 consumption due to dual LLM assessment mechanisms and
+   where Smax represents the maximum possible score, Nd                          the amonut of test cases and defect reports, we selected cost-
+denotes the leaf node containing defectd, and|N d| represents                    effective models DeepSeek-V3-0324 and kimi-latest-8k as the
+the number of defect reports in that node. This inverse rela-                    assessment models for this component. To ensure precision
+tionship ensures that unique defects discovered by only one or                   in clustering and other critical operations, all three assessment
+few testers receive significantly higher scores than commonly                    agents utilize gpt-4o-2024-05-13 as their base LLM, including
+reported issues.                                                                 the think and judge component in textuality assessment for
+   Report Score Aggregation computes the final competitive-                      resolving disagreements between the dual assessment models.
+ness score for each tester’s report by summing the scores of                     This configuration balances cost efficiency with assessment
+all unique defect categories they contributed to. Importantly, if                accuracy  across  different  operational  requirements.  For  all
+a tester submits multiple defects that belong to the same leaf                   models, we set the temperature to 0.1 and top-p to 0.9 to min-
+node in the clustering tree, they receive the score for that node                imize output randomness and ensure consistent, reproducible
+only once, preventing score inflation from reporting multiple                    assessment results while maintaining sufficient diversity in
+instances of the same underlying issue.                                          model responses.
+   This assessment methodology encourages testers to explore                        3) Manual Assessment:  To establish reliable baselines for
+diverse testing scenarios, discover edge cases, and employ                       evaluating our automated assessment method, we conducted
+innovative testing strategies. Reports that uncover rare, previ-                 comprehensive manual assessments across all three dimen-
+ously unknown defects receive higher competitiveness scores,                     sions  using  six  experienced  software  testing  experts.  Each
+while  those  reporting  common  or  duplicate  issues  receive                  expert possessed at least 5 years of industrial testing expe-
+lower scores accordingly. The approach maintains fairness by                     rience and demonstrated proficiency in crowdsourced testing
+recognizing genuine contributions while discouraging redun-                      assessment. The manual assessment process was designed to
+dant submissions, ultimately improving the overall effective-                    ensure  consistency  and  objectivity  while  providing  ground
+ness and quality of crowdsourced testing efforts.                                truth labels for our evaluation.
+
+
+
+
+
+
+                                                                            1800
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 8 =====
+
+   For the textuality dimension, human evaluators indepen-                        TABLE III: Inter-rater reliability and standard error of mea-
+dentlyscoredindividualtestcasesanddefectreportsfollowing                          surement analysis of human raters across three datasets.
+the same scoring criteria outlined in Table II. Each evaluator                      Dataset     n     k     ICC(2,1)    ICC(2,k)    SEMsingle     SEMmean
+assessed reports based on the quantitative indicators across
+morphological, relational, and analytical categories, assigning                     App 1      18    6        0.49           0.85      ±1.62       ±0.66
+scores according to the predefined scoring rubric. To ensure                        App 2      23    6        0.52           0.87      ±2.42       ±0.99
+consistency, evaluators underwent training sessions where as-                       App 3      23    6        0.63           0.91      ±2.00       ±0.82
+sessment criteria were explained and sample assessments were                      intra-class correlation coefficient ICC(2,1) ranges from 0.49 to
+conducted collectively until consensus was reached on scoring                     0.63, which falls within the ”moderate” agreement range ac-
+standards.                                                                        cordingtotheconventionalLandis–Kochscale1.Thisindicates
+   To  ensure  consistency  in  functional  point  identification                 that approximately 37%–51% of the observed score variance
+and coverage assessment, we provided evaluators with the                          in individual crowdsourced testing report assessments stems
+requirement tree generated by our adequacy assessment agent,                      from rater-specific bias and random error, rather than genuine
+containing all extracted functional points. Human evaluators                      differences in textual quality.
+analyzedthetestcaseswithineachcrowdsourcedtestingreport                              Thissubstantialindividualvariabilitypersisteddespitecom-
+to  determine  the  number  of  functional  points  covered  by                   prehensive evaluator training with predefined scoring rubrics,
+that report. This approach eliminated potential discrepancies                     suggesting that the observed rater-specific bias and random
+arising  from  different  interpretations  of  requirement  docu-                 error have deeper underlying causes. The persistent subjectiv-
+ments while focusing the evaluation on coverage assessment                        ity stems from the fundamental nature of human assessment
+accuracy.                                                                         as a complex cognitive process influenced by multiple factors
+   For the competitiveness dimension, we supplied evaluators                      that are difficult to standardize through training alone. The
+with  the  unique  defect  set  derived  from  our  hierarchical                  primary  contributing  factors  to  this  variance  include:  (1)
+clusteringtree.Humanevaluatorsreviewedeachcrowdsourced                            Individual experience and cognitive biases, where evaluators’
+testingreportagainstthisstandardizeddefectset,recordingthe                        diverse professional backgrounds and knowledge structures
+number of unique defect categories mentioned in each report.                      lead to different interpretations of the same content; (2) Psy-
+This methodology ensured that all evaluators worked with the                      chological and environmental factors, including order effects
+same defect taxonomy, enabling consistent assessment of each                      when reviewing multiple reports sequentially, fatigue-induced
+report’s contribution to defect discovery while maintaining the                   attention decline; and (3) Reference frame variations, where
+competitiveness scoring principle.                                                evaluators  inevitably  compare  current  reports  against  their
+   4) Evaluation  Metrics:   To  comprehensively  assess  our                     previous assessment experiences, causing deviations from the
+method’sperformance,weemploymultipleevaluationmetrics:                            standardized reference framework established during training.
+   •  Single-measure   Intra-class   Correlation   Coefficient                       Fortunately,thisindividual-levelsubjectivitycanbesubstan-
+      (ICC(2,1)) [31]: Estimates the reliability of an individual                 tially mitigated through aggregation. The reliability improves
+      judge’s score by quantifying the proportion of variance                     dramaticallywhenaveragingscoresacrossmultipleevaluators,
+      attributable  to  true  differences  between  reports  versus               as  demonstrated  in  Table  III,  where  the  average-measure
+      rater-specific error.                                                       ICC(2,6)  achieves  values  between  0.85–0.91,  representing
+   •  Average-measure  Intra-class  Correlation  Coefficient                      ”good”to”excellent”reliability.Correspondingly,thestandard
+      (ICC(2,k)) [31]: Estimates the reliability of the mean                      error of measurement is reduced by more than half when
+      score obtained by aggregating k judges (here, k = 6);                       using averaged scores (e.g., decreasing from ±2.42 to ±0.99
+      highervaluesreflecttheerror-reducingeffectofaveraging                       forApp2).Thisconsistentpatternacrossallthreeapplications
+      across raters.                                                              indicates that while individual judges share a common under-
+   •  Quadratic Weighted Kappa (κ)     [32]: Primary metric                       standingofqualitycriteria,theirindividualassessmentsexhibit
+      for measuring agreement between LLM assessments and                         substantialdivergence.Theaggregationofmultipleevaluators’
+      human expert assessments.                                                   assessments effectively mitigates the aforementioned sources
+   •  Spearman’s  Rank  Correlation  (ρ)     [33]:  Measures                      ofsubjectivity,resultinginmorereliableandconsistentquality
+      monotonic relationship between ranking orders produced                      assessments.
+      by automated and manual assessments.                                          Answer to RQ1: Manual assessment by human evaluators
+   •  Kendall-Tau (τ ) [34]: Assesses the ordinal association                       exhibits significant subjectivity and inconsistency issues,
+      between automated and human assessment rankings.                              with individual rater reliability remaining only at moderate
+B. Experimental Results                                                             levels (ICC(2,1) = 0.49–0.63). This substantial variability
+   1) RQ1: Human Evaluator Subjectivity and Consistency:                            in human judgment highlights the inherent limitations of
+As  shown  in  Table  III,  the  inter-rater  reliability  analysis                 manual assessment approaches and underscores the need
+reveals significant variability in individual human evaluator                       for more consistent automated assessment methods.
+consistency across the three datasets. For App 1 (18 reports),                       1According to the conventional Landis–Koch scale, values between 0.41
+App2(23reports),andApp3(23reports),thesingle-measure                              and 0.60 indicate moderate agreement, whereas 0.61–0.80 is substantial.
+
+
+
+
+
+
+                                                                             1801
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 9 =====
+
+    2) RQ2:   Consistency   with   Human   Raters:   Table   IV                         TABLE IV: Agreement between our method and six human
+ presents the agreement metrics between our LLM-based as-                               ratersonthreeappsacrosstextualityandadequacydimensions.
+ sessment method and human expert assessments across both
+ textuality and adequacy dimensions. The results demonstrate                              Dimension    Rater              APP1                     APP2                     APP3
+                                                                                                                 ρ       τ       κ      ρ       τ       κ      ρ       τ       κ
+ consistentlyhighagreementlevelsacrossallthreeapplications                                            Rater 1    0.53    0.38    0.70    0.72    0.54    0.61    0.76    0.60    0.57
+ and both assessment dimensions.                                                                      Rater 2    0.86    0.69    0.52    0.54    0.39    0.42    0.61    0.49    0.80
+    For the textuality dimension, the agreement metrics be-                                           Rater 3    0.59    0.42    0.68    0.68    0.48    0.62    0.63    0.51    0.79
+                                                                                          Textuality  Rater 4    0.86    0.72    0.49    0.77    0.58    0.47    0.49    0.38    0.42
+ tween our method and individual human raters exhibit sub-                                            Rater 5    0.49    0.34    0.51    0.69    0.51    0.62    0.88    0.74    0.94
+                                                                                                      Rater 6    0.79    0.60    0.77    0.77    0.62    0.76    0.75    0.58    0.76
+ stantial  variability,  further  confirming  the  subjectivity  and                                  Avg.∗      0.81    0.65    0.72    0.81    0.60    0.70    0.79    0.64    0.82
+ inconsistency issues identified in RQ1. As shown in Table IV,                                        Rater 1    0.88    0.75    0.80    0.57    0.50    0.81    0.63    0.63    0.91
+                                                                                                      Rater 2    0.87    0.72    0.84    0.62    0.54    0.89    0.88    0.88    0.97
+ the  Quadratic  Weighted  Kappa  (κ)  scores  with  individual                                       Rater 3    0.80    0.67    0.77    0.75    0.68    0.89    0.76    0.76    0.94
+ raters  vary  dramatically  across  applications:  ranging  from                         Adequacy    Rater 4    0.85    0.73    0.85    0.57    0.51    0.80    0.88    0.88    0.97
+                                                                                                      Rater 5    0.79    0.66    0.77    0.75    0.68    0.89    0.76    0.76    0.94
+ 0.49–0.86 for App 1, 0.42–0.76 for App 2, and 0.42–0.94 for                                          Rater 6    0.82    0.65    0.83    0.69    0.62    0.87    0.88    0.88    0.97
+                                                                                                      Avg.∗      0.86    0.72    0.89    0.64    0.54    0.90    0.88    0.87    0.97
+ App 3. Similarly, Spearman correlation coefficients (ρ) show                             ∗ Avg. represents the consistency measurement between our method
+ significant fluctuations, ranging from 0.49–0.86 for App 1,                                and the average scores of the six human raters, not the average of
+ 0.54–0.77 for App 2, and 0.49–0.88 for App 3. This substan-                                the above six individual rater metrics.
+ tial variation in agreement metrics with individual evaluators
+ directly reflects the inherent subjectivity and inconsistency in
+ manual assessment processes.
+    Tomoreintuitivelyillustratetheaforementionedsubjectivity
+ and inconsistency, we plotted boxplots of the textuality scores
+ for each report across the three applications, visualizing the
+ uncertainty and fluctuation in manual assessments (see Fig. 3                              (a) Textuality-APP1      (b) Textuality-APP2      (c) Textuality-APP3
+ (a)–(c)). Each box represents the interquartile range (IQR) of
+ the six evaluators’ scores, the whiskers indicate the overall
+ range, orange dots denote outliers, purple triangles represent
+ the mean, purple dashed lines show the mean trend, green
+ dashed lines indicate the median trend, and red pentagrams                                 (d) Adequacy-APP1        (e) Adequacy-APP2         (f) Adequacy-APP3
+ andredlinescorrespondtothescoresandtrendofourmethod.
+    Across Fig. 3 (a)–(c), the boxplots make human subjectivity                         Fig. 3: Visualization chart between our method and human
+ explicit. Many reports show wide IQRs, long whiskers, and                              raters: (a-c) Textuality dimension, (d-f) Adequacy dimension
+ outliers,  indicating  substantial  dispersion  and  skew  among
+ the six raters. The variability is particularly pronounced in                          analysisbycomparingfouraggregationschemesonthesixex-
+ APP2; APP1 also exhibits visible spread, whereas APP3 is                               pert scores: (1) Simple Average, (2)  Expert Weighted (weights
+ overall more compact yet still shows occasional skew or long                           derived from inter-rater consistency), (3) High Consistency
+ whiskers. In contrast, our method’s red stars mostly fall inside                       Subset  (low-disagreement items use simple average; others
+ the boxes and close to the medians, and the red trend line                             use weighted average), and (4) 20% Trimmed Mean. Then
+ closely  tracks  the  purple  triangles  and  purple  dashed  line                     we  compute  Spearman’s ρ  between  our  method  and  each
+ (the six raters’ average score and its trend), with only small                         scheme.  As  shown  in  Table  V,  correlations  are  uniformly
+ deviationsatafewreports.Thesepatternsindicatethat,despite                              high (0.802–0.805, all p<0.001) with negligible differences
+ notable  human  variability,  our  method  remains  stable  and                        (maximum absolute difference ≈ 0.4%, standard deviation
+ consistently aligns with the group consensus.                                          0.010–0.020), indicating insensitivity to aggregation choice
+    Consistent  with  these  observations,  our  method  exhibits                       and supporting simple averaging as a reasonable, reproducible
+ strongagreementwiththeaveragedscoresfromthesixhuman                                    option.
+ evaluators. This is corroborated by the data in the consistency                            For the adequacy dimension, a similar pattern emerges.
+ quantification  table  (Table  IV).  The  QWK  with  averaged                          Individual rater agreements show considerable variation, with
+ ratings achieves stable and high values of 0.72, 0.70, and 0.82                        Quadratic  Weighted  Kappa  scores  ranging  from  0.77–0.85
+ across the three applications, indicating substantial to near-                         for  App  1,  0.80–0.89  for  App  2,  and  0.91–0.97  for  App
+ perfect agreement. The Spearman correlations with averaged                             3. Spearman correlations with individual raters also fluctuate
+ scores  are  consistently  high  (0.79–0.81),  and  Kendall-Tau                        significantly, particularly for App 2 (0.57–0.75) and App 3
+ values remain in a narrow range (0.60–0.65). This sustained                            (0.63–0.88). However, our method achieves remarkably con-
+ high  agreement  with  collective  human  judgment  validates                          sistent and high agreement with the averaged human assess-
+ the effectiveness of our LLM-based assessment approach and                             ments, with Quadratic Weighted Kappa scores of 0.89, 0.90,
+ underscores the reliability gains from multi-rater aggregation.                        and 0.97 respectively. The Spearman correlations with aver-
+    To evaluate robustness of the textuality results with respect                       aged scores are stable and strong (0.64–0.88), demonstrating
+ to gold-label aggregation, we conduct a concise sensitivity                            even higher consistency than the textuality dimension.
+
+
+
+
+
+
+                                                                                   1802
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 10 =====
+
+ TABLE V: Sensitivity analysis: Spearman correlation (ρ) be-                                 Our  method  offers  significant  time  savings,  particularly
+ tween our method and four aggregation schemes on textuality.                             whenutilizingconcurrentexecution.Fortextualitydimension
+   App    Simple Avg.  Expert Wtd.  High-Consist.  Trimmed Mean                           assessment,  concurrent  execution  reduces  assessment  time
+                                                                                          to approximately 131-145 seconds per application, compared
+   APP1       0.814             0.804              0.814                0.804             to  sequential  execution  requiring  over  2000  seconds.  The
+   APP2       0.812             0.812              0.812                0.830             adequacydimensionshowsevengreaterefficiencygains,with
+   APP3       0.789             0.789              0.789                0.782             concurrentexecutioncompletingassessmentsin22-46seconds
+   Avg.         0.805             0.802              0.805                0.805           versus  256-582  seconds  sequentially.  The  competitiveness
+   SD           0.011             0.010              0.011                0.020
+                                                                                          dimension  demonstrates  the  most  dramatic  improvements,
+    The observed variation in performance across applications                             reducing assessment time to under 16 seconds with concurrent
+ can be attributed to the inherent characteristics of different                           processing.
+ software domains and the complexity of their functional re-                                 Incontrast,manualhumanassessmentrequiressubstantially
+ quirements.App2showsrelativelymorevariabilityinindivid-                                  more time investment. Human raters spend an average of 7.13
+ ualrateragreements,likelyduetoitsmorecomplexfunctional                                   to 12.30 minutes per report, with significant individual varia-
+ structure as an online community platform, while the utility                             tion (ranging from 135 to 276 minutes per application). Rater
+ application  (App  3)  demonstrates  the  highest  overall  con-                         6 consistently requires the most time across all applications,
+ sistency. Importantly, across both dimensions, our method’s                              while  Rater  3  demonstrates  the  fastest  manual  assessment
+ agreement with averaged human assessments consistently ex-                               speed.Theaveragehumanassessmenttimeis9.20minutesper
+ ceedscommonlyacceptedthresholdsforsubstantialagreement                                   report, representing a 552-second investment per assessment.
+ (κ >  0.60), with most achieving excellent agreement levels                                 When  comparing  per-report  efficiency,  our  automated
+ (κ >  0.80). These results validate the effectiveness of our                             methodachievesassessmenttimesrangingfrom5.73to127.19
+ LLM-based method in replicating reliable human expert judg-                              seconds per report across concurrent and sequential modes,
+ mentpatternswhileavoidingthesubjectivityandinconsistency                                 while human raters require 498.3 to 606.7 seconds per report.
+ inherent in individual manual assessments.                                               This represents approximately a 5 to 90-fold improvement in
+   Answer to RQ2: While our LLM-based method shows                                        efficiency depending on the execution mode, with concurrent
+   significant variability in agreement with individual human                             processing showing the most dramatic speedup.
+   raters (reflecting the subjectivity issues identified in RQ1),                            The variability in human assessment times also highlights
+   it demonstrates consistently high agreement with averaged                              the subjective nature and inconsistency inherent in manual
+   human assessments across both textuality and adequacy                                  assessment processes. Our automated method not only pro-
+   dimensions (average κ = 0.74    for textuality, κ = 0.92                               vides superior speed but also maintains consistent processing
+   for adequacy). Moreover, sensitivity analysis under four                               timesacrossevaluators,eliminatinghumansubjectivity-related
+   defensible  aggregation  schemes  yields  nearly  identical                            delays.
+   conclusions for textuality (Table V), confirming that our                                Answer  to  RQ3:  Our  automated  LLM-based  assess-
+   findings  are  robust  to  the  choice  of  aggregation.  This                           ment method significantly improves assessment efficiency,
+   validates the effectiveness of our automated assessment                                  achieving 5 to 90-fold speed improvements compared to
+   approach in replicating reliable collective human judgment                               manual human assessment (average 5.73-127.19 seconds
+   while avoiding individual assessment biases.                                             per  report  vs.  498.3-606.7  seconds),  while  maintaining
+                                                                                            consistentprocessingtimesandeliminatingsubjectivevari-
+ TABLE VI: Time cost comparison between our automated                                       ability in assessment duration.
+ method and manual human assessment.
+
+            Our Method (seconds)                    Human Raters (minutes)                C. Threats to Validity
+
+    APP     Dim.          Seq.           Con.          Avg.Rater            APP1         APP2         APP3          Avg.
+          Text.           2236.43      145.31        124.25                                  We acknowledge several potential threats to the validity of
+    APP1  Adeq.         582.98        46.67          32.33Rater 1           195             221             205            9.70
+          Comp.        182.74        15.23          10.15Rater 2           176             213             195            9.13our findings and outline the mitigation strategies employed.
+
+          Text.           2923.72      139.47        127.19Rater 3           135             172             149            7.13Althoughhumanassessmenthascertainsubjectivity(asshown
+    APP2  Adeq.         453.14        35.38          19.70Rater 4           175             231             170            9.00
+          Comp.        87.62          10.23          3.80Rater 5           165             182             162            7.95by individual differences in RQ1), we effectively mitigated
+
+          Text.           2093.76      131.89        91.03Rater 6           245             276             266           12.30this issue through aggregated assessment by six experts and
+    APP3  Adeq.         256.51        22.92          11.15Avg.                182             216             191            9.20ICC analysis, achieving good reliability levels of 0.85-0.91
+          Comp.        43.18          8.84           1.87
+                                                                                          foraverageassessment;LLMclusteringinthecompetitiveness
+    3) RQ3: Assessment Efficiency: Table VI presents a com-                               dimensionmayhavecertainclassificationbias,butweadopted
+ prehensive comparison of time expenditure between our auto-                              multi-level fine-grained clustering strategies to improve accu-
+ mated LLM-based method and manual human raters for as-                                   racy; quantitative indicator weights in the textuality dimension
+ sessing crowdsourced testing reports across three applications.                          are determined based on existing TERQAF research frame-
+ The results demonstrate substantial efficiency improvements                              work and expert experience, providing a reasonable starting
+ achieved through automation.                                                             point for this field. Overall, these limitations are acceptable
+
+
+
+
+
+
+                                                                                    1803
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 11 =====
+
+at the current research stage, and we have minimized related                     textual and non-textual fields for measuring report similarity,
+risks as much as possible through various technical means and                    and Nguyen et al. [43] designing DBTM, a tool that uses
+experimental designs.                                                            information-retrieval-based and topic-based features to detect
+                         VI.  DISCUSSION                                         duplicate reports.
+   A natural question is why a single automated score remains                    B. LLM-as-a-Judge
+useful when human judgments are subjective. Our goal is                             The LLM-as-a-Judge paradigm [15]–[17] leverages sophis-
+not to discover an absolute “true” score, but to provide a                       ticated natural language understanding capabilities to serve
+more consistent, repeatable, and scalable proxy for collective                   as  automated  evaluators  for  both  objective  and  subjective
+expert judgment. While strict determinism is not guaranteed,                     assessments. Compared to reward models that only output
+the scorer is configured for high consistency (e.g., checklist                   scalar scores [46], [47], LLM-as-a-Judge evaluators are more
+mechanism,standardizedpromptsandlow-temperaturedecod-                            robustandinterpretableduetotheirabilitytogeneratedetailed
+ing) and, in practice, exhibits low run-to-run variability; it                   rationales [15], [18], [48]. Past works have employed various
+reduces the intra-/inter-rater variance observed in RQ1 and                      evaluation  components  including  fine-grained  criteria  [15],
+aligns closely with aggregated expert labels in RQ2, including                   [49],  scoring  rubrics  [50],  [51],  and  verification  questions
+robustnessunderalternativeaggregationschemes.Thisconsis-                         [52]. Recent studies demonstrate effectiveness across diverse
+tency enables fair comparison, triage, and prioritization across                 applications, from code generation evaluation [19], [20] to
+large report sets where manual assessment is costly and hard                     content quality assessment [21], achieving high consistency
+to reproduce. Accordingly, the single score should be read                       with human evaluators while significantly reducing time and
+as an efficient, low-cost approximation to an expert panel’s                     cost. This paradigm offers unique advantages for assessing
+consensus, not as a replacement for expert deliberation. We                      crowdsourced testing reports, where the multi-faceted nature
+also qualify our claims: a single score simplifies an inher-                     of reports aligns well with LLMs’ comprehensive analysis
+ently subjective construct; our contribution is a highly con-                    capabilities.
+sistent, consensus-aligned mechanism that assists (rather than                                          VIII.  CONCLUSION
+replaces) human decision-making. Future work can expose                             In  this  paper,  we  proposed  a  novel  LLM-based  multi-
+uncertainty (e.g., confidence intervals or score distributions)                  dimensional assessment method for crowdsourced testing re-
+to better reflect residual ambiguity.                                            ports that addresses the critical challenge of efficiently as-
+                      VII.  RELATED WORK                                         sessing report quality in crowdsourced testing environments.
+A. Crowdsourced Testing Report Processing                                        Our  approach  introduces  three  complementary  assessment
+   With the increase in software scale and complexity, tra-                      dimensions—textuality, adequacy, and competitiveness—that
+ditional  testing  methods  are  no  longer  sufficient  to  meet                comprehensively assess reports from individual quality, re-
+the demands for comprehensive coverage and efficient issue                       quirement coverage, and defect discovery value perspectives.
+detection.  Crowdsourced  testing  draws  on  the  concept  of                   Through extensive experiments on three mobile applications
+crowdsourcing [35], effectively leveraging testers with diverse                  with  64  crowdworkers,  we  demonstrated  that  our  method
+backgroundsandskilllevelsbyoutsourcingtestingtaskstoin-                          achieves  substantial  to  near-perfect  agreement  with  human
+dividualsororganizationsglobally,therebyenhancingtestcov-                        expert consensus assessments (averageκ=0.74    for textuality
+erageanddiversity[1],[2].However,thisapproachalsobrings                          and κ = 0.92    for adequacy dimensions) while delivering 5
+about certain challenges, such as how to select crowdsourced                     to 90-fold improvements in assessment efficiency compared
+workers[36],[37],howtooptimizethecrowdsourcingprocess                            to  manual  assessment.  The  integration  of  LLM-as-a-Judge
+[38], [39], crowdsourced-assisted automated testing [35], and                    paradigm not only automates the assessment process but also
+optimization of test reporting [7], [27], with quality control of                provides detailed feedback to help testers improve their future
+crowdsourced testing reports becoming a particularly thorny                      submissions.  Our  work  contributes  to  the  advancement  of
+issue.  To  address  these  challenges,  many  researchers  have                 automated quality control in crowdsourced testing, offering a
+proposed various methods to assist developers in improving                       scalable and consistent solution that maintains high accuracy
+report review efficiency: Yu et al. [40] introduced SemCluster,                  while significantly reducing the time and cost associated with
+a semi-supervised clustering method that enhances clustering                     manual report review.
+by extracting features from application screenshots and textual                                       ACKNOWLEDGMENT
+descriptions, while their DeepPrior [7] utilizes image under-                       Theauthorswouldliketothankallanonymousreviewersfor
+standing technology for better report prioritization; Feng et                    their insightful comments. This work was partially supported
+al. [3], [6] improved prioritization by extracting features from                 by the National Key R&D Program of China under Grant
+screenshots and text; Chen et al. [12] modeled test reports                      2024YFF0908000.
+based on quality metrics to enable developers to focus on                                              DATA AVAILABILITY
+high-quality reports; and report deduplication has emerged
+as  another  important  direction  [41]–[43],  with  Sun  et  al.                   Our source code and prompt templates for the proposed
+[44], [45] employing information retrieval models to analyze                     method in this paper are publicly available at this repository.
+
+
+
+
+
+
+                                                                            1804
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 12 =====
+
+                                    REFERENCES                                                     [21]  Y. Wu, Y. Wan, Z. Chu, W. Zhao, Y. Liu, H. Zhang, X. Shi, and
+  [1]  K.  Mao,  L.  Capra,  M.  Harman,  and  Y.  Jia,  “A  survey  of  the  use                        P. S. Yu, “Can large language models serve as evaluators for code
+       of  crowdsourcing  in  software  engineering,” Journal  of  Systems  and                          summarization?” arXiv preprint arXiv:2412.01333, 2024.
+       Software, vol. 126, pp. 57–84, 2017.                                                        [22]  L.-H. Chang and F. Ginter, “Automatic short answer grading for finnish
+  [2]  R. Gao, Y. Wang, Y. Feng, Z. Chen, and W. Eric Wong, “Successes,                                  with chatgpt,”  in Proceedings of  the AAAI Conference  on Artificial
+       challenges, and rethinking–an industrial investigation on crowdsourced                            Intelligence, vol. 38, no. 21, 2024, pp. 23173–23181.
+       mobile application testing,” Empirical Software Engineering, vol. 24,                       [23]  O. Henkel, L. Hills, A. Boxer, B. Roberts, and Z. Levonian, “Can large
+       pp. 537–561, 2019.                                                                                language models make the grade? an empirical study evaluating llms
+  [3]  Y.  Feng,  J.  A.  Jones,  Z.  Chen,  and  C.  Fang,  “Multi-objective  test                      abilitytomarkshortanswerquestionsink-12education,”inProceedings
+       report  prioritization  using  image  understanding,”  in  Proceedings  of                        of the Eleventh ACM Conference on Learning@ Scale, 2024, pp. 300–
+       the 31st IEEE/ACM International Conference on Automated Software                                  304.
+       Engineering, 2016, pp. 202–213.                                                             [24]  C. Senanayake and D. Asanka, “Rubric based automated short answer
+  [4]  R. Hao, Y. Feng, J. A. Jones, Y. Li, and Z. Chen, “Ctras: Crowdsourced                            scoring  using  large  language  models  (llms),”  in 2024  International
+       test report aggregation and summarization,” in 2019 IEEE/ACM 41st                                 Research Conference on Smart Computing and Systems Engineering
+       InternationalConferenceonSoftwareEngineering(ICSE).  IEEE,2019,                                   (SCSE), vol. 7.   IEEE, 2024, pp. 1–6.
+       pp. 900–911.                                                                                [25]  O. Fagbohun, N. Iduwe, M. Abdullahi, A. Ifaturoti, and O. Nwanna,
+  [5]  Y.Li,Y.Feng,R.Hao,D.Liu,C.Fang,Z.Chen,andB.Xu,“Classifying                                        “Beyond traditional assessment: Exploring the impact of large language
+       crowdsourced mobile test reports with image features: An empirical                                models  on  grading  practices,” Journal  of  Artifical  Intelligence  and
+       study,” Journal of Systems and Software, vol. 184, p. 111121, 2022.                               Machine Learning & Data Science, vol. 2, no. 1, pp. 1–8, 2024.
+  [6]  Y.  Feng,  Z.  Chen,  J.  A.  Jones,  C.  Fang,  and  B.  Xu,  “Test  report                [26]  B.Jury,A.Lorusso,J.Leinonen,P.Denny,andA.Luxton-Reilly,“Eval-
+       prioritization to assist crowdsourced testing,” inProceedings of the 2015                         uating llm-generated worked examples in an introductory programming
+       10th Joint Meeting on Foundations of Software Engineering, 2015, pp.                              course,” in Proceedings of the 26th Australasian Computing Education
+       225–236.                                                                                          Conference, 2024, pp. 77–86.
+  [7]  S. Yu, C. Fang, Z. Cao, X. Wang, T. Li, and Z. Chen, “Prioritize                            [27]  J. Wang, M. Li, S. Wang, T. Menzies, and Q. Wang, “Images don’t lie:
+       crowdsourced test reports via deep screenshot understanding,” in 2021                             Duplicate crowdtesting reports detection with screenshot information,”
+       IEEE/ACM  43rd  International  Conference  on  Software  Engineering                              Information and Software Technology, vol. 110, pp. 139–155, 2019.
+       (ICSE).   IEEE, 2021, pp. 946–956.                                                          [28]  Y. Ling, S. Yu, C. Fang, G. Pan, J. Wang, and J. Liu, “Redefining
+  [8]  L. Aversano and E. Tedeschi, “Bug report quality evaluation considering                           crowdsourced test report prioritization: An innovative approach with
+       the  effect  of  submitter  reputation,”  in  International  Conference  on                       large language model,” Information and Software Technology, vol. 179,
+       Software Engineering and Applications, vol. 2.    SCITEPRESS, 2016,                               p. 107629, 2025.
+       pp. 194–201.                                                                                [29]  H.  K.  V.  Tran,  N.  b.  Ali,  M.  Unterkalmsteiner,  J.  B¨orstler,  and
+  [9]  N. Bettenburg, S. Just, A. Schr¨oter, C. Weiss, R. Premraj, and T. Zim-                           P.  Chatzipetrou,  “Quality  attributes  of  test  cases  and  test  suites–
+       mermann, “What makes a good bug report?” inProceedings of the 16th                                importance  &  challenges  from  practitioners’  perspectives,” Software
+       ACM SIGSOFT International Symposium on Foundations of software                                    quality journal, vol. 33, no. 1, p. 9, 2025.
+       engineering, 2008, pp. 308–318.                                                             [30]  T. Wei, W. Wen, R. Qiao, X. Sun, and J. Ma, “Rocketeval: Efficient
+ [10]  P.  Bhattacharya,  L.  Ulanova,  I.  Neamtiu,  and  S.  C.  Koduru,  “An                          automated LLM evaluation via grading checklist,” in The Thirteenth
+       empirical analysis of bug reports and bug fixing in open source android                           International Conference on Learning Representations, 2025. [Online].
+       apps,” in2013 17th European Conference on Software Maintenance and                                Available: https://openreview.net/forum?id=zJjzNj6QUe
+       Reengineering.   IEEE, 2013, pp. 133–143.                                                   [31]  R. A. Fisher, “On the” probable error” of a coefficient of correlation
+ [11]  X. Chen, H. Jiang, X. Li, T. He, and Z. Chen, “Automated quality as-                              deduced from a small sample,” Metron, vol. 1, pp. 3–32, 1921.
+       sessment for crowdsourced test reports of mobile applications,” in2018                      [32]  S. Bonthu, S. Rama Sree, and M. Krishna Prasad, “Automated short
+       IEEE 25th International Conference on Software Analysis, Evolution                                answer grading using deep learning: A survey,” in Machine Learning
+       and Reengineering (SANER).   IEEE, 2018, pp. 368–379.                                             andKnowledgeExtraction:5thIFIPTC5,TC12,WG8.4,WG8.9,WG
+ [12]  X.Chen,H.Jiang,X.Li,L.Nie,D.Yu,T.He,andZ.Chen,“Asystemic                                          12.9 International Cross-Domain Conference, CD-MAKE 2021, Virtual
+       framework for crowdsourced test report quality assessment,” Empirical                             Event, August 17–20, 2021, Proceedings 5.   Springer, 2021, pp. 61–78.
+       Software Engineering, vol. 25, pp. 1382–1418, 2020.                                         [33]  J. Hauke and T. Kossowski, “Comparison of values of pearson’s and
+ [13]  H. Zhang, Y. Zhao, S. Yu, and Z. Chen, “Automated quality assessment                              spearman’s correlation coefficients on the same sets of data,”Quaes-
+       forcrowdsourcedtestreportsbasedondependencyparsing,”in20229th                                     tiones geographicae, vol. 30, no. 2, pp. 87–93, 2011.
+       InternationalConferenceonDependableSystemsandTheirApplications                              [34]  P. K. Sen, “Estimates of the regression coefficient based on kendall’s
+       (DSA).   IEEE, 2022, pp. 34–41.                                                                   tau,” Journal of the American statistical association, vol. 63, no. 324,
+ [14]  Q. Wang, Z. Chen, J. Wang, and Y. Feng, Intelligent Crowdsourced                                  pp. 1379–1389, 1968.
+       Testing.   Springer, 2022.                                                                  [35]  J. Howe et al., “The rise of crowdsourcing,”    Wired magazine, vol. 14,
+ [15]  L.Zheng,W.-L.Chiang,Y.Sheng,S.Zhuang,Z.Wu,Y.Zhuang,Z.Lin,                                         no. 6, pp. 176–183, 2006.
+       Z. Li, D. Li, E. Xing et al., “Judging llm-as-a-judge with mt-bench                         [36]  J. Wang, S. Wang, J. Chen, T. Menzies, Q. Cui, M. Xie, and Q. Wang,
+       andchatbotarena,”AdvancesinNeuralInformationProcessingSystems,                                    “Characterizing crowds to better optimize worker recommendation in
+       vol. 36, 2024.                                                                                    crowdsourced  testing,” IEEE  Transactions  on  Software  Engineering,
+ [16]  Y. Liu, D. Iter, Y. Xu, S. Wang, R. Xu, and C. Zhu, “G-eval: Nlg                                  vol. 47, no. 6, pp. 1259–1276, 2019.
+       evaluation using gpt-4 with better human alignment,” in Proceedings                         [37]  J. Wang, Y. Yang, S. Wang, Y. Hu, D. Wang, and Q. Wang, “Context-
+       of the 2023 Conference on Empirical Methods in Natural Language                                   aware  in-process  crowdworker  recommendation,”  in  Proceedings  of
+       Processing, 2023, pp. 2511–2522.                                                                  the ACM/IEEE 42nd international conference on software engineering,
+ [17]  C.-M. Chan, W. Chen, Y. Su, J. Yu, W. Xue, S. Zhang, J. Fu, and                                   2020, pp. 1535–1546.
+       Z. Liu, “Chateval: Towards better llm-based evaluators through multi-                       [38]  J.  Wang,  Y.  Yang,  R.  Krishna,  T.  Menzies,  and  Q.  Wang,  “isense:
+       agent debate,” arXiv preprint arXiv:2308.07201, 2023.                                             Completion-aware crowdtesting management,” in2019 IEEE/ACM 41st
+ [18]  Q. Zhang, Y. Wang, T. Yu, Y. Jiang, C. Wu, L. Li, Y. Wang, X. Jiang,                              international conference on software engineering (ICSE).   IEEE, 2019,
+       L.  Shang,  R.  Tang  et  al.,  “Reviseval:  Improving  llm-as-a-judge  via                       pp. 912–923.
+       response-adapted references,” arXiv preprint arXiv:2410.05193, 2024.                        [39]  J. Wang, Y. Yang, T. Menzies, and Q. Wang, “isense2. 0: Improv-
+ [19]  T. Ahmed, P. Devanbu, C. Treude, and M. Pradel, “Can llms replace                                 ing completion-aware crowdtesting management with duplicate tagger
+       manual annotation of software engineering artifacts?” arXiv preprint                              and sanity checker,” ACM Transactions on Software Engineering and
+       arXiv:2408.05534, 2024.                                                                           Methodology (TOSEM), vol. 29, no. 4, pp. 1–27, 2020.
+ [20]  R. Wang, J. Guo, C. Gao, G. Fan, C. Y. Chong, and X. Xia, “Can                              [40]  S.Yu,C.Fang,Q.Zhang,M.Du,J.Liu,andZ.Chen,“Semi-supervised
+       llms replace human evaluators? an empirical study of llm-as-a-judge in                            crowdsourced test report clustering via screenshot-text binding rules,”
+       software engineering,” arXiv preprint arXiv:2502.06193, 2025.                                     Proceedings of the ACM on Software Engineering, vol. 1, no. FSE, pp.
+                                                                                                         1540–1563, 2024.
+
+
+
+
+
+
+
+
+                                                                                             1805
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.
+
+===== GV-14 PDF PAGE 13 =====
+
+ [41]  A. Alipour, A. Hindle, and E. Stroulia, “A contextual approach towards                             arXiv preprint arXiv:2408.02666, 2024.
+       more accurate duplicate bug report detection,” in 2013 10th Working                         [47]  P. Wang, A. Xu, Y. Zhou, C. Xiong, and S. Joty, “Direct judgement
+       Conference on Mining Software Repositories (MSR).   IEEE, 2013, pp.                                preference optimization,” 2024.
+       183–192.                                                                                    [48]  Z.  Ankner,  M.  Paul,  B.  Cui,  J.  D.  Chang,  and  P.  Ammanabrolu,
+ [42]  A. Hindle, A. Alipour, and E. Stroulia, “A contextual approach towards                             “Critique-out-loud reward models,” arXiv preprint arXiv:2408.11791,
+       more accurate duplicate bug report detection and ranking,” Empirical                               2024.
+       Software Engineering, vol. 21, pp. 368–410, 2016.                                           [49]  S. Saha, O. Levy, A. Celikyilmaz, M. Bansal, J. Weston, and X. Li,
+ [43]  A.  T.  Nguyen,  T.  T.  Nguyen,  T.  N.  Nguyen,  D.  Lo,  and  C.  Sun,                          “Branch-solve-merge  improves  large  language  model  evaluation  and
+       “Duplicate  bug  report  detection  with  a  combination  of  information                          generation,”  in  Proceedings  of  the  2024  Conference  of  the  North
+       retrieval and topic modeling,” in Proceedings of the 27th IEEE/ACM                                 American Chapter of the Association for Computational Linguistics:
+       InternationalConferenceonAutomatedSoftwareEngineering,2012,pp.                                     Human Language Technologies (Volume 1: Long Papers), 2024, pp.
+       70–79.                                                                                             8345–8363.
+ [44]  C.  Sun,  D.  Lo,  S.-C.  Khoo,  and  J.  Jiang,  “Towards  more  accurate                  [50]  W.  Yuan,  R.  Y.  Pang,  K.  Cho,  X.  Li,  S.  Sukhbaatar,  J.  Xu,  and
+       retrievalofduplicatebugreports,”in201126thIEEE/ACMInternational                                    J. Weston, “Self-rewarding language models, 2024,”URL https://arxiv.
+       Conference on Automated Software Engineering (ASE 2011).    IEEE,                                  org/abs/2401.10020.
+       2011, pp. 253–262.                                                                          [51]  P. Trivedi, A. Gulati, O. Molenschot, M. A. Rajeev, R. Ramamurthy,
+ [45]  C. Sun, D. Lo, X. Wang, J. Jiang, and S.-C. Khoo, “A discriminative                                K. Stevens, T. S. Chaudhery, J. Jambholkar, J. Zou, and N. Rajani,
+       model approach for accurate duplicate bug report retrieval,” in Pro-                               “Self-rationalization  improves  llm  as  a  fine-grained  judge,”  2024.
+       ceedings of the 32nd ACM/IEEE International Conference on Software                                 [Online]. Available: https://arxiv.org/abs/2410.05495
+       Engineering-Volume 1, 2010, pp. 45–54.                                                      [52]  S. Dhuliawala, M. Komeili, J. Xu, R. Raileanu, X. Li, A. Celikyilmaz,
+ [46]  T.Wang,I.Kulikov,O.Golovneva,P.Yu,W.Yuan,J.Dwivedi-Yu,R.Y.                                         and  J.  Weston,  “Chain-of-verification  reduces  hallucination  in  large
+       Pang, M. Fazel-Zarandi, J. Weston, and X. Li, “Self-taught evaluators,”                            language models,” arXiv preprint arXiv:2309.11495, 2023.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                             1806
+
+Authorized licensed use limited to: QUAID E AZAM UNIVERSITY. Downloaded on September 07,2026 at 19:37:37 UTC from IEEE Xplore.  Restrictions apply.

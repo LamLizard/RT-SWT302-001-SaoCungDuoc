@@ -1,0 +1,62 @@
+{
+  "id": "GV-11",
+  "pdf": "Paper-source/53-GV-11-Nuwa.pdf",
+  "pages_read": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "factors": {
+    "P": {
+      "sign": "·",
+      "reason": "Phần mềm được kiểm thử là hạ tầng trình biên dịch MLIR tại các commit LLVM được nêu, không phải benchmark REST API.",
+      "locator": "§IV-C/PDF7; §II-A/PDF2–3",
+      "confidence": "cao"
+    },
+    "I": {
+      "sign": "◐",
+      "reason": "Quá trình sinh mã hóa đặc tả operation, gồm kiểu đầu vào/đầu ra và miền số chiều, rồi tổng hợp chương trình tuân thủ ràng buộc dữ liệu/điều khiển. Adaptive mutation kết hợp các thành phần IR. Đây là sinh có nhận biết kiểu/miền/ràng buộc, chưa có EP/BVA là phương pháp chính.",
+      "locator": "§III-C, Figure 4 and Algorithm 1/PDF4; §III-C3–D/PDF5–6",
+      "confidence": "cao"
+    },
+    "C": {
+      "sign": "✓",
+      "reason": "Baseline MLIRSmith được mô tả rõ là tạo chương trình ngẫu nhiên bằng khởi tạo template theo cú pháp. Mỗi thí nghiệm có ngân sách mặc định 24 giờ và lặp năm lần; sinh ngẫu nhiên cùng thời gian vì vậy đạt rubric rộng. Nüwa-random chỉ ngẫu nhiên hóa việc chọn ví dụ few-shot và không phải căn cứ của dấu ✓ này.",
+      "locator": "§IV-C Experimental Configurations and §IV-D Compared Work/PDF7; §V-B/Table II/PDF8; distinction from Nüwa-random in §V-C/Table III/PDF9",
+      "confidence": "cao"
+    },
+    "O": {
+      "sign": "◐",
+      "reason": "Crash trình biên dịch được khử trùng theo thông báo lỗi, sau đó xác minh/báo cáo kèm lệnh thực thi và backtrace. Table II so sánh số crash bug; mutation trên chương trình test là sinh đầu vào, không phải mutation testing trên mã nguồn trình biên dịch.",
+      "locator": "§IV-E and §V-A/PDF7; §V-B/Table II/PDF8",
+      "confidence": "cao"
+    }
+  },
+  "old_signs": {
+    "P": "·",
+    "I": "◐",
+    "C": "✓",
+    "O": "◐"
+  },
+  "changes": [],
+  "notes": [
+    "Cả bốn dấu đã được kiểm chứng độc lập.",
+    "Giữ riêng 55 bug mới báo cáo trên commit mới nhất bab01ae với 56 bug trong Table II trên commit đánh giá bec839. Đây là hai bối cảnh thí nghiệm khác nhau, không phải tổng source-code mutant.",
+    "Dùng MLIRSmith cùng cấu hình ngân sách thời gian làm bằng chứng cho C; không dùng lựa chọn pass ngẫu nhiên hoặc ablation chọn few-shot ngẫu nhiên."
+  ],
+  "visual_checks": [
+    {
+      "page": 8,
+      "file": "GV-11-p8.png",
+      "checked": "Table II ghi MLIRSmith=16, MLIRod=18, NNSmith=26, Nüwa-Gen=38, Nüwa-Mut=47, Nüwa=56 crash bug; nhãn cột phân biệt bug và coverage."
+    }
+  ]
+}

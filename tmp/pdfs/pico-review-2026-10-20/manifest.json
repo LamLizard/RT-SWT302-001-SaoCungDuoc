@@ -1,0 +1,121 @@
+[
+  {
+    "id": "GV-01",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\43-GV-01-YAKUSU.pdf",
+    "pages": 12,
+    "sha256": "140495041cd05d02c1c18f0e574e141183409a1ad9ba3996cb213a081824f618",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-01.txt"
+  },
+  {
+    "id": "GV-02",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\44-GV-02-RESTestBench.pdf",
+    "pages": 10,
+    "sha256": "f815d03a915df859167846fc4bcb16bd183171172dbac3f8622905a5e19db6f3",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-02.txt"
+  },
+  {
+    "id": "GV-03",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\45-GV-03-Prompt-Based-REST-API-Amplification.pdf",
+    "pages": 8,
+    "sha256": "71717d020fa57dd25bd01608548961e2f118f9803ec7d3cc9397ac3c49883fa4",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-03.txt"
+  },
+  {
+    "id": "GV-04",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\46-GV-04-RESTOR.pdf",
+    "pages": 22,
+    "sha256": "35b3402277f78f994925f81a8ecec96e02673b0a71b93dc45c9e6c4980dddab3",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-04.txt"
+  },
+  {
+    "id": "GV-05",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\47-GV-05-AGORA-Plus.pdf",
+    "pages": 37,
+    "sha256": "ccd1de2d26444f56735d68462e91971c90d05ab4f501108c7f3f375204dbebbe",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-05.txt"
+  },
+  {
+    "id": "GV-06",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\48-GV-06-METFORD.pdf",
+    "pages": 25,
+    "sha256": "66b046ea4297806f94554b934428c41338b2cb6f05143e6f32cc57d6ebaabd6d",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-06.txt"
+  },
+  {
+    "id": "GV-07",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\49-GV-07-ArrayDiff.pdf",
+    "pages": 24,
+    "sha256": "90e052b5cbf2357013f6030a7261de06ccb8898b696781f866d5a66d6903a4a7",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-07.txt"
+  },
+  {
+    "id": "GV-08",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\50-GV-08-YATE.pdf",
+    "pages": 12,
+    "sha256": "18de1155be54f15f07a0a0471482489331c6c00f660dc826da2cc0881d434f58",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-08.txt"
+  },
+  {
+    "id": "GV-09",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\51-GV-09-SATORI.pdf",
+    "pages": 13,
+    "sha256": "77630ab65ca932fd498b2355e66aa61eb994f1c7704dd8d8df051d1ca3559beb",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-09.txt"
+  },
+  {
+    "id": "GV-10",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\52-GV-10-Mutation-Guided-Meta.pdf",
+    "pages": 12,
+    "sha256": "571de921086ad4f900059c8a2b51c7e0eb04ce8275a4374ec3823fbdc8094967",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-10.txt"
+  },
+  {
+    "id": "GV-11",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\53-GV-11-Nuwa.pdf",
+    "pages": 12,
+    "sha256": "a6d4a97fffb318566fa259f5b51f07427808454db7b71e28a275dd971df9d3da",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-11.txt"
+  },
+  {
+    "id": "GV-12",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\54-GV-12-Beyond-Flaky-Test.pdf",
+    "pages": 23,
+    "sha256": "a58fce737528447574c7cc29fa9e5922153cf8d49d4ebe5ffa40ca1808a34862",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-12.txt"
+  },
+  {
+    "id": "GV-13",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\55-GV-13-DualMine.pdf",
+    "pages": 12,
+    "sha256": "cc00d9fa95b4d98d04c00c37cb836dca2a00904c51aad60e0fe1c20b4e6c6bb1",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-13.txt"
+  },
+  {
+    "id": "GV-14",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\56-GV-14-Crowdsourced-Report-Assessment.pdf",
+    "pages": 13,
+    "sha256": "2524f52604f0d7922913ba95d7f1ca7b51346f3aa712cfc9c76d47b477691fe3",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-14.txt"
+  },
+  {
+    "id": "GV-15",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\57-GV-15-IoT-UI-Fuzzing.pdf",
+    "pages": 5,
+    "sha256": "d63402725e935c0ea95568f9bdc338eaae001a2d045755db11e27628ecf96b2f",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-15.txt"
+  },
+  {
+    "id": "GV-16",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\58-GV-16-How-Far-Flaky-Tests.pdf",
+    "pages": 15,
+    "sha256": "2f5a3feff80c7d3efe28cfa0ef15f6d3bd3c2247a6fc85c3f56f6a8d319cd30f",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-16.txt"
+  },
+  {
+    "id": "GV-17",
+    "pdf": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\Paper-source\\59-GV-17-Intelligent-Test-Automation.pdf",
+    "pages": 9,
+    "sha256": "b75eee98bc188fce96f595a89013ca21be48ccc36df6d4a9e11451a78ea37d56",
+    "text": "D:\\3_LAST SEMESTER\\SEMESTER_5_FALL26\\SWT301\\RT-SWT302-001-SaoCungDuoc\\tmp\\pdfs\\pico-review-2026-10-20\\GV-17.txt"
+  }
+]
