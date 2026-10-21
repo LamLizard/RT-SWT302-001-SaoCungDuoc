@@ -4,12 +4,12 @@ Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày 
 
 ## 1. Câu hỏi nghiên cứu
 
-- RQ (VN): Trên 45 yêu cầu của RESTestBench, phân hoạch tương đương kết hợp phân tích giá trị biên, so với sinh dữ liệu ngẫu nhiên đồng đều cùng ngân sách, khác nhau thế nào về số mutant riêng biệt bị phát hiện theo từng dạng yêu cầu?
-- H0 (phát biểu định hướng, đặc tả kiểm định cần khóa trước chạy chính): Không có khác biệt về số mutant riêng biệt được oracle xác nhận giữa EP+BVA và uniform random dưới cùng ngân sách request.
-- H1 (phát biểu định hướng): Có khác biệt về số mutant riêng biệt được oracle xác nhận giữa EP+BVA và uniform random dưới cùng ngân sách request.
-- PICO: P = 45 yêu cầu RESTestBench (**16 FastAPI + 15 NestJS RealWorld + 14 TodoApp**, thống nhất 20/10/2026, thay 15/dịch vụ) · I = EP + BVA · C = random đồng đều cùng budget · O = số mutant riêng biệt được oracle xác nhận.
+- RQ (VN): Trên 106 yêu cầu bản vague của RESTestBench, prompt có hướng dẫn kỹ thuật EP+BVA và prompt single-step gốc của benchmark khác nhau thế nào về MS_φ, khi dùng cùng một mô hình ngôn ngữ và cùng temperature?
+- H0 (phát biểu định hướng, đặc tả kiểm định cần khóa trước chạy chính): Không có khác biệt về MS_φ giữa prompt có hướng dẫn EP+BVA và prompt single-step gốc, với cùng mô hình, cùng temperature và cùng 106 yêu cầu.
+- H1 (phát biểu định hướng): Có khác biệt về MS_φ giữa hai prompt dưới cùng điều kiện.
+- PICO: P = **106 yêu cầu bản vague** của RESTestBench (**63 FastAPI + 29 NestJS RealWorld + 14 TodoApp**) · I = prompt có hướng dẫn EP+BVA · C = prompt single-step gốc của benchmark · O = **MS_φ** trên 228 mutant · S = cùng model, cùng temperature, 3 lần chạy, so sánh paired theo requirement.
 
-Nhãn `extension` đã được GV bổ sung theo xác nhận người phụ trách ngày 20/10/2026. Thiết kế hiện hành và các điều kiện chưa khóa: [rq-validation §1](rq-validation.md). Chưa có snapshot/danh sách 45 ID hoặc kết quả pilot; chưa xác nhận thay đổi P đã được cập nhật trên thẻ/GV. Nhật ký thay đổi: [search-log ngày 20/10/2026](../lam/SLR/search-log.md).
+Nhãn `extension` theo bảng căn hàng GV-02/RESTestBench: P/C/O trùng, I khác. Thiết kế hiện hành và các điều kiện chưa khóa: [rq-validation §1](rq-validation.md). Chưa có pilot; chưa xác nhận thay đổi P đã được cập nhật trên thẻ/GV.
 
 ## 2. Nguồn & phân công
 | Thành viên | Nguồn |
@@ -53,5 +53,3 @@ Paper (tên + năm + venue + DOI) · Tool/LLM · Dataset · Metric · Kết qu�
 ## 7. Mốc thời gian
 
 - Ngày dừng search: **23:59 05/10/2026** · Snowballing: Ngày 3–4 (1 vòng bắt buộc, tối đa 2) · Screening xong: Ngày 4 · Evidence table + kiểm chéo: Ngày 4–5 · Gộp nhóm: cuối tuần.
-
-**Phân biệt lượt tìm:** mốc dừng search 05/10/2026 ở §7 là mốc protocol RBL-1. Lượt rà cập nhật RBL-2 ngày 18–20/10 được ghi riêng tại [audit](rq-validation-audit.md); không tự cộng nguồn bổ sung vào N/PRISMA RBL-1.
