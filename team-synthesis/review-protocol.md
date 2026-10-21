@@ -1,6 +1,6 @@
 # Review Protocol — nhóm 1 (SaoCungDuoc) · RQ FA26-EXT-12
 
-Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày (không sửa lặng lẽ).
+Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày (không sửa lặng lẽ). Đợt đồng bộ 21/10/2026 được ghi tại [nhật ký Lâm](../lam/SLR/search-log.md); không phải một lượt chạy query mới.
 
 ## 1. Câu hỏi nghiên cứu
 
@@ -9,7 +9,7 @@ Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày 
 - H1 (phát biểu định hướng): Có khác biệt về MS_φ giữa hai prompt dưới cùng điều kiện.
 - PICO: P = **106 yêu cầu bản vague** của RESTestBench (**63 FastAPI + 29 NestJS RealWorld + 14 TodoApp**) · I = prompt có hướng dẫn EP+BVA · C = prompt single-step gốc của benchmark · O = **MS_φ** trên 228 mutant · S = cùng model, cùng temperature, 3 lần chạy, so sánh paired theo requirement.
 
-Nhãn `extension` theo bảng căn hàng GV-02/RESTestBench: P/C/O trùng, I khác. Thiết kế hiện hành và các điều kiện chưa khóa: [rq-validation §1](rq-validation.md). Chưa có pilot; chưa xác nhận thay đổi P đã được cập nhật trên thẻ/GV.
+Nhãn nhóm `extension`: kế thừa điều kiện vague, nhánh single-step và MS_φ của GV-02, bổ sung phép so hướng dẫn EP+BVA; paper gốc còn đánh giá precise và refinement. Định nghĩa pass-valid/fail-mutant, điểm từng run và trung bình mô tả ba run tại [rq-validation §1.1](rq-validation.md#11-định-nghĩa-outcome-và-tổng-hợp-ba-run). Phân tích cụm requirement và ba run **chưa chốt** tại [§4](rq-validation.md#4-khả-thi-của-gap-đang-cân-nhắc); không mặc định 228 mutant/684 mutant-run độc lập. Chưa có pilot; chưa xác nhận thay đổi P đã được cập nhật trên thẻ/GV.
 
 ## 2. Nguồn & phân công
 | Thành viên | Nguồn |
@@ -20,18 +20,20 @@ Nhãn `extension` theo bảng căn hàng GV-02/RESTestBench: P/C/O trùng, I kh�
 | T.Duy | Semantic Scholar + Google Scholar (seed & bổ sung) |
 | K.Duy |Springer |
 
-## 3. Phạm vi tìm
+## 3. Phạm vi tìm — protocol kế thừa của hướng cũ
+
+Các chuỗi và quy tắc dưới đây được giữ để truy vết cách tạo tập 42 INCLUDE; chưa phải protocol tìm kiếm mới được khóa cho phép so prompt-guided EP+BVA/single-step. Chưa có query bổ sung cho RQ mới trong đợt đồng bộ này. Cần nhóm chốt chuỗi có LLM/prompt và tiêu chí phù hợp RQ mới trước khi tìm bổ sung; không tự sửa số lượt tìm, số bài hoặc PRISMA.
 
 - Trường tìm: Title / Abstract / Keywords
 - Khoảng năm: từ 2020 (theo IC-Y)
-- **String A (CHÍNH THỨC — dán nguyên văn, giữ đủ ngoặc/ký tự):** ("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")
+- **String A (CHÍNH THỨC của protocol cũ — giữ nguyên văn để truy vết):** ("REST API testing" OR "natural language requirement" OR "RESTestBench") AND ("equivalence partitioning" OR "boundary-value analysis" OR "boundary testing") AND ("fault detection" OR "mutant detection" OR "bugs found")
 - String B/C (dùng khi cần nới — giữ bản nháp cũ làm dự phòng, bổ sung từ đồng nghĩa khi chạy): ("REST API" OR "RESTful API" OR "web API" OR "web service") AND ("boundary value analysis" OR "boundary value" OR "boundary testing" OR "equivalence partitioning") AND ("mutation testing" OR "mutants" OR "mutation score")
 - Quy tắc chạy: >500 kết quả → AND thêm tên dataset ("RESTestBench"); <20 → bỏ khối O trước; ghi MỌI phiên bản chuỗi + số kết quả vào search-log.
 - Chạy chính để đếm: IEEE / ACM / OpenAlex. Google Scholar & Semantic Scholar KHÔNG đếm vào PRISMA.
 
 ## 4. Tiêu chí lọc
 
-Theo `team-synthesis/ie_criteria.md`, với quy trình bổ sung sau:
+Tiêu chí kế thừa tại `team-synthesis/ie_criteria.md` giải thích tập screening cũ; chưa được tái thẩm định đầy đủ cho RQ prompt mới. Giữ số **42 INCLUDE + 17 bài nền = 59 evidence**, không mặc nhiên xem 59 là số INCLUDE. Quy trình dưới đây là bản đã ban hành, không phải các bước vừa chạy lại:
 
 - Bước 1: thu thập `01_all_records.csv` từ các query chính; trước khi screening, bỏ trùng theo DOI (nếu thiếu DOI thì theo title + năm); giữ một bản ghi cho mỗi paper.
 - Bước 2: vòng 1 screening trên title + abstract; mỗi record gán `v1_decision` = `INCLUDE / EXCLUDE / Unsure` và `v1_reason` theo mã IC/EC.
@@ -52,4 +54,4 @@ Paper (tên + năm + venue + DOI) · Tool/LLM · Dataset · Metric · Kết qu�
 
 ## 7. Mốc thời gian
 
-- Ngày dừng search: **23:59 05/10/2026** · Snowballing: Ngày 3–4 (1 vòng bắt buộc, tối đa 2) · Screening xong: Ngày 4 · Evidence table + kiểm chéo: Ngày 4–5 · Gộp nhóm: cuối tuần.
+- Mốc của protocol ban đầu: **23:59 05/10/2026** · Snowballing: Ngày 3–4 (1 vòng bắt buộc, tối đa 2) · Screening xong: Ngày 4 · Evidence table + kiểm chéo: Ngày 4–5 · Gộp nhóm: cuối tuần. Search-log có các lượt thực tế sau mốc này; giữ lịch sử, không suy đây là ngày dừng thực tế đã xác minh. Mốc/protocol bổ sung cho RQ hiện hành chưa chốt.

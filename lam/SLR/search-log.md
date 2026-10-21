@@ -99,3 +99,12 @@
 - **Mã mới:** GV-01–GV-17 liên tục theo thứ tự các bài còn lại. Các mã GV trong §7–8 là mã lịch sử theo danh sách 20 nguồn, không phải mã hiện hành. Mapping vị trí gốc ↔ mã mới ↔ dòng Lâm ↔ PDF được ghi ở `teacher-papers-audit.md`.
 - **Tên PDF mới:** `43-GV-01-YAKUSU.pdf` đến `59-GV-17-Intelligent-Test-Automation.pdf`, theo đúng thứ tự dòng #3–#19 của evidence table. Chỉ đổi tên 17 PDF bổ sung trong Paper-source; xác minh SHA256 trước/sau khớp toàn bộ, không thay nội dung PDF. Giữ các file #01–#42.
 - **Đồng bộ:** sửa link PDF và các tham chiếu mã hiện hành trong evidence table/audit; bỏ bảng lịch sử web khỏi audit hiện hành, giữ lịch sử thao tác ở nhật ký này. Không đổi tập 42/PRISMA hoặc commit/push.
+
+## 10. Đồng bộ tài liệu sau đổi hướng RQ — 21/10/2026 (Asia/Saigon)
+
+- **Đầu vào:** nhánh Lam, commit `6658a63de7250dd7a41bbd6d140b3cdb3f9f5f51`; working tree sạch trước sửa. Commit này đã đổi RQ sang prompt-guided EP+BVA vs single-step, chưa phải triển khai thí nghiệm.
+- **Phạm vi được phép:** đồng bộ tài liệu theo phản hồi GV và các lỗi đã kiểm; giữ RQ mới. Người dùng chọn **giữ nguyên điểm nền, ghi rõ chỗ chưa đồng nhất**, không tái chấm 59 paper theo RQ mới. Đồng bộ TD-0015 ở merge về nhãn map đang lưu (0✓, chạm 2), giữ TD-0002 2✓/chạm 3; sắp thứ tự theo ✓ rồi chạm và sửa số tổng hợp nhãn.
+- **Nội dung:** sửa bảng căn hàng GV-02 thành refinement vs single-step, làm rõ paper có cả precise/vague; bổ sung pass-valid/fail-mutant, công thức từng run/trung bình mô tả ba run và mẫu số dịch vụ; sửa full hai arm thành 636 lượt sinh, 636 valid, 1.368 mutant trước setup/reset/retry. Ghi phân tích có cụm/ba run còn chưa chốt, nguồn email của 15 mutant và giới hạn suy luận.
+- **Protocol:** giữ nguyên chuỗi, tiêu chí và mốc cũ dưới nhãn lịch sử; protocol/IC-EC bổ sung phù hợp RQ mới chưa khóa. README và phần hiện hành của notes theo RQ mới; giữ các quyết định cũ theo ngày. Không chạy query thu thập/screening mới, không thay 42 INCLUDE + 17 bài nền hoặc PRISMA/CSV.
+- **Nguồn đối chiếu trong đợt này:** paper RESTestBench §3.2–4.2/Table 3; `src/evaluator.py` và prompt single-step tại snapshot benchmark `4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae`; các phần liên quan của PDF TD-0002; abstract Durkalski et al. (2003), DOI 10.1002/sim.1438. Kiểm kê 106 JSON/228 mutant kế thừa lượt rà trước, không ghi thành kiểm kê mới của đợt này.
+- **Trạng thái:** chỉ sửa tài liệu; chưa Docker/golden tests, chưa LLM/pilot/thí nghiệm, chưa kiểm lại toàn văn 59 bài hoặc có phê duyệt GV. Không stage/commit/push.
