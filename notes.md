@@ -2,7 +2,7 @@
 
 ## Thiết kế hiện hành — bản review 22/10/2026
 
-- **RQ:** theo nguyên văn cô đề xuất, có điều kiện cùng model/cấu hình/ngân sách; thêm RQ phân tích input, tiền điều kiện và oracle. Canonical: [rq-validation](team-synthesis/rq-validation.md).
+- **RQ:** chỉ giữ một RQ chính theo nguyên văn cô đề xuất, có điều kiện cùng model/cấu hình/ngân sách. Phân tích input, tiền điều kiện và oracle là mục tiêu bổ trợ để diễn giải kết quả; không là RQ thứ hai hoặc bằng chứng cơ chế nhân quả từ liên hệ quan sát. Canonical: [rq-validation](team-synthesis/rq-validation.md).
 - **Quyết định người dùng:** DeepSeek-V4.1-Flash-1017 qua DeepSeek API chính thức; tổng chi phí API tối đa 3 USD, gồm pilot/main/retry. API ID là alias `deepseek-flash`, không phải snapshot bất biến.
 - **Mục 1:** 60 nguồn = 42 INCLUDE lịch sử + 18 nguồn nền, thêm GV-18/PDF60; giữ PRISMA 42 và 59 dòng điểm nền. Năm rq-check có phần hiện hành và lịch sử; chưa systematic search/screening mới hoặc tái chấm cả tập cũ.
 - **Mục 2:** [experiment-design](team-synthesis/experiment-design.md), hai prompt C/I, config, manifest tĩnh 106/228 và lịch dự kiến 660 slot. R=3 là phương án nguồn lực cần review, không bảo đảm power. Envelope 16k input/2048 output off-peak cho 660 call là 2.395008 USD trước retry; chưa đo token thật.
@@ -34,3 +34,5 @@ Các mục 45 yêu cầu, không dùng LLM và oracle tự xây dưới đây th
 - 21/10/2026 — Commit `6658a63de7250dd7a41bbd6d140b3cdb3f9f5f51` trên nhánh Lam đổi RQ/gap sang prompt-guided EP+BVA vs single-step, P = 106 vague. Đợt đồng bộ tài liệu tiếp theo sửa bảng căn hàng, số lượt, định nghĩa outcome và giới hạn bằng chứng; người dùng chọn giữ điểm nền, chỉ ghi rõ chỗ chưa đồng nhất. Chưa chạy thí nghiệm hoặc xác minh GV phê duyệt.
 
 - 22/10/2026 — Theo người dùng cho phép, cập nhật mục 1 bằng skill experimental-design, bổ sung GV-18 và protocol RQ mới, bảo toàn điểm/screening cũ; tiếp đó soạn mục 2 với DeepSeek-V4.1-Flash-1017/API chính thức/3 USD. Chỉ tạo hồ sơ để review; chưa làm bước 3/golden/pilot/main, chưa chi phí DeepSeek. Chi tiết nguồn/thay đổi ở search-log §11–12.
+
+- 22/10/2026 — Lượt rà tiếp theo dùng duy nhất scientific-critical-thinking, chỉ agent chính. Trước đó đã thêm “RQ phân tích” theo gợi ý phân tích cải thiện/suy giảm trong mail cô; nay giữ nội dung làm mục tiêu phân tích bổ trợ, chỉ còn một RQ chính. Viết rõ PICO và tách điều kiện kiểm soát; viết đầy đủ H0: Δ = 0 / H1: Δ ≠ 0, giữ ý nghĩa hai phía, phân biệt Δ với Δ_hat. Gộp nội dung mục 8 của protocol vào §3 và §5, giữ truy vết tìm kiếm cũ và query dự kiến. Đổi tên báo cáo thành [TEMP_RESEARCH_SYNC_REVIEW_2026-10-22.md](TEMP_RESEARCH_SYNC_REVIEW_2026-10-22.md); chi tiết tại search-log §13. Không đổi artifact hoặc triển khai bước 3.

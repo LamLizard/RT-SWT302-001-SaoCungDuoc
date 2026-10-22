@@ -1,8 +1,12 @@
 # Bản đồ bằng chứng nền — nhóm 1 (SaoCungDuoc) · RQ FA26-EXT-12
 
-**RQ hiện hành:** xem nguyên văn RQ cô đề xuất và câu hỏi phân tích tại [rq-validation §1](rq-validation.md#1-rq--pico).
+**RQ hiện hành:** chỉ có một RQ chính theo nguyên văn cô đề xuất; mục tiêu phân tích bổ trợ được ghi tại [rq-validation §1](rq-validation.md#1-rq--pico).
 
-**PICO hiện hành:** 106 vague / 228 mutant; I = C + hướng dẫn EP+BVA có căn cứ; C = single-step gốc; O = MS_φ. DeepSeek-V4.1-Flash-1017 / API chính thức / trần 3 USD. Số lần sinh và ngân sách ở [experiment-design](experiment-design.md).
+**PICO hiện hành:** **P** = các yêu cầu vague của RESTestBench tại phiên bản đóng băng (commit `4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae`); **I** = prompt gốc bổ sung hướng dẫn EP+BVA có căn cứ; **C** = prompt single-step gốc; **O** = MS_φ.
+
+**Điều kiện kiểm soát (không thuộc PICO):** cùng mô hình, cấu hình và ngân sách kiểm thử quy định trước. Model người dùng chọn: DeepSeek-V4.1-Flash-1017 qua DeepSeek API chính thức; trần tổng chi phí model 3 USD gồm pilot, main và retry. Chi tiết ở [experiment-design](experiment-design.md); alias `deepseek-flash` không bảo đảm checkpoint bất biến, cần xác minh trước khi chạy.
+
+**Kiểm kê benchmark:** 106 yêu cầu vague, 228 mutant tại commit trên là số liệu kiểm tra tĩnh đã ghi trong manifest, chưa xác minh runtime. Bản thiết kế vẫn chờ review, chưa freeze đánh giá chính.
 
 **Phạm vi hiện hành:** 60 nguồn = 42 INCLUDE lịch sử + 18 nguồn nền. Theo lựa chọn người dùng ngày 21/10, giữ nguyên nhãn/điểm của **59 bài nền cũ**. GV-18 mới được đối chiếu nội dung, chưa gán điểm nền. Không xem bảng này là kết quả tái chấm thống nhất toàn bộ theo RQ mới.
 

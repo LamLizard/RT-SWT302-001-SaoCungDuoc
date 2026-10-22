@@ -6,19 +6,29 @@
 
 **RQ chính:** Trong điều kiện sinh single-step với cùng mô hình, cấu hình và ngân sách kiểm thử được quy định trước, việc bổ sung hướng dẫn EP+BVA vào prompt gốc ảnh hưởng như thế nào đến MS_φ trên các yêu cầu vague của RESTestBench tại phiên bản đóng băng?
 
-**RQ phân tích:** Các trường hợp cải thiện hoặc suy giảm MS_φ đi kèm những khác biệt nào về lựa chọn dữ liệu kiểm thử, thiết lập tiền điều kiện và tính đúng của oracle?
+**Mục tiêu phân tích bổ trợ (không phải RQ riêng):** mô tả những khác biệt về lựa chọn dữ liệu kiểm thử, thiết lập tiền điều kiện và tính đúng của oracle đi kèm các trường hợp MS_φ cải thiện, suy giảm hoặc không đổi, nhằm hỗ trợ diễn giải kết quả của RQ chính.
 
-RQ phân tích mô tả các đặc điểm đi kèm; không chứng minh một cơ chế chỉ từ tương quan hoặc vài ví dụ. Chi phí và lượng kiểm thử là biến đo bổ sung cho cả hai RQ.
+**Nguồn gốc và điều chỉnh:** tại mục 5 của [mail cô Chi](../lam/SLR/AI%20cua%20lam%20response.txt), cô gợi ý có thể bổ sung câu hỏi phân tích các trường hợp cải thiện/suy giảm. Bản cập nhật trước đã tách gợi ý này thành “RQ phân tích”; lượt rà 22/10/2026 giữ nội dung hữu ích dưới dạng mục tiêu/kế hoạch phân tích, chỉ giữ một RQ chính. Các đặc điểm đi kèm là liên hệ quan sát, không chứng minh cơ chế nhân quả chỉ từ tương quan hoặc vài ví dụ.
 
 | Thành phần | Thiết kế hiện hành |
 |---|---|
 | P | 106 requirement vague tại commit RESTestBench `4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae`: 63 FastAPI, 29 RealWorld, 14 TodoApp. |
 | I | Toàn bộ prompt C, bổ sung hướng dẫn EP+BVA có căn cứ và cách xử lý khi thiếu thông tin. |
 | C | Prompt single-step gốc của benchmark, nguyên văn; không gọi SUT trong lúc sinh. |
-| O | MS_φ chính; khả năng thực thi/pass-valid, lựa chọn dữ liệu, tiền điều kiện, oracle, request/assertion, token và chi phí là kết quả bổ sung. |
-| Điều kiện | Model người dùng chọn: **DeepSeek-V4.1-Flash-1017**, **DeepSeek API chính thức**, trần tổng chi phí gọi model **3 USD**, gồm pilot và retry. Cấu hình chi tiết ở [thiết kế thực nghiệm](experiment-design.md). |
+| O | MS_φ. |
 
-**H0 định hướng:** chênh lệch kỳ vọng MS_φ giữa hai cấu hình prompt bằng 0 trong điều kiện đã quy định. **H1:** khác 0. Không chọn kiểm định sau khi nhìn điểm; số lần sinh và cách diễn giải bất định phải được duyệt trước đánh giá chính.
+**Điều kiện kiểm soát, tách khỏi PICO:** hai nhánh dùng cùng mô hình, cấu hình và ngân sách kiểm thử được quy định trước. Model người dùng chọn là **DeepSeek-V4.1-Flash-1017** qua **DeepSeek API chính thức**; trần tổng chi phí model là **3 USD**, gồm pilot, main và retry. Cấu hình chi tiết ở [thiết kế thực nghiệm](experiment-design.md); đây vẫn là bản review, chưa freeze đánh giá chính.
+
+**Chỉ số phân tích bổ trợ:** khả năng thực thi/pass-valid, lựa chọn dữ liệu, tiền điều kiện, oracle, request/assertion, token và chi phí hỗ trợ trả lời RQ chính; không tạo thêm RQ hoặc thay outcome chính MS_φ.
+
+**Đại lượng giả thuyết:** trên panel vague cố định tại commit trên, gọi `μ_a = E[MS_φ(a,r)]` với `a ∈ {C, I}` là MS_φ kỳ vọng qua các lần sinh ngẫu nhiên dưới điều kiện so sánh đã quy định. Đặt `Δ = μ_I − μ_C`; `100 × Δ` là chênh lệch tính bằng điểm phần trăm. Đây là kỳ vọng trên panel cố định, không phải kỳ vọng cho mọi REST API/LLM.
+
+- **H0: Δ = 0.** Trong điều kiện sinh single-step với cùng mô hình, cấu hình và ngân sách kiểm thử được quy định trước, MS_φ kỳ vọng của prompt gốc bổ sung hướng dẫn EP+BVA có căn cứ bằng MS_φ kỳ vọng của prompt single-step gốc trên cùng các yêu cầu vague của RESTestBench tại phiên bản đóng băng.
+- **H1: Δ ≠ 0.** Trong cùng điều kiện sinh single-step, mô hình, cấu hình và ngân sách kiểm thử được quy định trước, MS_φ kỳ vọng của hai prompt khác nhau trên cùng các yêu cầu vague của RESTestBench tại phiên bản đóng băng; khác biệt có thể dương hoặc âm.
+
+**Làm rõ trước/sau:** cách viết trước “chênh lệch kỳ vọng MS_φ bằng 0” / “khác 0” đã mang nghĩa H0: Δ = 0 và H1: Δ ≠ 0. Đây vẫn là hai giả thuyết bổ sung nhau: loại trừ nhau và bao quát hai khả năng của Δ. Cách viết rút gọn, nhất là H1 chỉ ghi “khác 0”, làm thiếu rõ đại lượng và điều kiện so sánh; lượt này viết đầy đủ, không đổi bản chất giả thuyết.
+
+Định hướng kiểm định là **hai phía**, phù hợp RQ “ảnh hưởng như thế nào”, không mặc định EP+BVA tốt hơn. Phép kiểm định cụ thể, số lần sinh và cách diễn giải bất định phải được duyệt trước đánh giá chính; bản thiết kế R=3 hiện chưa chốt kiểm định p-value confirmatory. Không bác bỏ H0 hoặc không có ý nghĩa thống kê không xác nhận Δ = 0, không chứng minh hai prompt bằng nhau hoặc tương đương.
 
 Mỗi requirement/arm/run sinh một test; cùng đầu vào vague + toàn bộ OAS + base URL, cùng cấu hình và chính sách thực thi. Một hàm pytest có thể chứa nhiều request, nên số hàm không thay thế việc đo/giới hạn ngân sách thực dùng.
 
@@ -30,10 +40,10 @@ Với requirement i có m_i mutant, k[a,r,i] là số mutant được test tươ
 
 - `MS_φ(a,r) = Σ_i k[a,r,i] / 228`.
 - Theo dịch vụ chia 141 FastAPI / 65 RealWorld / 22 TodoApp.
-- Với R lần sinh được chốt: `mean_MS_φ(a) = Σ_r Σ_i k[a,r,i] / (R × 228)`; `Δ = mean_MS_φ(I) − mean_MS_φ(C)`; nhân 100 để báo điểm phần trăm.
+- Với R lần sinh được chốt: `mean_MS_φ(a) = Σ_r Σ_i k[a,r,i] / (R × 228)`; chênh lệch quan sát `Δ_r = MS_φ(I,r) − MS_φ(C,r)` và `Δ_hat = mean_MS_φ(I) − mean_MS_φ(C) = Σ_r Δ_r / R`. `Δ_hat` ước lượng chênh lệch kỳ vọng Δ; nhân 100 để báo điểm phần trăm.
 - Trung bình không phải union kill, không phải trung bình không trọng số của 106 tỷ lệ. Mutant cùng requirement dùng chung test; các lần sinh là đo lặp trên cùng benchmark.
 
-Validity gate được xác nhận trong [Evaluator.evaluate_test](https://github.com/casablancahotelsoftware/RESTestBench/blob/4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae/src/evaluator.py). Hàm aggregate chỉ thấy requirement có score, nên bước 3/pilot phải kiểm tra đối soát manifest khi mất output/kết quả; chưa tái hiện lỗi bằng thực thi.
+Theo đối chiếu mã nguồn tĩnh trước đó, validity gate được xác định tại [Evaluator.evaluate_test](https://github.com/casablancahotelsoftware/RESTestBench/blob/4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae/src/evaluator.py). Hàm aggregate chỉ thấy requirement có score, nên bước 3/pilot phải kiểm tra đối soát manifest khi mất output/kết quả. Chưa xác minh runtime hoặc chất lượng evaluator bằng thực thi.
 
 <a id="22-đối-chiếu-pico-cho-rq-hiện-hành"></a>
 

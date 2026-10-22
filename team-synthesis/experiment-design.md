@@ -4,7 +4,7 @@
 
 ## 1. Câu hỏi, đơn vị và điều kiện
 
-RQ chính và RQ phân tích theo [rq-validation §1](rq-validation.md#1-rq--pico). Thiết kế ghép cặp: mỗi requirement nhận cả C và I trong từng lần sinh; mutant nằm trong requirement, các run là đo lặp. Không coi 228 mutant hoặc 684 mutant-run/arm là mẫu độc lập.
+Một RQ chính và mục tiêu phân tích bổ trợ theo [rq-validation §1](rq-validation.md#1-rq--pico); phân tích input, tiền điều kiện và oracle hỗ trợ diễn giải kết quả, không đặt thành RQ thứ hai. Thiết kế ghép cặp: mỗi requirement nhận cả C và I trong từng lần sinh; mutant nằm trong requirement, các run là đo lặp. Không coi 228 mutant hoặc 684 mutant-run/arm là mẫu độc lập.
 
 - Đối tượng đích trực tiếp là **106 vague requirement/228 mutant tại commit đã chọn**. Ước lượng tác động trung bình của cấu hình prompt trên tập cố định này, qua các lần sinh có ngẫu nhiên; không suy cho mọi REST API/LLM.
 - Cùng vague, toàn bộ OAS, base URL, system-message policy, model, thinking mode, temperature, max output, timeout và quy tắc retry. Không cắt OAS để làm vừa tiền hoặc đưa oracle từ precise vào prompt.
@@ -107,13 +107,13 @@ Mỗi main run có 53 cặp C-trước và 53 cặp I-trước; 106 requirement 
 
 Một record cần giữ: phase, run, pair/slot/attempt ID, service/requirement/mutant index, arm, benchmark commit, prompt/config hashes, timestamp, request/response model, usage/cache tokens, charge/reservation, finish_reason, raw output, cú pháp/số test, pass-valid, kết quả từng mutant, request/input-case/assertion counts, thời gian và error category. Không lưu credential vào artifact.
 
-**Chính:** MS_φ từng arm/run và Δ_r ghép theo run; mean Δ, SD và min/max của ba Δ_r; per-service và per-requirement giữ nguyên trọng số mutant khi tổng hợp. Không union kills, không chọn run cao nhất, không bỏ generated failure khỏi mẫu số.
+**Chính:** MS_φ từng arm/run và `Δ_r = MS_φ(I,r) − MS_φ(C,r)` ghép theo run; `Δ_hat = mean_r(Δ_r)` ước lượng chênh lệch kỳ vọng `Δ = μ_I − μ_C` ở rq-validation §1. Báo Δ_hat, SD và min/max của ba Δ_r; per-service và per-requirement giữ nguyên trọng số mutant khi tổng hợp. Không union kills, không chọn run cao nhất, không bỏ generated failure khỏi mẫu số.
 
-**Bất định:** với chỉ ba run, không có bảo đảm power. Có thể báo thêm interval Student-t 95% của trung bình ba Δ_r (`mean ± 4.30265273 × SD/sqrt(3)`) dưới giả định ba aggregate run độc lập và gần chuẩn; đánh dấu model-based/exploratory, không coi giả định đã được kiểm chứng. Nếu giả định không bảo vệ được, báo raw Δ_r/SD/range và giới hạn, không ngụy tạo CI. Không chốt một kiểm định p-value confirmatory trong thiết kế nguồn lực này.
+**Bất định:** với chỉ ba run, không có bảo đảm power. Có thể báo thêm interval Student-t 95% của trung bình ba Δ_r (`mean ± 4.30265273 × SD/sqrt(3)`) dưới giả định ba aggregate run độc lập và gần chuẩn; đánh dấu model-based/exploratory, không coi giả định đã được kiểm chứng. Nếu giả định không bảo vệ được, báo raw Δ_r/SD/range và giới hạn, không ngụy tạo CI. Không chốt một kiểm định p-value confirmatory trong thiết kế nguồn lực này. Nếu chốt phép kiểm định trước main, phải dùng hai phía cho H0: Δ = 0 và H1: Δ ≠ 0; không chọn một phía theo kỳ vọng hoặc kết quả quan sát.
 
 **Phân tích nhạy theo composition:** bootstrap 10.000 lần, seed `SaoCungDuoc-20261022-v1-bootstrap`, lấy lại cụm requirement trong từng service, giữ toàn bộ mutant, hai arm và ba run rồi tính lại tỷ số. Đây là sensitivity về case mix của panel, **không thay thế bất định giữa các lần sinh và không là CI cho mọi REST service**. Không dùng McNemar thông thường cho 228/684 quan sát giả độc lập. Kết quả không phân biệt được không chứng minh tương đương; chưa có equivalence margin/power.
 
-## 9. Codebook và kiểm tra độc lập cho RQ phân tích
+## 9. Codebook và kiểm tra độc lập cho phân tích bổ trợ
 
 Trước khi nhìn kết quả, đánh dấu cơ hội EP/BVA bằng vague + OAS: có căn cứ / không có căn cứ / chưa xác định; trích locator schema/requirement. Không đọc mutant để chọn case thuận lợi. Danh sách này chưa được người chấm hoàn thành trong mục 2.
 
@@ -142,5 +142,7 @@ Báo số lượng/mẫu số theo service và nhãn; nếu ước lượng tỷ
 **Phạm vi hoàn thành hiện tại:** tài liệu, dữ liệu kiểm kê tĩnh, prompt và cấu hình/lịch **để review**. Chưa có runner, instrumentation, hard-budget enforcement, environment lock, kết quả golden/pilot hoặc quyết định giảng viên. Không tự chuyển sang bước 3; không gọi API bằng cấu hình này trong lượt hiện tại.
 
 ## Nguồn phương pháp và hỗ trợ
+
+Lượt rà tài liệu ngày 22/10/2026 áp dụng **scientific-critical-thinking v1.5** (01/10/2026) để làm rõ RQ/PICO, giả thuyết, chênh lệch kỳ vọng/quan sát và giới hạn suy luận. Skill thuộc cùng thư viện phương pháp đã được ghi nguồn dưới đây; không thêm một nguồn vào corpus thực nghiệm. Ghi nhận experimental-design bên dưới thuộc lượt soạn thiết kế trước, không phải skill được dùng trong lượt rà này.
 
 Thiết kế đơn vị, blocking/thứ tự và tránh pseudoreplication được hỗ trợ bởi skill **experimental-design v1.5** (30/09/2026). Có sử dụng AI hỗ trợ soạn thiết kế; nhóm chịu trách nhiệm review độc lập và nội dung cuối. Nguồn thư viện: Timothy Kassis, Vinayak Agarwal, Yuhuan He, Darshil Patel, Aubrey M. Brueckner (2026), *Scientific Agent Skills: A Library of Procedural Knowledge for Research Agents*, bản arXiv hiện hành v2 khi kiểm ngày 22/10, [DOI](https://doi.org/10.48550/arXiv.2609.00065). Đây là nguồn phương pháp/phần mềm hỗ trợ, không cộng thành bài thực nghiệm thứ 61 của corpus.
