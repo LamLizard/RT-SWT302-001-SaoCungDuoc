@@ -1,169 +1,116 @@
 # Kiểm chứng RQ — FA26-EXT-12 · SaoCungDuoc
 
-Tài liệu giữ 6 mục của [mẫu RBL-2](RBL-2-Kiem-chung-RQ-full.md). Đầu vào: [merge 59 bài](evidence-table-merged.md), [map PICO](rq-evidence-map.md) và các PDF gốc được dẫn tại từng đối chiếu. Bộ evidence gồm **42 bài INCLUDE qua screening + 17 bài nền GV-01–GV-17 = 59 bài**; 17 bài nền không cộng vào PRISMA final.
+**Cập nhật 22/10/2026 (Asia/Saigon):** bản thiết kế để nhóm review theo mail cô Chi. Đã được người dùng cho phép triển khai mục 1–2; chưa phải giảng viên chốt RQ, chưa cho phép bước 3. Không có kết quả golden tests, pilot hoặc đánh giá chính thức.
 
 ## 1. RQ + PICO
 
-**RQ nhóm:** Trên 106 yêu cầu bản vague của RESTestBench, prompt có hướng dẫn kỹ thuật EP+BVA và prompt single-step gốc của benchmark khác nhau thế nào về **MS_φ**, khi dùng cùng một mô hình ngôn ngữ và cùng temperature?
+**RQ chính:** Trong điều kiện sinh single-step với cùng mô hình, cấu hình và ngân sách kiểm thử được quy định trước, việc bổ sung hướng dẫn EP+BVA vào prompt gốc ảnh hưởng như thế nào đến MS_φ trên các yêu cầu vague của RESTestBench tại phiên bản đóng băng?
 
-**H0:** Không có khác biệt về MS_φ giữa prompt có hướng dẫn EP+BVA và prompt single-step gốc, với cùng mô hình, cùng temperature và cùng 106 yêu cầu.
+**RQ phân tích:** Các trường hợp cải thiện hoặc suy giảm MS_φ đi kèm những khác biệt nào về lựa chọn dữ liệu kiểm thử, thiết lập tiền điều kiện và tính đúng của oracle?
 
-**H1:** Có khác biệt về MS_φ giữa hai prompt dưới cùng điều kiện.
+RQ phân tích mô tả các đặc điểm đi kèm; không chứng minh một cơ chế chỉ từ tương quan hoặc vài ví dụ. Chi phí và lượng kiểm thử là biến đo bổ sung cho cả hai RQ.
 
-| Yếu tố | Nội dung |
+| Thành phần | Thiết kế hiện hành |
 |---|---|
-| **P** | **106 yêu cầu bản vague** của RESTestBench: 63 FastAPI + 29 NestJS RealWorld + 14 TodoApp. |
-| **I** | Prompt yêu cầu LLM phân hoạch tương đương và chọn giá trị biên từ requirement + OpenAPI schema trước khi viết một test. |
-| **C** | Prompt single-step gốc của RESTestBench, không có bước EP/BVA. |
-| **O** | **MS_φ** = số mutant được test tương ứng pass-valid/fail-mutant phát hiện / **228 mutant**; mẫu số theo dịch vụ là **141/65/22**. Báo cáo từng run và trung bình mô tả ba run theo §1.1. |
-| **S** | Cùng một model, cùng temperature, **3 lần chạy độc lập**; so sánh paired theo requirement. |
+| P | 106 requirement vague tại commit RESTestBench `4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae`: 63 FastAPI, 29 RealWorld, 14 TodoApp. |
+| I | Toàn bộ prompt C, bổ sung hướng dẫn EP+BVA có căn cứ và cách xử lý khi thiếu thông tin. |
+| C | Prompt single-step gốc của benchmark, nguyên văn; không gọi SUT trong lúc sinh. |
+| O | MS_φ chính; khả năng thực thi/pass-valid, lựa chọn dữ liệu, tiền điều kiện, oracle, request/assertion, token và chi phí là kết quả bổ sung. |
+| Điều kiện | Model người dùng chọn: **DeepSeek-V4.1-Flash-1017**, **DeepSeek API chính thức**, trần tổng chi phí gọi model **3 USD**, gồm pilot và retry. Cấu hình chi tiết ở [thiết kế thực nghiệm](experiment-design.md). |
 
-**Điều kiện dùng chung:** mỗi requirement sinh **một test**, `INTERACTIVE=False` (không gọi SUT khi sinh), cùng model/temperature/max token, cùng phần hướng dẫn assertion gốc; chỉ khác phần hướng dẫn EP/BVA. Dùng bản vague, không trộn precise. Không đổi O hoặc cách tính MS_φ sau khi xem kết quả.
+**H0 định hướng:** chênh lệch kỳ vọng MS_φ giữa hai cấu hình prompt bằng 0 trong điều kiện đã quy định. **H1:** khác 0. Không chọn kiểm định sau khi nhìn điểm; số lần sinh và cách diễn giải bất định phải được duyệt trước đánh giá chính.
 
-**Dữ liệu:** tại snapshot benchmark [`4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae`](https://github.com/casablancahotelsoftware/RESTestBench/tree/4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae), `data/requirements/` có **106 file** (63/29/14), tất cả có `requirement_vague` không rỗng; tổng **228 mutant** (141/65/22 theo dịch vụ), theo kiểm kê từ lượt rà soát trước. README benchmark ghi 26 NestJS/tổng 103 khác dữ liệu và [paper GV-02, Table 3](https://arxiv.org/html/2604.25862#S3.T3) — giữ **106/228**. Snapshot đã đối chiếu chưa thay cho việc khóa artifact/môi trường thực nghiệm của nhóm.
+Mỗi requirement/arm/run sinh một test; cùng đầu vào vague + toàn bộ OAS + base URL, cùng cấu hình và chính sách thực thi. Một hàm pytest có thể chứa nhiều request, nên số hàm không thay thế việc đo/giới hạn ngân sách thực dùng.
 
-### 1.1. Định nghĩa outcome và tổng hợp ba run
+<a id="11-định-nghĩa-outcome-và-tổng-hợp-ba-run"></a>
 
-Với arm `a ∈ {I, C}`, run `r ∈ {1, 2, 3}`, requirement `i` có `m_i` mutant và một test được sinh, đặt `k_{a,r,i}` là số mutant của requirement đó mà test **pass trên bản valid và fail trên bản mutant**. Nếu test fail valid thì `k_{a,r,i} = 0`; không loại requirement hoặc mutant của nó khỏi mẫu số. Đây là validity gate có sẵn trong [`src/evaluator.py`, `Evaluator.evaluate_test`](https://github.com/casablancahotelsoftware/RESTestBench/blob/4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae/src/evaluator.py), không phải đề xuất sửa metric.
+### 1.1. Outcome và đơn vị phân tích
 
-- Mỗi run: `MS_φ(a,r) = Σ_i k_{a,r,i} / 228`.
-- Theo dịch vụ: chỉ cộng `k` thuộc dịch vụ đó, chia **141 FastAPI / 65 RealWorld / 22 TodoApp**.
-- Báo cáo cả ba điểm từng run; trung bình mô tả là `mean_MS_φ(a) = (MS_φ(a,1) + MS_φ(a,2) + MS_φ(a,3)) / 3 = Σ_r Σ_i k_{a,r,i} / (3 × 228)`. Chênh lệch mô tả là `mean_MS_φ(I) − mean_MS_φ(C)`; nhân 100 để biểu diễn bằng điểm phần trăm.
+Với requirement i có m_i mutant, k[a,r,i] là số mutant được test tương ứng pass-valid/fail-mutant phát hiện. Test fail trên bản gốc có k = 0. Kết quả chính giữ mẫu số manifest; lỗi sinh hoặc thiếu output không được âm thầm làm mất requirement.
 
-Trung bình ba run không phải union mutant bị kill qua ba test, không phải trung bình không trọng số của 106 tỷ lệ theo requirement, và không biến 228 mutant thành 684 mutant khác nhau. Cách báo cáo mô tả này không chốt estimand hoặc phép kiểm suy luận ở §4. Quy tắc xử lý lượt thiếu do lỗi sinh/hạ tầng và retry còn phải khóa; không âm thầm bỏ dòng hoặc đổi mẫu số.
+- `MS_φ(a,r) = Σ_i k[a,r,i] / 228`.
+- Theo dịch vụ chia 141 FastAPI / 65 RealWorld / 22 TodoApp.
+- Với R lần sinh được chốt: `mean_MS_φ(a) = Σ_r Σ_i k[a,r,i] / (R × 228)`; `Δ = mean_MS_φ(I) − mean_MS_φ(C)`; nhân 100 để báo điểm phần trăm.
+- Trung bình không phải union kill, không phải trung bình không trọng số của 106 tỷ lệ. Mutant cùng requirement dùng chung test; các lần sinh là đo lặp trên cùng benchmark.
 
-Hai arm giữ cùng **hướng dẫn assertion** gốc; model vẫn sinh test và assertions cụ thể. Golden tests chỉ dùng kiểm tra benchmark/pipeline, không cung cấp cho LLM làm đáp án. Giữ evaluator/harness gốc.
+Validity gate được xác nhận trong [Evaluator.evaluate_test](https://github.com/casablancahotelsoftware/RESTestBench/blob/4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae/src/evaluator.py). Hàm aggregate chỉ thấy requirement có score, nên bước 3/pilot phải kiểm tra đối soát manifest khi mất output/kết quả; chưa tái hiện lỗi bằng thực thi.
 
-## 2. Bằng chứng làm nền (N = 59 paper evidence)
+<a id="22-đối-chiếu-pico-cho-rq-hiện-hành"></a>
 
-### 2.1. Phạm vi đầu vào và các cổng
+## 2. Bằng chứng và nghiên cứu gần nhất
 
-| Phạm vi | Số bài | Cách sử dụng |
-|---|---:|---|
-| INCLUDE qua screening của các nguồn, sau khử trùng | **42** | Merge #1–#42; giữ số liệu và quyết định IC/EC theo [PRISMA](prisma-team.md). |
-| Bài nền do leader bổ sung | **17** | GV-01–GV-17, merge #43–#59; đọc toàn văn phần liên quan và audit PICO, không mặc nhiên INCLUDE theo IC/EC. |
-| Bộ evidence của merge/map | **59 = 42 + 17** | 0 bài trùng giữa hai tập. |
-| Phản chứng ngoài ma trận | Không cộng vào 59 | Chỉ dùng để kiểm tra thêm, không đổi mẫu số. |
+**Bộ evidence: 60 nguồn = 42 INCLUDE lịch sử + 18 nguồn nền bổ sung.** Bài 60 là GV-18/Rodríguez; chưa nhập vào phễu screening cũ. Không đổi PRISMA final 42 hoặc CSV lịch sử. Điểm P/I/C/O của 59 bài cũ được giữ để truy vết, không đổi thành điểm hiện hành.
 
-| Cổng | Kết quả |
-|---|---|
-| P1 — ≥12 INCLUDE | **Đạt: 42 ≥ 12.** 17 bài nền không dùng thay số INCLUDE. |
-| P2 — ≥90% có Tool/LLM | **Đạt: 42/42 = 100%.** |
-| P3 — ≥50% có kết quả số | **Đạt: 42/42 có số trong bảng**; 58/59 evidence có kết quả định lượng, GV-17 chỉ định tính. |
-| P4 — ≥50% có hạn chế | **Đạt: 42/42 có dữ liệu hạn chế**; 59/59 có nội dung hạn chế nhưng phải tách AUTHOR_STATED khỏi REVIEWER_INFERRED. |
-| P5 — metric cụ thể | **Đạt ở mức bảng: 42/42 ghi metric**; 58/59 evidence có metric thực nghiệm mô tả được. |
-
-### 2.2. Đối chiếu PICO cho RQ hiện hành
-
-Bảng đầy đủ 59 dòng nằm ở [evidence table](evidence-table-merged.md); dưới đây là đối chiếu nội dung của ba paper đã được rà phần liên quan. **Điểm nền được giữ để truy vết, chưa phải điểm theo một rubric hiện hành thống nhất** (xem [map §1](rq-evidence-map.md#1-quy-tắc-chấm-ma-trận-nền-giữ-điểm-đã-ghi)). Không ghép P/I/C/O của nhiều paper để tạo một phản chứng.
-
-| Paper | P nền | I nền | C nền | O nền | ✓ nền giữ lại | Đối chiếu với RQ hiện hành |
-|---|---|---|---|---|---|---|
-| **GV-02 / RESTestBench** (EASE 2026) | ✓ | · | ✓ | ✓ | **3/4** | Có 106 yêu cầu, mỗi yêu cầu gồm bản precise và vague; điều kiện vague của paper trùng với P nhóm chọn. Có single-step và MS_φ; **không có prompt hướng dẫn EP/BVA**. C✓ đã được ghi theo baseline single-step, khác rubric random nền. |
-| **TD-0002** — Combining TSL and LLM to Automate REST API Testing (2025) | ◐ | ✓ | · | ✓ | **2/4** | Có boundary testing/equivalence classes trong prompt và mutation score từ Stryker.NET; 6 dự án REST, không phải RESTestBench. Không có đối chứng single-step gốc; **O✓ nền không xác nhận MS_φ**. (§3/PDF4; §4.6/PDF7–8; Table 3/PDF8.) |
-| **TD-0015** — Orchestration architecture of AI agents for automated API testing (2026) | ◐ | ◐ | · | · | **0/4** | Module G sinh EP+BVA nhưng không phải prompt-guided trên RESTestBench; outcome là coverage, không phải MS_φ. |
-
-**Giới hạn kết luận:** GV-02 là nền trực tiếp cho P/C/O qua bảng căn hàng §3.1; TD-0002 hỗ trợ hướng dẫn kỹ thuật trong prompt, TD-0015 là tham chiếu về sinh test EP+BVA. Các điểm nền 3/4, 2/4, 0/4 không đủ xếp hạng độ khớp hiện hành của cả 59 bài. Chưa tái thẩm định cả 59 theo RQ mới nên không giữ khẳng định “không có paper nào khác đạt ≥2/4”.
-
-**Quy ước đối chiếu hiện hành (không dùng tái chấm ma trận nền trong đợt này):** P xét đúng điều kiện 106 vague trên RESTestBench; I xét hướng dẫn EP+BVA trong prompt; C xét single-step gốc; O xét đúng MS_φ với validity gate. Mutation score nói chung không tự đáp ứng O này. Không suy nhãn hoặc ưu thế thực nghiệm chỉ từ tổng số ✓ nền.
-
-## 3. Phản chứng và nhãn
-
-### 3.1. Paper gần nhất và bảng căn hàng
-
-**Nhãn nhóm: `extension`.**
-
-Paper nền gần nhất nhóm chọn là **GV-02/RESTestBench**. Bảng sau căn hàng phép so refinement với single-step của paper và phép so nhóm dự kiến; nhóm kế thừa **nhánh single-step trong điều kiện vague**, không mô tả paper như so single-step với chính nó:
-
-| Yếu tố | GV-02 | RQ nhóm | Giống/khác | Căn cứ |
+| Nghiên cứu | Đầu vào / phép so thực sự | Đã cung cấp gì? | Điều chưa trả lời trực tiếp cho RQ này | Locator |
 |---|---|---|---|---|
-| **P** | 106 yêu cầu, mỗi yêu cầu có precise và vague; paper đánh giá cả hai điều kiện | 106 yêu cầu bản vague | **Trùng điều kiện vague**, không phải toàn phạm vi paper | GV-02 §3.2, Table 3 và §4/PDF4–8. |
-| **I** | Refinement loop: sinh rồi chạy test, dùng execution/HTTP trace để sửa | Prompt có hướng dẫn EP+BVA, không gọi SUT khi sinh | **Khác** | GV-02 §4.2/PDF7–8; nhóm không kế thừa refinement làm I. |
-| **C** | Prompt single-step là baseline của paper | Prompt single-step gốc | **Giống** | GV-02 §4/PDF6–8; đây là đối chứng nguyên văn của RQ. |
-| **O** | Nhánh single-step dùng MS_φ; refinement còn có MS_φ^valid và MS_φ^m | MS_φ của test sinh không tương tác; pass-valid/fail-mutant, tổng /228 và theo dịch vụ /141, /65, /22 | **Kế thừa O của single-step** | GV-02 §3.4/PDF5–6; `Evaluator.evaluate_test`; công thức từng run/trung bình ba run tại §1.1. |
+| GV-02 · RESTestBench (2026) | NL precise/vague + OAS; single-step so với refinement | Benchmark và MS_φ; đánh giá ảnh hưởng độ chi tiết và tương tác SUT | Không có phép so C với C + hướng dẫn EP+BVA | [PDF 44](../Paper-source/44-GV-02-RESTestBench.pdf), §3.2–4.2/PDF4–8; §5–6/PDF9 |
+| **GV-18 · Rodríguez et al. (2025)** | Đặc tả + mã Java; GPT-4-0613 có hướng dẫn EP+BVA so với test thủ công; 10 scenario | EP+BVA trong prompt đã tồn tại; 30 lớp test LLM/10 lớp thủ công; đánh giá PIT, coverage và định tính | Không có đối chứng LLM bỏ hướng dẫn EP+BVA; không thực nghiệm vague REST API/MS_φ | [PDF 60](../Paper-source/60-Martin%20Rodriguez.pdf), §3/PDF4–8; Tables1–2/PDF9–10; §5–6/PDF10–13; [arXiv](https://arxiv.org/abs/2505.09830) |
+| TD-0002 · RestTSLLM (2025) | OpenAPI → TSL → integration tests; so các LLM trên 6 dự án .NET | Có equivalence/boundary trong hướng dẫn; đo mutation bằng Stryker.NET | Không phải baseline single-step của RESTestBench; mutation score không tự là MS_φ | [PDF 39](../Paper-source/39-TD-0002.pdf), §3/PDF3–4; §4.3–4.6/PDF6–8; Table3/PDF8 |
+| GV-03 · Prompt-Based REST API Test Amplification in Industry (2026) | Test có sẵn + ngữ cảnh; amplification cho 6 endpoint công nghiệp | Bằng chứng replication công nghiệp, coverage và công sửa test | Không so hai prompt trên vague RESTestBench; coverage không thay MS_φ | [PDF 45](../Paper-source/45-GV-03-Prompt-Based-REST-API-Amplification.pdf), §4–5/PDF3–6; §7/PDF7 |
+| GV-04 · RESTOR (2026) | Một request–response quan sát được; oracle generation với GRPO | Đánh giá chất lượng oracle trong REST API | Không phải sinh test single-step chỉ từ vague + OAS, không đối chứng EP+BVA/MS_φ | [PDF 46](../Paper-source/46-GV-04-RESTOR.pdf), §3–5; §7/PDF18–19 |
 
-Nhóm giữ nhãn **extension**: kế thừa P ở điều kiện vague, baseline single-step và outcome tương ứng, rồi thêm phép so prompt-guided EP+BVA. “Một yếu tố” nói về khác biệt prompt giữa hai arm **của nhóm**, không khẳng định giữ nguyên toàn thiết kế refinement của paper. Điểm nền của 59 bài không tự chứng minh novelty; chưa có tái chấm toàn bộ theo rubric hiện hành.
+Ba bài 2026 GV-02/GV-03/GV-04 được chọn để đối chiếu nghiên cứu trong 12 tháng gần nhất theo mức liên quan bài toán/metric; không tuyên bố chúng là ba bài mạnh nhất toàn lĩnh vực. GV-18 là nguồn cô yêu cầu; TD-0002 gần về can thiệp, cả hai nằm ngoài cửa sổ 12 tháng tại 22/10/2026. Tra cứu web bổ sung có ghi truy vấn, nguồn và giới hạn tại [search-log §11](../lam/SLR/search-log.md). Không phải một lượt systematic screening mới của ACM/IEEE/OpenAlex.
 
-**Đóng góp dự kiến:** bổ sung bằng chứng thực nghiệm về việc **prompt-guided EP/BVA** có cải thiện MS_φ so với prompt single-step gốc hay không; không đề xuất thuật toán EP/BVA mới, không tuyên bố mutation testing cho REST chưa tồn tại. Kết quả có thể dương, âm hoặc không khác biệt; cả ba đều là kết quả hợp lệ.
+<a id="31-paper-gần-nhất-và-bảng-căn-hàng"></a>
 
-## 4. Khả thi của gap đang cân nhắc
+## 3. Đóng góp dự kiến và nhãn
 
-Chỉ đánh giá **GAP-T — prompt-guided EP/BVA + RQ tại §1**. Các số dưới đây là ước tính từ benchmark và repo, **chưa phải kết quả pilot**.
+**Định vị đề xuất: extension của phép sinh single-step trên RESTestBench.** Kế thừa P ở điều kiện vague, baseline và outcome; bổ sung phép so prompt có kiểm soát cùng phân tích test. Đây là định vị cần nhóm/cô review, không phải xác nhận chốt đề tài.
 
-| Tiêu chí | Căn cứ hiện có | Chấm | Việc cần xử lý |
-|---|---|---|---|
-| Dataset | 106 requirement vague/228 mutant đã kiểm; dùng commit benchmark và `data/requirements`, không dùng README 103. | ✅ | Khóa commit, danh sách 106 ID và manifest mutant trước khi chạy. |
-| API/Tool | Cần Docker cho 3 service và một API key/model cố định; repo có `single_step_tool` và evaluator. | ⚠️ | Dựng 3 service, chạy golden test 1 requirement, xác nhận model/temperature. |
-| Tính toán | Kế hoạch full: **106 × 2 arm × 3 run = 636 lượt sinh test**, **636 lượt kiểm valid**, **228 × 2 × 3 = 1.368 lượt thực thi mutant** (**684/arm**), trước setup/reset/retry. | ⚠️ | Fail valid có thể dẫn tới skip mutant, retry có thể tăng số lượt; đo thực tế trên pilot, chưa có số đo nhóm. |
-| Ground truth | Benchmark có golden tests, mutant theo requirement và evaluator MS_φ với validity gate. | ✅ | Kiểm pipeline và định danh mutant; không đưa golden tests cho LLM. Model vẫn sinh assertions từ cùng hướng dẫn gốc. |
-| Code base | Chỉ cần **một tool mới** copy `single_step_tool`, thay prompt; không sửa evaluator/harness. | ⚠️ | Viết prompt I, kiểm `INTERACTIVE=False`, cùng interface. |
-| Kỹ năng | 5 thành viên; chưa có log tích hợp prompt tool hoặc phân công giờ công. | ⚠️ | Chốt người phụ trách setup, prompt, chạy, phân tích. |
-| Thời gian | Chưa có pilot; dự kiến pilot 10 requirement × 2 arm × 1 run, sau đó full 106 × 2 × 3. | ⚠️ | Đặt hạn pilot/full và ≥3 ngày dự phòng. |
+Ba đầu ra dự kiến:
 
-**Đếm: 2 ✅ / 5 ⚠️ / 0 ❌ — rủi ro trung bình, chưa đủ để gọi “an toàn”.** Hai ✅ chỉ xác nhận có dữ liệu và ground truth để kế thừa, chưa xác nhận môi trường chạy.
+1. So sánh C/I dưới cùng điều kiện và ngân sách đã quy định.
+2. Phân tích có tiêu chí và kiểm tra độc lập về lựa chọn dữ liệu, tiền điều kiện, oracle và giả định thiếu căn cứ trong cả trường hợp tăng, giảm, không đổi điểm.
+3. Gói tái lập gồm phiên bản nguồn, manifest, prompt/hash, cấu hình, lịch chạy, output thô, kết quả và quy trình phân tích.
 
-**Kế hoạch xử lý có đầu ra kiểm được:**
+Không tuyên bố phát minh EP/BVA hoặc thêm EP/BVA vào prompt. Không bác bỏ replication chỉ vì kỹ thuật đã được so sánh. Kết quả dương, âm hoặc chưa phân biệt được đều có thể hữu ích nếu báo đúng phạm vi và độ bất định.
 
-1. Khóa commit benchmark, 106 requirement ID và mutant manifest.
-2. Viết prompt I và tool wrapper; giữ nguyên prompt C, model, temperature, assertion instructions.
-3. Pilot 10 requirement thuộc một service × 2 arm × 1 run: kiểm prompt adherence, test validity, pipeline; không dùng pilot để tuyên bố effect.
-4. Full 106 × 2 arm × 3 run; lưu prompt hash, token count, output, cost.
-5. Báo cáo MS_φ từng run, trung bình mô tả ba run, tổng và theo dịch vụ (§1.1); khóa kế hoạch suy luận dưới đây trước chạy chính. Subgroup 15 mutant chỉ xét khi có danh sách và căn cứ phân loại.
+<a id="4-khả-thi-của-gap-đang-cân-nhắc"></a>
 
-**Kế hoạch thống kê — chưa chốt:** dữ liệu quan sát phải giữ khóa service/requirement/mutant/arm/run; ghép I/C theo cùng requirement và lưu cả ba run, không chọn run tốt nhất. Các mutant cùng requirement dùng chung test nên tạo cụm phụ thuộc; ba run là đo lặp trên cùng tập requirement/mutant, không mặc định **228 mutant hoặc 684 mutant-run là các cặp độc lập**.
+## 4. Khả thi và điều kiện còn thiếu
 
-Paired bootstrap theo **cụm requirement** là phương án đang cân nhắc: nếu chọn, mỗi lần lấy mẫu phải giữ cả hai arm, toàn bộ mutant và ba run của requirement đó; tính lại tỷ số có trọng số mutant tương ứng §1.1, không mặc định trung bình không trọng số các tỷ lệ requirement. Chưa chốt estimand, cách tổng hợp/ghép ba run cho suy luận, có phân tầng service hay không, cách resample, số bootstrap, CI, xử lý lỗi/retry và multiple comparisons. **McNemar thông thường trên 228 mutant chưa được chốt**; muốn phân tích nhị phân phải xử lý cả cụm requirement và đo lặp. [Durkalski et al. (2003), DOI 10.1002/sim.1438 — abstract](https://pubmed.ncbi.nlm.nih.gov/12872299/) nêu giả định độc lập giữa các cặp và vấn đề matched-pair có cụm; nguồn này không tự quyết định phép kiểm cho thiết kế nhóm. Không ghi các phương án này như đã được nhóm phê duyệt.
+| Hạng mục | Bằng chứng thực tế | Trạng thái |
+|---|---|---|
+| Dữ liệu tĩnh | Đã đọc 106 JSON, 228 mutant; vague không rỗng; đúng 63/29/14 và 141/65/22 tại commit trên. README cùng commit ghi 26 RealWorld, khác dữ liệu 29. | Đã kiểm tĩnh; không đồng nghĩa chạy được |
+| Model/provider/budget | Người dùng chọn DeepSeek-V4.1-Flash-1017 / API chính thức / tối đa 3 USD | Đã có quyết định; chưa gọi API |
+| Prompt, ngân sách, manifest | Hồ sơ review ở [experiment-design](experiment-design.md) và [experiments](../experiments/) | Cần nhóm review; không phải freeze đánh giá chính |
+| Môi trường | Chưa có log Docker/golden tests, phiên bản máy chạy hoặc reset/mutant validation | Thuộc bước 3, chưa triển khai |
+| Pilot và chi phí thật | Chưa có output/usage thực tế; dự toán không phải hóa đơn hoặc kết quả pilot | Chưa triển khai |
+| Nhân lực/deadline | Có vai trò trong [authorship](authorship.md); chưa có cam kết giờ công, deadline cụ thể và tên hai người chấm oracle | Cần nhóm chốt trước khi chạy |
 
-**Giới hạn 15 mutant — thông tin từ email GV, chưa được nhóm phân loại độc lập:** chưa có danh sách ID/requirement. Chỉ trong giả định minh họa rằng I **chỉ thay đổi chọn input**, đúng 15 mutant đó có thể đổi kết quả và 213 mutant còn lại giữ nguyên, mức tăng tối đa mới là **15/228 = 6,58 điểm phần trăm**. Đây **không phải trần chung của prompt-guided EP+BVA**: prompt còn có thể ảnh hưởng setup và assertions. Ba run không tăng số mutant khác nhau.
+**Đủ thông tin để hoàn thiện tài liệu và soạn thiết kế review cho mục 1–2. Chưa đủ để xác nhận thực nghiệm khả thi trên máy nhóm hoặc chốt đánh giá chính.** Không tự điền API key, kết quả pilot, runtime hay sự đồng ý của cô.
 
-Với giả định minh họa khác là **15 cặp discordant độc lập** và exact McNemar hai phía: **12 thắng/3 thua cho p = 0,03515625**, **10 thắng/5 thua cho p = 0,3017578125**. Đây không phải power hoặc p-value dự kiến của nghiên cứu có cụm/ba run. Chưa biết 15 mutant thuộc dịch vụ nào; nếu tập trung ở TodoApp, đóng góp vào tổng sẽ nhỏ do mẫu số dịch vụ là 22 so với FastAPI 141 và RealWorld 65. Báo per-service và cần xin danh sách ID từ GV; không kết luận hướng dẫn vô ích hoặc hai prompt tương đương từ kết quả không có ý nghĩa thống kê.
+<a id="5-gap-mà-rq-lấp-kết-quả-bước-2"></a>
 
-## 5. Gap mà RQ lấp
+<a id="5-gap-mà-rq-lấp"></a>
 
-**Gap nhóm chọn: GAP-T — đánh giá prompt-guided EP/BVA trên RESTestBench.**
+## 5. Vì sao câu hỏi bổ sung đáng kiểm tra?
 
-### 5.1. Phát biểu gap
+### 5.1. Bằng chứng, suy luận và điều chưa biết
 
-> Trong bộ 59 tài liệu kế thừa và các phần bằng chứng đã rà, nhóm chưa ghi nhận nghiên cứu đánh giá **prompt có hướng dẫn EP+BVA** so với **prompt single-step gốc** của RESTestBench trên **106 yêu cầu bản vague**, đo **MS_φ** trên 228 mutant. Chưa tái thẩm định toàn bộ 59 theo RQ mới.
+- **Đã kiểm chứng:** GV-18 dùng EP+BVA trong prompt; nghiên cứu unit test có mã nguồn và đối chứng con người. GV-02 cung cấp bối cảnh vague và MS_φ nhưng không thử I của nhóm.
+- **Suy luận nghiên cứu:** trong đầu vào thiếu chi tiết, hướng dẫn có thể giúp chọn đại diện/biên có căn cứ và tránh bỏ sót; cũng có thể dẫn đến thêm điều kiện/oracle thiếu căn cứ hoặc bỏ qua BVA vì không có miền rõ. Đây là các khả năng cạnh tranh, chưa phải kết quả.
+- **Chưa biết:** chiều/độ lớn tác động, độ biến động, tỷ lệ lỗi oracle, mức dùng ngân sách và tỷ lệ requirement có cơ hội EP/BVA thực sự. Chưa tái thẩm định toàn bộ 59 nguồn theo rubric mới; không khẳng định chưa ai làm trên toàn lĩnh vực.
 
-Đây là **giả định/đề xuất của nhóm**, không phải gap mạnh AUTHOR_STATED: không có tập x/N tác giả cùng nêu limitation này. GV-02 chỉ đánh giá single-step/refinement, không đánh giá prompt-guided EP/BVA; việc paper không thử không đồng nghĩa tác giả đã thừa nhận thiếu.
+### 5.2. Phát biểu gap có giới hạn
 
-### 5.2. Bảng hạn chế và độ mạnh
+> Các nghiên cứu gần nhất được đối chiếu chưa trả lời trực tiếp việc bổ sung hướng dẫn EP+BVA có căn cứ vào baseline single-step ảnh hưởng thế nào đến MS_φ và đặc điểm thành công/thất bại khi sinh test từ vague requirement, với đầu vào và ngân sách quy định trước trên RESTestBench đã khóa phiên bản.
 
-| Hạn chế | Paper nêu | Paper đã giải quyết | Còn lại | Mạnh/yếu | Loại |
-|---|---|---|---|---|---|
-| Chưa đánh giá prompt-guided EP+BVA so với prompt single-step trên 106 yêu cầu vague, đo MS_φ | Chưa ghi nhận paper nêu trực tiếp trong bằng chứng đã rà; chưa tái thẩm định cả 59 theo RQ mới | GV-02 cung cấp điều kiện vague, single-step và MS_φ; **không có I guided** | Chưa có x/N; đây là giả định của nhóm | **Giả định**, chưa xếp mạnh/yếu theo đếm | GAP-T |
-| Ít dịch vụ/khó khái quát | 18/42 paper, 10 cụm — số kế thừa, chưa kiểm lại sổ quote; K89/K32 có nêu trực tiếp | GV-02 chỉ có 3 dịch vụ; không giải quyết | RQ dùng 3 dịch vụ, **không lấp GAP-D** | Tham khảo | GAP-D |
-| Coverage chưa đo fault detection | GV-03 §7.3: “does not directly measure fault detection or overall test adequacy” | GV-02/TD-0002 có mutation ở thiết kế khác | 1/17 bài nền; yếu | Yếu | GAP-M |
+Đây là gap do nhóm tổng hợp trong phạm vi đã đọc, không phải limitation được cả năm tác giả cùng tuyên bố. Không suy độ mạnh khoa học chỉ từ số dấu P/I/C/O hoặc x/N. Các hạn chế về ít dịch vụ là giới hạn của đề tài, không phải GAP-D mà nhóm tuyên bố đã giải quyết.
 
-**GAP-D** giữ làm giới hạn/bàn luận, không phải đóng góp chính. **GAP-M** chỉ hỗ trợ chọn outcome, không chứng minh thiếu phép so I/C.
+Cần kiểm kê cơ hội áp dụng EP/BVA từ vague + OAS bằng quy tắc có trước, không dùng mutant để chọn case thuận lợi. Tài liệu precise/golden/mutant chỉ dùng phía kiểm kê/hậu kiểm, không chuyển vào prompt, ví dụ hoặc quy tắc riêng từng requirement.
 
-### 5.3. Đối chiếu gap và RQ
+## 6. Quyết định và mốc review
 
-**Gap:** prompt-guided EP/BVA chưa được đánh giá trên 106 yêu cầu vague của RESTestBench, với MS_φ và baseline single-step.
+Giữ hướng hai prompt và chuẩn bị bộ hồ sơ cho cô; chỉ kết luận tác động của **cấu hình prompt I** trong điều kiện này. Hai arm không tách riêng tác động EP khỏi BVA, hay tác động từng câu chỉ dẫn tránh suy đoán. Phân tích ở vague không chứng minh sự khác biệt so với precise.
 
-**RQ:** Trên 106 yêu cầu bản vague của RESTestBench, prompt có hướng dẫn EP+BVA và prompt single-step gốc khác nhau thế nào về MS_φ, cùng model và temperature?
+| Bước | Đầu ra | Trạng thái |
+|---|---|---|
+| 1 · Nền tảng tài liệu | RQ, đóng góp, đối chiếu bài 60, protocol bổ sung, đồng bộ tài liệu cá nhân | Bản cập nhật ngày 22/10 để review |
+| 2 · Thiết kế thực nghiệm | Manifest, C/I đầy đủ, cấu hình, ngân sách, lịch và kế hoạch phân tích | Xem experiment-design; cần review, chưa freeze đánh giá chính |
+| 3 · Môi trường/golden tests | Log xác minh ba service, reset, mutant và evaluator | Chưa làm; chỉ tiếp tục sau khi người dùng review |
+| 4 · Pilot | Xác minh pipeline, đo usage/chi phí/runtime; kiểm mất output và mẫu số | Chưa làm |
+| 5 · Gửi cô | Bảng nghiên cứu gần nhất + commit/thống kê + hai prompt + ngân sách + pilot evaluator | Chưa đủ hồ sơ, chưa gửi |
+| 6 · Đánh giá chính | Prompt/config đã freeze, đánh giá, phân tích và gói tái lập | Chưa được triển khai |
 
-**So với GV-02:** kế thừa điều kiện vague của 106 yêu cầu, nhánh single-step và MS_φ; bổ sung phép so prompt-guided EP/BVA. Chỉ một yếu tố prompt khác giữa hai arm nhóm; không đồng nhất với phép so refinement của paper.
-
-### 5.4. Vì sao gap còn trống
-
-GV-02 tập trung vào single-step/refinement và chất lượng requirement; chưa thử một prompt hướng dẫn kỹ thuật EP/BVA. Tổ hợp này chưa được ghi nhận trong bằng chứng đã rà, nhưng chưa tái thẩm định cả 59 theo RQ mới. Nguyên nhân chưa được tác giả xác nhận; nhóm không khẳng định “chưa ai làm”.
-
-### 5.5. Lợi ích
-
-Kỹ sư kiểm thử cần bằng chứng về hiệu quả của hướng dẫn EP+BVA khi LLM sinh test trên yêu cầu vague. Kết quả cao hơn hoặc thấp hơn phải được diễn giải cùng độ bất định, chi phí và phạm vi benchmark. Kết quả không có ý nghĩa thống kê chỉ cho biết chưa đủ bằng chứng về khác biệt theo thiết kế/phép kiểm đã khóa; không chứng minh hai cách tương đương hoặc hướng dẫn không hiệu quả.
-
-## 6. Quyết định
-
-**Giữ RQ tại §1 và nhãn `extension`.** Gap đề xuất là **GAP-T — prompt-guided EP/BVA**; GV-02/RESTestBench là nền trực tiếp theo §3.1. Bộ evidence vẫn là 59, điểm nền giữ nguyên nhưng chưa có rubric hiện hành thống nhất cho toàn bộ. Không đổi H0/H1; chưa xác minh cập nhật thẻ hoặc được GV duyệt.
-
-**Trạng thái dữ liệu:** P = **106 yêu cầu vague**, 228 mutant. Chưa có pilot; API key, Docker 3 service, prompt I, phân công và thời gian còn phải khóa.
-
-**Việc tiếp theo:**
-
-1. Khóa commit benchmark, 106 ID và mutant manifest.
-2. Viết prompt I, kiểm tra bằng 10 requirement; giữ prompt C nguyên văn.
-3. Pilot và ghi runtime/lỗi; nếu ổn, chạy full 106 × 2 arm × 3 run.
-4. Khóa kế hoạch phân tích cụm requirement và ba run tại §4 trước chạy chính; lưu prompt/model/version, báo cáo MS_φ theo §1.1. Bootstrap/McNemar chưa phải quyết định đã duyệt.
-5. Xin GV danh sách 15 mutant và đối chiếu ID/requirement; báo kết quả pilot khi có. Chưa thực hiện các bước này.
+**Ghi chú lịch sử:** con số 15 mutant từ trao đổi GV trước đây chưa có danh sách ID và phân loại độc lập; không dùng làm trần tăng điểm hoặc căn cứ power. Kế hoạch 45 requirement/random/10 run đã được thay thế, không phải thiết kế hiện hành.

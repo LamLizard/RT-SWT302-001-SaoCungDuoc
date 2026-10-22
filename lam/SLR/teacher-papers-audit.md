@@ -1,8 +1,8 @@
-# Nhật ký đọc 17 paper nền giảng viên — Lâm
+# Nhật ký đọc paper nền giảng viên — Lâm
 
 Ngày cập nhật: **20/10/2026 (Asia/Saigon)**. Nhánh `Lam`. Bảng đích: [evidence-table.md](evidence-table.md#b-paper-nền-giảng-viên-cung-cấp--17-bài-có-toàn-văn).
 
-**Tập hiện hành: 17 bài, đều có PDF local và đã đọc toàn văn các phần liên quan.** Ba nguồn không có PDF đã bị loại theo yêu cầu người phụ trách, ghi vết loại tại [search-log §9](search-log.md#9-loại-nguồn-không-có-pdf-và-đổi-tên-file--20102026). Không còn hàng chờ đọc/ABS/META trong evidence table.
+**Tập audit ngày 20/10: 17 bài, đều có PDF local và đã đọc toàn văn các phần liên quan.** Ba nguồn không có PDF đã bị loại theo yêu cầu người phụ trách, ghi vết loại tại [search-log §9](search-log.md#9-loại-nguồn-không-có-pdf-và-đổi-tên-file--20102026). Không còn hàng chờ đọc/ABS/META trong evidence table.
 
 ## Mapping mã và PDF hiện hành
 
@@ -49,3 +49,11 @@ Ngày cập nhật: **20/10/2026 (Asia/Saigon)**. Nhánh `Lam`. Bảng đích: [
 - Sửa locator RESTOR Fig3/Fig4→PDF12 (phân tíchF1 ởPDF11); GV-10 9095 build và pass existing tests; GV-14 64 crowdworkers.
 
 Đợt đọc PDF đã đồng bộ kết quả vào bảng Lâm, merge, map và rq-check Lâm; chưa chạy artifact. Câu RQ và trạng thái kiểm chứng hiện hành được tổng hợp tại [rq-validation](../../team-synthesis/rq-validation.md).
+
+## Bổ sung GV-18 / PDF60 — 22/10/2026
+
+- Tiếp nhận theo mail cô Chi, arXiv:2505.09830v1, 14/05/2025; 15 trang. Tên file giữ nguyên `60-Martin Rodriguez.pdf`; không đổi mã GV-01–GV-17 hoặc tên PDF cũ.
+- SHA256: `f5ac7e8b3a1222276a32bdae6f8594fe313e7c8486616346ef1c9651a7700ed2`.
+- Đọc metadata, abstract, phương pháp §3/PDF4–8, kết quả §4–5/PDF9–12, threats/conclusion §6–7/PDF12–13 và ref.[15]. GPT-4-0613, temperature0.3, 10 scenario; ba run LLM được tác giả chọn sau tối ưu prompt. Không suy quy trình này thành kế hoạch chọn run của nhóm.
+- EP+BVA đã có trong prompt; input gồm specification + implementation; comparator là test thủ công. Không có ablation LLM không hướng dẫn EP+BVA; PIT mutation coverage không bằng MS_φ.
+- Chưa chạy artifact; chưa xác nhận bản published thay preprint. Nguồn nền hiện hành tăng 17 → 18, bộ nhóm 59 → 60; PRISMA final 42 giữ nguyên. Không tái chấm 59 điểm PICO nền.

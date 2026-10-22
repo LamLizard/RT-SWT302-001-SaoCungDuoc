@@ -1,5 +1,7 @@
 # PRISMA nhóm — nhóm 1 (SaoCungDuoc) · RQ FA26-EXT-12
 
+> **Đối soát hiện hành 22/10/2026:** thêm GV-18/Rodríguez theo mail cô vào lớp nguồn nền, thành **60 nguồn evidence = 42 INCLUDE lịch sử + 18 nguồn nền**. Không có lượt screening CSDL mới hoặc INCLUDE mới trong cập nhật này. Toàn bộ số 59/17 và phễu phía dưới là hồ sơ ngày 20/10 được giữ để truy vết; PRISMA final vẫn 42.
+
 **Cập nhật:** 20/10/2026. Phân biệt **42 bài INCLUDE qua screening** với **17 bài nền bổ sung**: [bảng merge](evidence-table-merged.md) và [map](rq-evidence-map.md) hiện có **59 bài evidence duy nhất**. Đợt này đồng bộ cách báo cáo; không screening lại IC/EC hoặc đổi quyết định INCLUDE của các nguồn.
 
 ## Phễu screening nhóm — giữ số liệu 42 bài

@@ -1,10 +1,10 @@
 # Bản đồ bằng chứng nền — nhóm 1 (SaoCungDuoc) · RQ FA26-EXT-12
 
-**RQ hiện hành:** Trên 106 yêu cầu bản vague của RESTestBench, prompt có hướng dẫn kỹ thuật EP+BVA và prompt single-step gốc của benchmark khác nhau thế nào về MS_φ, khi dùng cùng một mô hình ngôn ngữ và cùng temperature?
+**RQ hiện hành:** xem nguyên văn RQ cô đề xuất và câu hỏi phân tích tại [rq-validation §1](rq-validation.md#1-rq--pico).
 
-**PICO hiện hành:** P = 106 yêu cầu bản vague (63 FastAPI + 29 NestJS RealWorld + 14 TodoApp) · I = prompt có hướng dẫn EP+BVA · C = prompt single-step gốc · O = MS_φ trên 228 mutant · S = cùng model/temperature, 3 lần chạy, paired theo requirement.
+**PICO hiện hành:** 106 vague / 228 mutant; I = C + hướng dẫn EP+BVA có căn cứ; C = single-step gốc; O = MS_φ. DeepSeek-V4.1-Flash-1017 / API chính thức / trần 3 USD. Số lần sinh và ngân sách ở [experiment-design](experiment-design.md).
 
-**Phạm vi:** 59 bài = 42 bài INCLUDE qua screening + 17 bài nền GV-01–GV-17; 17 bài nền không cộng vào PRISMA final. Theo lựa chọn người dùng ngày 21/10/2026, **giữ nguyên nhãn P/I/C/O và số ✓ nền đã ghi**, chỉ đồng bộ bản sao, số đếm, chạm và thứ tự. Các nhãn nền còn chỗ chưa đồng nhất ở §1; không xem đây là ma trận đã tái chấm thống nhất theo RQ mới. [rq-validation §2.2–3.1](rq-validation.md#22-đối-chiếu-pico-cho-rq-hiện-hành) tách điểm nền với đối chiếu nội dung hiện hành.
+**Phạm vi hiện hành:** 60 nguồn = 42 INCLUDE lịch sử + 18 nguồn nền. Theo lựa chọn người dùng ngày 21/10, giữ nguyên nhãn/điểm của **59 bài nền cũ**. GV-18 mới được đối chiếu nội dung, chưa gán điểm nền. Không xem bảng này là kết quả tái chấm thống nhất toàn bộ theo RQ mới.
 
 ## 1. Quy tắc chấm ma trận nền (giữ điểm đã ghi)
 
@@ -40,7 +40,7 @@ Các quy tắc dưới đây là **rubric nền đã ban hành**, phục vụ tr
 
 Bảng 59 dòng dưới là ma trận nền để truy vết nguồn; bảng căn hàng RQ hiện hành ở [rq-validation §3.1](rq-validation.md#31-paper-gần-nhất-và-bảng-căn-hàng).
 
-## 3. Ma trận P · I · C · O (59 bài — đồng bộ bảng merge)
+## 3. Ma trận nền 59 bài và một nguồn bổ sung chưa chấm điểm
 
 Xếp theo số ✓, rồi số ô chạm **đã xác nhận**; ? không cộng như◐ và không đổi thành·. Dùng mã paper để đối chiếu vì số# ở map là thứ hạng, khác dòng merge.
 
@@ -107,6 +107,8 @@ Xếp theo số ✓, rồi số ô chạm **đã xác nhận**; ? không cộng 
 | 59 | GV-17 | [Intelligent Test Automation: A Multi-Agent LLM Framework for Dynamic Test Case Generation and Validation](https://doi.org/10.71097/ijsat.v16.i1.2232), IJSAT 16(1), **2025**<br>[PDF 59](../Paper-source/59-GV-17-Intelligent-Test-Automation.pdf) | Lâm · FT | · | · | · | · | 0 | 0/4 | **P·:** Demo sinh calculator.py và Python unittest từ requirement PDF. API endpoint/OAI_CONFIG_LIST là cấu hình gọi LLM, không REST API SUT của nghiên cứu. (§3/PDF2; AppendixA.1–A.6/PDF5–6).<br>**I·:** TCGA/TCMA/TCVA sinh/sửa/validate tests và cả implementation. Paper nói edge cases ở discussion nhưng không đặc tả hay thí nghiệm EP/BVA, partitions hoặc boundary request generator. (§3/PDF2; §4/PDF2–3; §5/PDF4; AppendixA.4–A.6/PDF6).<br>**C·:** §4 và appendix chỉ mô tả setup, agents và vòng sửa đến pass; không báo thí nghiệm có random/fuzz comparator. Temperature điều khiển randomness của LLM không phải một nhánh đối chứng. (§4/PDF2–3; AppendixA.2–A.6/PDF5–6).<br>**O·:** §4 nêu định tính high coverage/adaptability; Figs1–2 là workflow, không có mutation score, distinct bugs/failures yield hoặc bảng kết quả định lượng. Pass/fail của generated tests và sửa cả SUT không đủ chứng minh fault detection. (§3/Fig1/PDF2; §4/Fig2/PDF3; §5/PDF4; AppendixA.5–A.6/PDF6). |
 
 
+| 60 | GV-18 | [Evaluating Large Language Models for the Generation of Unit Tests with Equivalence Partitions and Boundary Values](https://arxiv.org/abs/2505.09830), Martín Rodríguez, Gustavo Rossi, Alejandro Fernandez, **2025**, arXiv:2505.09830v1 (preprint)<br>[PDF 60](../Paper-source/60-Martin%20Rodriguez.pdf) | Lâm · mail GV · FT | Khác: unit Java | Có EP+BVA trong prompt | Khác: human | Khác: PIT | n/a | n/a | Đối chiếu hiện hành: P khác domain; I có EP+BVA trong prompt; C là human; O là PIT, không MS_φ. Chưa gán điểm theo rubric nền. §3/PDF4–8; §4–6/PDF9–13. |
+
 ## 4. Ứng viên phản chứng
 
 GV-02 là nền trực tiếp cho điều kiện vague, single-step và MS_φ; TD-0002 có hướng dẫn boundary/equivalence classes trong prompt nhưng mutation score khác MS_φ; TD-0015 là tham chiếu về sinh test EP+BVA. **3/4, 2/4 và 0/4 là điểm nền giữ lại**, không phải kết quả áp dụng thống nhất rubric hiện hành. Chưa tái thẩm định cả 59 nên không khẳng định “không có paper nào khác đạt ≥2/4” theo RQ mới. Xem bảng căn hàng và giới hạn kết luận tại [rq-validation §2.2–3.1](rq-validation.md#22-đối-chiếu-pico-cho-rq-hiện-hành).
@@ -151,4 +153,8 @@ Danh sách dưới là ưu tiên đọc/đối chiếu theo **điểm đang lưu
 - **GV-02 = R2R-01 (RESTestBench)**; **GV-03 = R2R-04 (Prompt-Based)**; **GV-04 = R2R-03 (RESTOR)** tại [rq-check của Tùng §2.2](../tung/SLR/rq-check.md#22-đối-chiếu-picos-từ-bản-toàn-văn). Mỗi nghiên cứu chỉ có một dòng trong ma trận; các mã R2R là mã đối chiếu, không cộng thêm paper. MioHint/R2R-02 không thuộc 17 bài GV.
 - GV-01–GV-17 có toàn văn, locator và hạn chế tại [audit Lâm](../lam/SLR/teacher-papers-audit.md); phần đối chiếu cá nhân được bổ sung tại [rq-check Lâm](../lam/SLR/rq-check.md).
 - Kiểm đếm nhãn đang lưu: **P = 1✓/28◐/29·/1?; I = 1✓/28◐/30·/0?; C = 8✓/26◐/25·/0?; O = 5✓/39◐/15·/0?**. Mỗi yếu tố tổng 59; đây không phải thống kê theo rubric hiện hành đã tái thẩm định. Các mã paper khớp một-một với bảng merge.
-- Thiết kế hiện hành đã chọn **106 vague**, hai prompt cùng hướng dẫn assertion gốc, ba run và cùng model/temperature. Còn mở: prompt I, model/cấu hình cụ thể, artifact/môi trường chạy, định danh mutant, xử lý lỗi/retry, phân tích cụm requirement/ba run và runtime pilot. B/miền uniform random là điều kiện hướng cũ, không còn là tham số phải khóa của phép so hiện hành.
+- Thiết kế hiện hành theo rq-validation và experiment-design: 106 vague, hai prompt, DeepSeek-V4.1-Flash-1017/API chính thức, tổng 3 USD. Hồ sơ mục 1–2 là bản review; chưa có Docker/golden/pilot. Các thống kê nhãn trong §6 vẫn chỉ áp dụng 59 dòng cũ, không bao gồm GV-18 n/a.
+
+## 7. Đối chiếu hiện hành ngày 22/10
+
+GV-18 bác bỏ tuyên bố EP+BVA trong prompt là phương pháp mới, nhưng không thực hiện phép so I/C của nhóm. Bảng nghiên cứu gần nhất gồm GV-02/GV-18/TD-0002/GV-03/GV-04 ở [rq-validation §2](rq-validation.md#2-bằng-chứng-và-nghiên-cứu-gần-nhất). Các xếp hạng/đếm dấu nền phía trên không được dùng để chứng minh novelty hiện hành. Không bác bỏ replication; định vị extension đang chờ nhóm/cô review.

@@ -2,14 +2,15 @@
 
 Mọi thay đổi sau khi ban hành: ghi vào search-log.md kèm lý do + ngày (không sửa lặng lẽ). Đợt đồng bộ 21/10/2026 được ghi tại [nhật ký Lâm](../lam/SLR/search-log.md); không phải một lượt chạy query mới.
 
-## 1. Câu hỏi nghiên cứu
+## 1. Câu hỏi nghiên cứu hiện hành — 22/10/2026
 
-- RQ (VN): Trên 106 yêu cầu bản vague của RESTestBench, prompt có hướng dẫn kỹ thuật EP+BVA và prompt single-step gốc của benchmark khác nhau thế nào về MS_φ, khi dùng cùng một mô hình ngôn ngữ và cùng temperature?
-- H0 (phát biểu định hướng, đặc tả kiểm định cần khóa trước chạy chính): Không có khác biệt về MS_φ giữa prompt có hướng dẫn EP+BVA và prompt single-step gốc, với cùng mô hình, cùng temperature và cùng 106 yêu cầu.
-- H1 (phát biểu định hướng): Có khác biệt về MS_φ giữa hai prompt dưới cùng điều kiện.
-- PICO: P = **106 yêu cầu bản vague** của RESTestBench (**63 FastAPI + 29 NestJS RealWorld + 14 TodoApp**) · I = prompt có hướng dẫn EP+BVA · C = prompt single-step gốc của benchmark · O = **MS_φ** trên 228 mutant · S = cùng model, cùng temperature, 3 lần chạy, so sánh paired theo requirement.
+- **RQ chính:** Trong điều kiện sinh single-step với cùng mô hình, cấu hình và ngân sách kiểm thử được quy định trước, việc bổ sung hướng dẫn EP+BVA vào prompt gốc ảnh hưởng như thế nào đến MS_φ trên các yêu cầu vague của RESTestBench tại phiên bản đóng băng?
+- **RQ phân tích:** Các trường hợp cải thiện hoặc suy giảm MS_φ đi kèm những khác biệt nào về lựa chọn dữ liệu kiểm thử, thiết lập tiền điều kiện và tính đúng của oracle?
+- **PICO:** P = 106 vague / 228 mutant tại commit `4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae`; I = C + hướng dẫn EP+BVA có căn cứ; C = single-step gốc; O = MS_φ và kết quả bổ sung.
+- **Quyết định người dùng:** DeepSeek-V4.1-Flash-1017 qua DeepSeek API chính thức; tổng chi phí model tối đa 3 USD, kể cả pilot/retry.
+- **H0/H1:** chênh lệch kỳ vọng MS_φ bằng 0 / khác 0 dưới điều kiện đã quy định; kế hoạch phân tích và giới hạn số lần sinh ở [experiment-design](experiment-design.md), chưa chạy thực nghiệm.
 
-Nhãn nhóm `extension`: kế thừa điều kiện vague, nhánh single-step và MS_φ của GV-02, bổ sung phép so hướng dẫn EP+BVA; paper gốc còn đánh giá precise và refinement. Định nghĩa pass-valid/fail-mutant, điểm từng run và trung bình mô tả ba run tại [rq-validation §1.1](rq-validation.md#11-định-nghĩa-outcome-và-tổng-hợp-ba-run). Phân tích cụm requirement và ba run **chưa chốt** tại [§4](rq-validation.md#4-khả-thi-của-gap-đang-cân-nhắc); không mặc định 228 mutant/684 mutant-run độc lập. Chưa có pilot; chưa xác nhận thay đổi P đã được cập nhật trên thẻ/GV.
+Đóng góp đề xuất gồm phép so có kiểm soát, phân tích thành công/thất bại và gói tái lập. Nhãn extension cần được nhóm/cô review; không chứng minh novelty bằng điểm PICO hoặc tuyên bố thêm EP+BVA vào prompt là mới. Điểm nền được giữ lịch sử, xem [rq-validation](rq-validation.md).
 
 ## 2. Nguồn & phân công
 | Thành viên | Nguồn |
@@ -55,3 +56,30 @@ Paper (tên + năm + venue + DOI) · Tool/LLM · Dataset · Metric · Kết qu�
 ## 7. Mốc thời gian
 
 - Mốc của protocol ban đầu: **23:59 05/10/2026** · Snowballing: Ngày 3–4 (1 vòng bắt buộc, tối đa 2) · Screening xong: Ngày 4 · Evidence table + kiểm chéo: Ngày 4–5 · Gộp nhóm: cuối tuần. Search-log có các lượt thực tế sau mốc này; giữ lịch sử, không suy đây là ngày dừng thực tế đã xác minh. Mốc/protocol bổ sung cho RQ hiện hành chưa chốt.
+
+## 8. Protocol bổ sung cho RQ prompt — phiên bản review 22/10/2026
+
+Phần §3–7 là hồ sơ tạo tập 42 INCLUDE, không sửa ngược query, IC/EC, ngày hoặc số screening. Phần này quy định lượt bổ sung, không tuyên bố đã chạy ba CSDL một lần nữa.
+
+### 8.1. Hai lớp nguồn
+
+1. **Lớp nghiên cứu REST API trực tiếp:** LLM sinh test/oracle từ yêu cầu/tài liệu API; tìm cả prompt engineering, input selection, oracle và budget. Không buộc mọi bài phải dùng đúng RESTestBench hoặc MS_φ mới được xem xét.
+2. **Lớp cơ sở phương pháp:** LLM + EP/BVA hoặc ảnh hưởng của đặc tả thiếu chi tiết trong unit/integration testing. Đánh dấu domain khác. GV-18/Rodríguez thuộc lớp này, là nguồn nền cô yêu cầu, không phải INCLUDE mới theo EC-O cũ.
+
+### 8.2. Chuỗi đề xuất cho lượt CSDL tiếp theo
+
+- A1: `(REST API OR RESTful API) AND (large language model OR LLM) AND (test generation OR oracle generation OR prompt OR test amplification)`.
+- A2: `(large language model OR LLM) AND (equivalence partitioning OR boundary value analysis OR boundary testing) AND (test generation OR unit test OR integration test)`.
+- A3: `(REST API OR RESTestBench) AND (vague OR underspecified OR natural language requirements OR oracle) AND (LLM OR prompt)`.
+
+Chuỗi là bản review, phải ghi biến thể cú pháp từng CSDL trước khi chạy. Chạy chính giữ IEEE/ACM/OpenAlex theo phân công; tra cứu web/snowballing ghi riêng và không tự cộng vào PRISMA. Cửa sổ ưu tiên nghiên cứu gần đây: 22/10/2025–22/10/2026; các nguồn nền quan trọng ngoài cửa sổ vẫn được đối chiếu và gắn nhãn.
+
+### 8.3. Bằng chứng và chấm đối chiếu
+
+Ghi title/author/year/DOI hoặc arXiv, phiên bản PDF, trang/mục, input được phép, can thiệp, comparator, metric/mẫu số, ngân sách thực nghiệm và threats tác giả nêu. Phân biệt AUTHOR_STATED / REVIEWER_INFERRED / NOT_VERIFIED. Cùng tên mutation score không tự bằng MS_φ; LLM với người viết test không bằng hai prompt có/không EP+BVA.
+
+Mỗi bài được đối chiếu nội dung với RQ hiện hành riêng; không tái đặt tên dấu ✓ của bảng nền thành kết quả chấm mới. Muốn tái thẩm định toàn bộ tập cũ cần một lượt có log và kiểm tra độc lập. Không gán x/N limitation hoặc số hit của CSDL từ kết quả web.
+
+### 8.4. Lượt đã thực hiện và phần còn mở
+
+Ngày 22/10 thực hiện tra cứu web có hướng, đọc các phần liên quan của PDF GV-18, TD-0002, GV-02/GV-03/GV-04; log tại [search-log §11](../lam/SLR/search-log.md). Ba nguồn 2026 đã có trong tập cũ, không cộng trùng. Bộ đối chiếu có 60 nguồn sau thêm GV-18; PRISMA final vẫn 42. Chưa hoàn thành một lượt systematic search/screening mới theo A1–A3; không dùng bản cập nhật này để khẳng định bao phủ toàn lĩnh vực.

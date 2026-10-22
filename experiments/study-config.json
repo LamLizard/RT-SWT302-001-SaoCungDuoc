@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "status": "review_draft_not_final_freeze",
+  "execution_permitted": false,
+  "created_on": "2026-10-22",
+  "timezone": "Asia/Saigon",
+  "scope": "Only steps 1 and 2 approved. No setup, golden tests, pilot, paid model call, main execution, commit or push has been performed.",
+  "benchmark": {
+    "repository": "https://github.com/casablancahotelsoftware/RESTestBench",
+    "commit": "4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae",
+    "manifest": "benchmark-manifest.json",
+    "requirements": 106,
+    "mutants": 228,
+    "requirement_variant": "vague"
+  },
+  "model": {
+    "provider": "deepseek_official",
+    "base_url": "https://api.deepseek.com",
+    "endpoint": "/chat/completions",
+    "api_model_id": "deepseek-flash",
+    "expected_checkpoint": "DeepSeek-V4.1-Flash-1017",
+    "version_binding": "official_alias_not_immutable_snapshot",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "thinking": {
+      "type": "disabled"
+    },
+    "temperature": 0.2,
+    "top_p": 1.0,
+    "max_tokens": 2048,
+    "stream": false,
+    "tools": null,
+    "system_prompt": null,
+    "sdk_max_retries": 0,
+    "sampling_seed": null,
+    "timeout_seconds": 360
+  },
+  "generation": {
+    "logical_calls_per_requirement_arm_run": 1,
+    "test_functions_per_output": 1,
+    "interactive": false,
+    "input_tokens_planning_ceiling": 16000,
+    "exact_input_token_preflight_required": true,
+    "input_truncation_allowed": false,
+    "retain_full_oas": true,
+    "semantic_repair_retries": 0,
+    "empty_or_truncated_output_retries": 0,
+    "max_transport_retry_per_slot": 1,
+    "transport_retry_condition": "Only explicit retryable transport error without usable generation; retain and reserve cost of unknown attempts; no best-of selection"
+  },
+  "test_budget": {
+    "max_http_requests_per_test_execution": 64,
+    "count_setup_and_cleanup_requests": true,
+    "max_elapsed_seconds_per_test_execution": 60,
+    "assertion_policy": "Count actual checks; no equal-assertion-count claim",
+    "overflow_policy": "Stop execution at the common cap; retain output and mark budget_exceeded; no silent truncation of tests",
+    "sut_reset": "Before each original/mutant execution; same pinned harness for both arms",
+    "instrumentation_error_policy": "Do not score cap/infrastructure failures as mutant kills; mark unresolved and block a complete benchmark conclusion until verified."
+  },
+  "replication": {
+    "main_runs_planned": 3,
+    "main_runs_finalized": false,
+    "rationale": "Budget-constrained repeated generation; not a power or equivalence guarantee; review and precision gate before main",
+    "pilot_requirements": 12,
+    "pilot_per_service": 4,
+    "pilot_runs": 1,
+    "pilot_model_slots": 24,
+    "main_model_slots": 636,
+    "pilot_for_prompt_tuning": false
+  },
+  "allocation": {
+    "seed": "SaoCungDuoc-20261022-v1",
+    "algorithm": "SHA256 ranking; stratified pilot selection; service/run alternating CI/IC orders; hash interleave; keep each pair adjacent",
+    "schedule": "run-schedule.csv",
+    "final_schedule_frozen": false
+  },
+  "budget": {
+    "currency": "USD",
+    "hard_total": 3.0,
+    "includes": [
+      "pilot",
+      "main",
+      "all_billable_retries",
+      "unknown_charge_reservations"
+    ],
+    "planned_pilot": 0.15,
+    "planned_main": 2.45,
+    "retry_and_contingency_reserve": 0.4,
+    "concurrency": 1,
+    "use_credit_or_cache_discount_as_guarantee": false,
+    "off_peak_only": true,
+    "preferred_local_window": "17:15-07:30 Asia/Saigon; recheck official rates and UTC peak windows before dispatch",
+    "peak_input_per_million": 0.3,
+    "peak_output_per_million": 1.2,
+    "off_peak_input_per_million": 0.15,
+    "off_peak_output_per_million": 0.6,
+    "input_cache_assumption": "all cache miss",
+    "prices_verified_on": "2026-10-22",
+    "price_source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "admission": "Require a validated upper bound for request tokens/cost, reserve at peak miss/output rates, and enforce used+reserved<=3 before dispatch. If bound or price cannot be verified, do not dispatch. Reconcile provider usage; retain reservations for unknown billing. Stop with incomplete status rather than reduce N/R or select outputs.",
+    "minimum_off_peak_window_for_pair_seconds": 1500,
+    "pair_admission": "Reserve both arms and maximum permitted transport attempts before starting a pair; retain unknown charges. Never start a pair whose worst-case verified reservation could exceed USD 3."
+  },
+  "review_gates": [
+    "User review before step 3",
+    "Actual environment/dependency versions and API parameter support verification",
+    "Golden tests and evaluator manifest/missing-output checks",
+    "Exact tokenizer/accounting preflight and pilot cost/precision review",
+    "Two independent qualitative reviewers and deadline confirmed",
+    "Final prompt/config/manifest/schedule hashes locked before main"
+  ],
+  "sha256": {
+    "prompts/C.txt": "af717c86e54149aef250e98fa471b0c7942144d3011e9e83786399962c1c9275",
+    "prompts/I.txt": "43abf1588e21b5e5c026182eeabf5f479cca57d3ff915751333c8929da49cce2",
+    "benchmark-manifest.json": "77d43970252f1d668a3ad73f6d948f3da60aad3fbff2a5c135e330eb266f59f6",
+    "run-schedule.csv": "77af2025d9919f5a217661ec43d01f05d1f474a2f4605ea7e255356530bb5d01"
+  },
+  "sources": {
+    "api_version_mapping": "https://api-docs.deepseek.com/updates/",
+    "pricing": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "parameters": "https://api-docs.deepseek.com/api/create-chat-completion/",
+    "skill": "experimental-design v1.5 (2026-09-30)"
+  },
+  "preprocessing": {
+    "common_code_cleaning": "Pinned SingleStepTool._clean_code_fences only",
+    "retain_raw_and_cleaned_output": true,
+    "manual_or_llm_repairs": false
+  },
+  "analysis": {
+    "primary_estimand": "I minus C mean MS_phi over the fixed 106-requirement panel and planned repeated generations",
+    "primary_reporting": [
+      "three paired aggregate run differences",
+      "mean difference in percentage points",
+      "SD",
+      "min/max",
+      "per-service and per-requirement results"
+    ],
+    "confirmatory_significance_test": null,
+    "optional_t_interval": "Exploratory/model-based only: mean +/- 4.30265273*SD/sqrt(3); requires independent approximately normal aggregate run differences, not verified by R=3",
+    "requirement_bootstrap": {
+      "replicates": 10000,
+      "stratify_by_service": true,
+      "retain_both_arms_all_mutants_all_runs": true,
+      "purpose": "Secondary case-mix sensitivity, not stochastic-generation uncertainty or generalization to all REST APIs"
+    },
+    "equivalence_claim_permitted": false
+  },
+  "qualitative_review": {
+    "requirements": 12,
+    "per_service": 4,
+    "selection_seed_label": "qualitative-selection",
+    "outputs_if_complete": 72,
+    "independent_reviewers_required": 2,
+    "reviewer_ids": null,
+    "deadline": null,
+    "status": "planned_not_annotated",
+    "selected_requirement_keys": [
+      "fastapi/38",
+      "fastapi/12",
+      "fastapi/25",
+      "fastapi/61",
+      "nestjs-realworld/16",
+      "nestjs-realworld/10",
+      "nestjs-realworld/2",
+      "nestjs-realworld/21",
+      "todoapp/7",
+      "todoapp/11",
+      "todoapp/6",
+      "todoapp/14"
+    ]
+  }
+}

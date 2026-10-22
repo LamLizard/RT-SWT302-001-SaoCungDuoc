@@ -1,5 +1,18 @@
 # rq-check — K.Duy · Bước 2 (phần cá nhân)
 
+## Hiện hành — cập nhật 22/10/2026
+
+**RQ chính:** Trong điều kiện sinh single-step với cùng mô hình, cấu hình và ngân sách kiểm thử được quy định trước, việc bổ sung hướng dẫn EP+BVA vào prompt gốc ảnh hưởng như thế nào đến MS_φ trên các yêu cầu vague của RESTestBench tại phiên bản đóng băng?
+
+**PICO:** P = 106 vague/228 mutant, commit `4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae`; I = prompt C + EP+BVA có căn cứ; C = single-step gốc; O = MS_φ. Model được chọn: DeepSeek-V4.1-Flash-1017, DeepSeek API chính thức; ngân sách tổng 3 USD.
+
+Đối chiếu nghiên cứu gần nhất, gồm GV-18/Rodríguez, ở [rq-validation §2](../../team-synthesis/rq-validation.md#2-bằng-chứng-và-nghiên-cứu-gần-nhất); thiết kế ở [experiment-design](../../team-synthesis/experiment-design.md). Bản cập nhật hiện hành không phải tái chấm paper của cá nhân; các dấu P/I/C/O bên dưới giữ nguyên bằng chứng/phiên bản cũ. Không dùng tổng điểm cũ để kết luận RQ mới có tính mới.
+
+## Hồ sơ đối chiếu trước 22/10/2026 — lịch sử hướng cũ
+
+Các RQ 45 requirement, EP+BVA truyền thống so random, số lần chạy và kết luận phía dưới là hồ sơ trước đổi hướng, không phải điều kiện thực nghiệm hiện hành. Chưa chạy lại screening hoặc thực nghiệm trong lượt đồng bộ này.
+
+
 **Phạm vi:** 8 bài được phân công: #17–#22 (K46, K49, K56, K60, K67, K68) và #41–#42 (K02, K33), theo `evidence-table-merged.md`.
 
 **Ngày:** 18/10/2026

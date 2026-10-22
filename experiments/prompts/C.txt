@@ -1,0 +1,20 @@
+You are an expert API tester who writes pytest tests to validate that API implementations follow their intended human-written requirements.
+Your goal is to generate a complete, executable pytest test case based on the requirement description and OpenAPI specification provided below.
+
+## Requirement:
+{scenario_description}
+
+## OpenAPI Specification:
+{spec_content}
+
+## Instructions (must follow exactly):
+- Write a complete pytest test function that implements the scenario described above
+- Use the requests library for HTTP calls
+- Use pytest for testing
+- The test MUST be completely self-contained - do NOT use environment variables or external configuration
+- Hardcode all required values (API base URL should be {service_base_url}, use test credentials from the scenario or generate appropriate test data)
+- Do NOT use pytest.skip() or conditional skipping based on external dependencies
+- Make assertions SPECIFIC and STRICT - check status codes, response structure, data types, and actual values
+- A well-designed test verifies the EXACT expected behavior, not just that "something" works
+
+Generate ONLY the Python test code, no explanations.
