@@ -1,0 +1,1355 @@
+{
+  "schema_version": 1,
+  "status": "review_draft_static_inventory_not_runtime_validated",
+  "verified_on": "2026-10-22",
+  "timezone": "Asia/Saigon",
+  "repository": "https://github.com/casablancahotelsoftware/RESTestBench",
+  "commit": "4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae",
+  "requirements_total": 106,
+  "mutants_total": 228,
+  "provenance": "106 pinned JSON files read with GitHub connector; no Docker, golden tests, generation or evaluator execution. Composite mutant IDs are study keys; native mutant locator is zero-based index in the pinned requirement JSON.",
+  "requirement_key_format": "service/requirement_id",
+  "mutant_key_format": "service/requirement_id/mutant_index",
+  "services": [
+    {
+      "service": "fastapi",
+      "requirement_count": 63,
+      "mutant_count": 141,
+      "spec_path": "services/fastapi/spec.json",
+      "spec_git_blob_sha1": "91a2e5f7c254dd975c7a5232e5d9c8e45a6da21f",
+      "spec_text_characters": 38478,
+      "base_url": "http://localhost:8000"
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_count": 29,
+      "mutant_count": 65,
+      "spec_path": "services/nestjs-realworld/spec.json",
+      "spec_git_blob_sha1": "f59bad89ea91305c6f24dcabe2c400b5f08e495a",
+      "spec_text_characters": 36766,
+      "base_url": "http://localhost:3000"
+    },
+    {
+      "service": "todoapp",
+      "requirement_count": 14,
+      "mutant_count": 22,
+      "spec_path": "services/todoapp/spec.json",
+      "spec_git_blob_sha1": "c295bf26e1259f436fcdc16172215f1640bfa21b",
+      "spec_text_characters": 8962,
+      "base_url": "http://localhost:5000"
+    }
+  ],
+  "requirements": [
+    {
+      "service": "fastapi",
+      "requirement_id": 1,
+      "path": "data/requirements/fastapi/requirement_1.json",
+      "git_blob_sha1": "52c5db219458a5192386a9f4381d011b33be89e6",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 2,
+      "path": "data/requirements/fastapi/requirement_2.json",
+      "git_blob_sha1": "812249eb755213d32fbf28d4a1e912a409c070e8",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 3,
+      "path": "data/requirements/fastapi/requirement_3.json",
+      "git_blob_sha1": "7a7ffc1d5b18472d35b87d328c06fe9809bce924",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 4,
+      "path": "data/requirements/fastapi/requirement_4.json",
+      "git_blob_sha1": "2fafae7220b93ec22e7d9c33ace717bbd1316ab1",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 5,
+      "path": "data/requirements/fastapi/requirement_5.json",
+      "git_blob_sha1": "c6f3da90ba745e408377b6a2185c29467d9bd638",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 6,
+      "path": "data/requirements/fastapi/requirement_6.json",
+      "git_blob_sha1": "bc493f8d35b09e37f94cf544e1c115620b5f950b",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 7,
+      "path": "data/requirements/fastapi/requirement_7.json",
+      "git_blob_sha1": "a60f933d198806596403ef80808d82d67af29b33",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 8,
+      "path": "data/requirements/fastapi/requirement_8.json",
+      "git_blob_sha1": "a059baec96cc0e202e8593a9ba6415dbc749d164",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 9,
+      "path": "data/requirements/fastapi/requirement_9.json",
+      "git_blob_sha1": "4955c2db57e9f4605932a5aff62c021c5e9a4601",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 10,
+      "path": "data/requirements/fastapi/requirement_10.json",
+      "git_blob_sha1": "8ed6bf1e8db08e3165583c888c5b97e30b86459c",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 11,
+      "path": "data/requirements/fastapi/requirement_11.json",
+      "git_blob_sha1": "817c5f11579df24ef8943091c48bfe2fd644ad43",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 12,
+      "path": "data/requirements/fastapi/requirement_12.json",
+      "git_blob_sha1": "f3d1b25a60a61ca4356ab61fce94c1d809a25bcf",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 13,
+      "path": "data/requirements/fastapi/requirement_13.json",
+      "git_blob_sha1": "c11a832a8b95be6f7ef108155cc2b89c4232bedd",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 14,
+      "path": "data/requirements/fastapi/requirement_14.json",
+      "git_blob_sha1": "df3b3224046dce3de988b37a16191d95b33f5603",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 15,
+      "path": "data/requirements/fastapi/requirement_15.json",
+      "git_blob_sha1": "11f0ba5e2b7268e4bace2db686b0b979449d1ea0",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 16,
+      "path": "data/requirements/fastapi/requirement_16.json",
+      "git_blob_sha1": "13b9af07ba7a29878bcb7b36576cf6298d8500ec",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 17,
+      "path": "data/requirements/fastapi/requirement_17.json",
+      "git_blob_sha1": "efb312e3293bdf718daf484f47e139ef985e4214",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 18,
+      "path": "data/requirements/fastapi/requirement_18.json",
+      "git_blob_sha1": "b1b399df1235331062d2ebb4db233f5d8b0fa405",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 19,
+      "path": "data/requirements/fastapi/requirement_19.json",
+      "git_blob_sha1": "c0b309708da5590814255b127405b6c3cf976b28",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 20,
+      "path": "data/requirements/fastapi/requirement_20.json",
+      "git_blob_sha1": "91c7a72831721fb01ea3e6cc30b4a60cae8c09eb",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 21,
+      "path": "data/requirements/fastapi/requirement_21.json",
+      "git_blob_sha1": "a06d04eef52ef8fd9e75e8a14239300e3c656a47",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 22,
+      "path": "data/requirements/fastapi/requirement_22.json",
+      "git_blob_sha1": "34369642f476b0afab9c5c5c81e53ac6b911b5d4",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 23,
+      "path": "data/requirements/fastapi/requirement_23.json",
+      "git_blob_sha1": "d15ece42fb67dbb5797b8b9d303ac627b9dbd802",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 24,
+      "path": "data/requirements/fastapi/requirement_24.json",
+      "git_blob_sha1": "7ad0a6cb898dfd41bce4ba68f9e0a66c8acf1c75",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 25,
+      "path": "data/requirements/fastapi/requirement_25.json",
+      "git_blob_sha1": "b138c5e1cf94964492120d1ff7246a3652ee73c4",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 26,
+      "path": "data/requirements/fastapi/requirement_26.json",
+      "git_blob_sha1": "0a167cbc6fc790936ff00dc8491d7f9d6745c9c0",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 27,
+      "path": "data/requirements/fastapi/requirement_27.json",
+      "git_blob_sha1": "e88927c9c7bc6826b4c582754b316d4b21e4237c",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 28,
+      "path": "data/requirements/fastapi/requirement_28.json",
+      "git_blob_sha1": "b4e512236a854f1903e6e2656fc25720155a253e",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 29,
+      "path": "data/requirements/fastapi/requirement_29.json",
+      "git_blob_sha1": "67d68c7434a6f38603151c37155bd789bfd23c2e",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 30,
+      "path": "data/requirements/fastapi/requirement_30.json",
+      "git_blob_sha1": "25a73d15f10f9189dc44e49e9eefc54814f19b89",
+      "num_mutants": 5,
+      "mutant_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 31,
+      "path": "data/requirements/fastapi/requirement_31.json",
+      "git_blob_sha1": "dc1ca8f13a47fd624bb6b07c503c913d38457c8e",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 32,
+      "path": "data/requirements/fastapi/requirement_32.json",
+      "git_blob_sha1": "35c413fdb47036b8b3f5eebe51d183f89ca44834",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 33,
+      "path": "data/requirements/fastapi/requirement_33.json",
+      "git_blob_sha1": "b27bac28296194cd0fb0cb71dbca4263b7ecbc7a",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 34,
+      "path": "data/requirements/fastapi/requirement_34.json",
+      "git_blob_sha1": "b4bb1ba5779a2457ea180ebdb8a2ba8832457976",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 35,
+      "path": "data/requirements/fastapi/requirement_35.json",
+      "git_blob_sha1": "0785d62b3aec1e15ae1224e427847a6203198269",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 36,
+      "path": "data/requirements/fastapi/requirement_36.json",
+      "git_blob_sha1": "18b1f7e8bf58ee601c82feac12e2c845d65d704c",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 37,
+      "path": "data/requirements/fastapi/requirement_37.json",
+      "git_blob_sha1": "76f2e027010966e0cd94dfc7dddc72c4216a6270",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 38,
+      "path": "data/requirements/fastapi/requirement_38.json",
+      "git_blob_sha1": "772efd13a40996aa3a7efd296823f09c37bbe71c",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 39,
+      "path": "data/requirements/fastapi/requirement_39.json",
+      "git_blob_sha1": "b7b3eb7f866a8192212468f93c800929970bb726",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 40,
+      "path": "data/requirements/fastapi/requirement_40.json",
+      "git_blob_sha1": "b12c6ec8df0e85785b19f5135896f86778686289",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 41,
+      "path": "data/requirements/fastapi/requirement_41.json",
+      "git_blob_sha1": "7a23d7596e5ca50aedc9ceeda1caf89d8a71ae89",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 42,
+      "path": "data/requirements/fastapi/requirement_42.json",
+      "git_blob_sha1": "ee888fefae75bb32b4e55f8a41c3b494af81fb27",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 43,
+      "path": "data/requirements/fastapi/requirement_43.json",
+      "git_blob_sha1": "6f311f8447b04fe00c5d6a4e3481db543990a4b5",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 44,
+      "path": "data/requirements/fastapi/requirement_44.json",
+      "git_blob_sha1": "c2eea6609b0bafad4fd9324ac2b9e1358778dd99",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 45,
+      "path": "data/requirements/fastapi/requirement_45.json",
+      "git_blob_sha1": "d76824b17e4467e854638dcb2ed42969787f97b9",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 46,
+      "path": "data/requirements/fastapi/requirement_46.json",
+      "git_blob_sha1": "28676478d81027d84f9a9df88aca6bb3eea657d2",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 47,
+      "path": "data/requirements/fastapi/requirement_47.json",
+      "git_blob_sha1": "5f639f2e4bbf65fa95754115fe19edc9b752d23c",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 48,
+      "path": "data/requirements/fastapi/requirement_48.json",
+      "git_blob_sha1": "6be84534868c5bba0a97df6c4604d94d3564aa4e",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 49,
+      "path": "data/requirements/fastapi/requirement_49.json",
+      "git_blob_sha1": "a78b8b0fc940b5c705e58fb82d3a2779947e2d6f",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 50,
+      "path": "data/requirements/fastapi/requirement_50.json",
+      "git_blob_sha1": "1d6cefe1f372349887cc0ff37cf5e9e4b12e90aa",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 51,
+      "path": "data/requirements/fastapi/requirement_51.json",
+      "git_blob_sha1": "26623de58286ab8066711576e0f4ff01e1ebf7ab",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 52,
+      "path": "data/requirements/fastapi/requirement_52.json",
+      "git_blob_sha1": "0054308d674834129578e1ead0191f4f858d0347",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 53,
+      "path": "data/requirements/fastapi/requirement_53.json",
+      "git_blob_sha1": "07ef5d8f8ae0701bf3c7830437af4c4160d3a893",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 54,
+      "path": "data/requirements/fastapi/requirement_54.json",
+      "git_blob_sha1": "a24083b34365aef7b670cf8b469db6bfa75e6cd2",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 55,
+      "path": "data/requirements/fastapi/requirement_55.json",
+      "git_blob_sha1": "b6de093bc3c55f71af7de86222ce1ba4e95032ff",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 56,
+      "path": "data/requirements/fastapi/requirement_56.json",
+      "git_blob_sha1": "628087493cc5fae739f56d826766b65aaee12b9d",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 57,
+      "path": "data/requirements/fastapi/requirement_57.json",
+      "git_blob_sha1": "2b63a05b59cb7a86e42ebf5abbf26c804b3d4828",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 58,
+      "path": "data/requirements/fastapi/requirement_58.json",
+      "git_blob_sha1": "0007f542675af63cc6a2e57e853ff1f2a7d0a463",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 59,
+      "path": "data/requirements/fastapi/requirement_59.json",
+      "git_blob_sha1": "a7abe3097067e0ebaeb4f6a614057351c53b7231",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 60,
+      "path": "data/requirements/fastapi/requirement_60.json",
+      "git_blob_sha1": "b2fcb63f015968384fe3db238da43730d7a1e163",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 61,
+      "path": "data/requirements/fastapi/requirement_61.json",
+      "git_blob_sha1": "ecc6884fea41acfb011f3f6e0f45f41ede5cc508",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 62,
+      "path": "data/requirements/fastapi/requirement_62.json",
+      "git_blob_sha1": "02a562b4395ea86e405ef80f5b956cdc4b0ca282",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "fastapi",
+      "requirement_id": 63,
+      "path": "data/requirements/fastapi/requirement_63.json",
+      "git_blob_sha1": "d6eb53a0b0049b098b09f28e860ae1013f63b6a4",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 1,
+      "path": "data/requirements/nestjs-realworld/requirement_1.json",
+      "git_blob_sha1": "97584a259639b23c45d917885da6036f89b49bff",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 2,
+      "path": "data/requirements/nestjs-realworld/requirement_2.json",
+      "git_blob_sha1": "bb28512b13ef7d6601c7ef5f28b07fd3c1236220",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 3,
+      "path": "data/requirements/nestjs-realworld/requirement_3.json",
+      "git_blob_sha1": "757594802b231d1497ea516bc0c11a61e923cbdc",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 4,
+      "path": "data/requirements/nestjs-realworld/requirement_4.json",
+      "git_blob_sha1": "48a42db06253320985753d24db1039270a1b308d",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 5,
+      "path": "data/requirements/nestjs-realworld/requirement_5.json",
+      "git_blob_sha1": "5d9742e903385b48227d3c00ff821d0f67aa7d00",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 6,
+      "path": "data/requirements/nestjs-realworld/requirement_6.json",
+      "git_blob_sha1": "f34af62b3411286c09af554677adbb509eeff998",
+      "num_mutants": 4,
+      "mutant_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 7,
+      "path": "data/requirements/nestjs-realworld/requirement_7.json",
+      "git_blob_sha1": "34606b40c225fb6cb25c7eb9f52c2094e0e1a9e5",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 8,
+      "path": "data/requirements/nestjs-realworld/requirement_8.json",
+      "git_blob_sha1": "f2a875fb3b112da2188b0ceede00d0e313aea00d",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 9,
+      "path": "data/requirements/nestjs-realworld/requirement_9.json",
+      "git_blob_sha1": "1d7cb29ed004c796070da463d4c9b0983b4e2eea",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 10,
+      "path": "data/requirements/nestjs-realworld/requirement_10.json",
+      "git_blob_sha1": "5395e467d1461a4be15dfa62f47f3c69dbdfcc2e",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 11,
+      "path": "data/requirements/nestjs-realworld/requirement_11.json",
+      "git_blob_sha1": "5e87a4cb2fc782427b96d777f21881d0574cf97e",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 12,
+      "path": "data/requirements/nestjs-realworld/requirement_12.json",
+      "git_blob_sha1": "33c71acd311a83416f3558dd7c39c949513dc3ce",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 13,
+      "path": "data/requirements/nestjs-realworld/requirement_13.json",
+      "git_blob_sha1": "aa3f4074a05507ca067183a19648a0e6bf2370d5",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 14,
+      "path": "data/requirements/nestjs-realworld/requirement_14.json",
+      "git_blob_sha1": "29f122b038abb8ad61d7157e6ed3640a1aade384",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 15,
+      "path": "data/requirements/nestjs-realworld/requirement_15.json",
+      "git_blob_sha1": "a465644e7baac5e3fe62ee8c3d97568a9cca07f1",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 16,
+      "path": "data/requirements/nestjs-realworld/requirement_16.json",
+      "git_blob_sha1": "e2714bae08e76252109ac5eafa4a8f7a78e10837",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 17,
+      "path": "data/requirements/nestjs-realworld/requirement_17.json",
+      "git_blob_sha1": "527fe4c2ae86dab21d47b06cfbb413ab831b1e76",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 18,
+      "path": "data/requirements/nestjs-realworld/requirement_18.json",
+      "git_blob_sha1": "2934b7514be73ca5a275e3a0cbd6caca45aacd1e",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 19,
+      "path": "data/requirements/nestjs-realworld/requirement_19.json",
+      "git_blob_sha1": "7e0bda782d2a718cf980ca64f89181bcaa9c3ca0",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 20,
+      "path": "data/requirements/nestjs-realworld/requirement_20.json",
+      "git_blob_sha1": "9f78eef1953086c0fec8b2d80b9caa11a274ee82",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 21,
+      "path": "data/requirements/nestjs-realworld/requirement_21.json",
+      "git_blob_sha1": "b55f24d44c5a45d98fabdbd55dc2846b3e19bd3d",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 22,
+      "path": "data/requirements/nestjs-realworld/requirement_22.json",
+      "git_blob_sha1": "415c7f62f25d653c57c5963f5d7caaa1a1728e34",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 23,
+      "path": "data/requirements/nestjs-realworld/requirement_23.json",
+      "git_blob_sha1": "4f51844cf0afc198485d036edb35e2ed9c51549f",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 24,
+      "path": "data/requirements/nestjs-realworld/requirement_24.json",
+      "git_blob_sha1": "71315775d83c9dae6974803c113ef4bbd20eb503",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 25,
+      "path": "data/requirements/nestjs-realworld/requirement_25.json",
+      "git_blob_sha1": "c60f2834ed55ec088c8e32da1762e9152cfd49eb",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 26,
+      "path": "data/requirements/nestjs-realworld/requirement_26.json",
+      "git_blob_sha1": "14a0a4cd31e07ad9145f0001450fca5f2c7bd85c",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 27,
+      "path": "data/requirements/nestjs-realworld/requirement_27.json",
+      "git_blob_sha1": "900eac265c5d27b4153295b6054cccd3fe788a04",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 28,
+      "path": "data/requirements/nestjs-realworld/requirement_28.json",
+      "git_blob_sha1": "a04fe5f35e3e2a4405cf3b9dace9b795fc0e12ef",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "nestjs-realworld",
+      "requirement_id": 29,
+      "path": "data/requirements/nestjs-realworld/requirement_29.json",
+      "git_blob_sha1": "6f78e4912cddd5be1c33b6565f3b315f5f0f1f37",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 1,
+      "path": "data/requirements/todoapp/requirement_1.json",
+      "git_blob_sha1": "045bc5419d33baea48ca8a084476ef6b5b6ab6cf",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 2,
+      "path": "data/requirements/todoapp/requirement_2.json",
+      "git_blob_sha1": "f0fa92431388c300649db202542ba9e44ebb8bfc",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 3,
+      "path": "data/requirements/todoapp/requirement_3.json",
+      "git_blob_sha1": "3bcc23cf04c789eefca9a26b4956168e6a5cfcc6",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 4,
+      "path": "data/requirements/todoapp/requirement_4.json",
+      "git_blob_sha1": "81b699593d9e7d2f73469b3ea222cd21221a2c53",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 5,
+      "path": "data/requirements/todoapp/requirement_5.json",
+      "git_blob_sha1": "adba38400b99788c353048522ef07f527a662b36",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 6,
+      "path": "data/requirements/todoapp/requirement_6.json",
+      "git_blob_sha1": "b5600a4e3e3b1738ec5249fd88de3d212a670a6d",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 7,
+      "path": "data/requirements/todoapp/requirement_7.json",
+      "git_blob_sha1": "58c5b20ee2c623caf6a0e14da5e77de24b8c77b3",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 8,
+      "path": "data/requirements/todoapp/requirement_8.json",
+      "git_blob_sha1": "faeb7e69636c8adfda2a24149f21fa46948197ac",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 9,
+      "path": "data/requirements/todoapp/requirement_9.json",
+      "git_blob_sha1": "a1e23231bf9ce333e0b5a868e0c4c82a8353d0a6",
+      "num_mutants": 3,
+      "mutant_indices": [
+        0,
+        1,
+        2
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 10,
+      "path": "data/requirements/todoapp/requirement_10.json",
+      "git_blob_sha1": "5158ded13623a664720935c0ba1a3f4f9094e585",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 11,
+      "path": "data/requirements/todoapp/requirement_11.json",
+      "git_blob_sha1": "89f84c0571e812d61b177d5d51861deddbcdee02",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 12,
+      "path": "data/requirements/todoapp/requirement_12.json",
+      "git_blob_sha1": "2098f1887c1045a3557c65f717a7819bb5c6dd13",
+      "num_mutants": 2,
+      "mutant_indices": [
+        0,
+        1
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 13,
+      "path": "data/requirements/todoapp/requirement_13.json",
+      "git_blob_sha1": "771d51c853e8ca312b13203e0a07f6300444ad71",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    },
+    {
+      "service": "todoapp",
+      "requirement_id": 14,
+      "path": "data/requirements/todoapp/requirement_14.json",
+      "git_blob_sha1": "d21cd018d627487dc887180e6a5e359623943598",
+      "num_mutants": 1,
+      "mutant_indices": [
+        0
+      ],
+      "vague_nonempty": true
+    }
+  ],
+  "source_files": [
+    {
+      "path": "tools/single_step_tool/single_step_tool.py",
+      "git_blob_sha1": "717ad869dbad88fe46e0f92614b086fe22be3c23"
+    },
+    {
+      "path": "src/evaluator.py",
+      "git_blob_sha1": "fb79e0f9d35e9cd76aae98ea916be0a9fb06121e"
+    },
+    {
+      "path": "scripts/run_mutation_benchmark.py",
+      "git_blob_sha1": "84553f014e2c6e6758889352a94d01e215758f8e"
+    },
+    {
+      "path": "requirements.txt",
+      "git_blob_sha1": "5155a86cfc9da610e6f2174e794dedf01295790f"
+    },
+    {
+      "path": "tools/golden_tests.py",
+      "git_blob_sha1": "b73b771c846503b9a4023a71a4321fcee2b2cb70"
+    }
+  ]
+}
+

@@ -17,3 +17,13 @@ Thumbs.db
 # File lớn (thêm nếu data > 100MB)
 # data/raw/
 rbl-step/
+AGENTS.md
+# Local evidence snapshots retained outside the working Markdown documents
+/team-synthesis/.local-evidence/rbl2/
+
+# Internal chat checkpoint, local only
+/CHECKPOINT.md
+
+# Local runs, environments and source mirrors stay outside Git.
+/.local/
+/reference-snapshots/

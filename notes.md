@@ -1,7 +1,21 @@
 # notes.md — quyết định kỹ thuật & error log · nhóm 1 (SaoCungDuoc)
 
-## Thử khả thi RQ FA26-EXT-12 (làm thật — hạn cứng: chậm nhất buổi 2)
-1. **Dữ liệu**: clone `github.com/casablancahotelsoftware/RESTestBench`; tải requirements + mutants; mở 1 yêu cầu kiểm định dạng. Đủ 45 yêu cầu (15/dịch vụ)? → ⬜ kết quả thật: việc đã làm + số cụ thể + ✅/❌
+## Thiết kế hiện hành — amendment trạng thái 23/10/2026, chưa freeze main
+
+- **RQ:** chỉ giữ một RQ chính theo nguyên văn cô đề xuất, có điều kiện cùng model/cấu hình/ngân sách. Phân tích input, tiền điều kiện và oracle là mục tiêu bổ trợ để diễn giải kết quả; không là RQ thứ hai hoặc bằng chứng cơ chế nhân quả từ liên hệ quan sát. Canonical: [rq-validation](team-synthesis/rq-validation.md).
+- **Quyết định người dùng:** DeepSeek-V4.1-Flash-1017 qua DeepSeek API chính thức; tổng chi phí API tối đa 3 USD, gồm pilot/main/retry. API ID là alias `deepseek-flash`, không phải snapshot bất biến.
+- **Mục 1:** 60 nguồn = 42 INCLUDE lịch sử + 18 nguồn nền, thêm GV-18/PDF60; giữ PRISMA 42 và 59 dòng điểm nền. Năm rq-check có phần hiện hành và lịch sử; chưa systematic search/screening mới hoặc tái chấm cả tập cũ.
+- **Mục 2:** [experiment-design](team-synthesis/experiment-design.md), hai prompt C/I, config, manifest 106/228 và lịch baseline 660 slot giữ nguyên. Pilot thực đã có 24 slot; 636 main slot/R=3 chưa chốt, không bảo đảm power. Dự toán 2.395008 USD ngày 22/10 là lịch sử, không phải phí thực.
+- **Trạng thái:** golden lịch sử 106 original pass/227 assertion kill/1 compile error/106 restored pass. Bước 1 `completed_with_known_failure`, không chặn bước 2. Pilot đóng qua [đối soát offline có công bố](.local/pilot-preparation/pilot-reconciliation-20261023-01/provenance.json): 24/24 resolved, C 19/25 (76%), I 18/25 (72%), không suy kết luận từ một run. 23 slot giữ nguyên; NestJS 8/C được chấm original-quality-failure bằng 0 từ log/JUnit/reset/instrumentation, không sửa/sinh lại test hoặc gọi model. Run gốc và ledger giữ nguyên.
+- **Chi phí:** 24 model attempt; ledger bound USD0.0655344, ước tính off-peak từ usage USD0.022192608, không unknown charge, chưa xác nhận hóa đơn. Không commit/push, chưa gửi cô, chưa main/freeze.
+- **Cần chốt trước main:** hai người chấm/giờ công/deadline, annotation và hòa giải, căn cứ R/độ bất định, xác nhận cô; khóa hash và xác minh lại model/giá/token/preflight/smoke của mã mới. Smoke cũ không xác minh mã sau amendment. NestJS 5/0 compile lỗi vẫn giữ mẫu số 228, không kill. [Hồ sơ review và tồn đọng](.local/pilot-preparation/pilot-reconciliation-20261023-01/HO-SO-GUI-GIANG-VIEN.md); không tự điền quyết định còn thiếu.
+- **Giữ nguyên:** precise/golden/mutant không là đầu vào LLM; một test/requirement/arm/run, single-step; cùng hướng dẫn assertion gốc; metric pass-valid/fail-mutant và mẫu số manifest.
+
+## Lịch sử — thử khả thi RQ FA26-EXT-12 trước đổi hướng (không còn là thiết kế hiện hành)
+
+Các mục 45 yêu cầu, không dùng LLM và oracle tự xây dưới đây thuộc hướng EP+BVA truyền thống so với random; giữ để truy vết, không dùng làm yêu cầu chạy hiện tại.
+
+1. **Dữ liệu**: clone `github.com/casablancahotelsoftware/RESTestBench`; khóa commit, kiểm kê requirements + mutants, mở 1 yêu cầu kiểm định dạng. Đủ 45 yêu cầu (**16 FastAPI + 15 RealWorld + 14 TodoApp**, thống nhất 20/10/2026)? → ⬜ kết quả thật: snapshot + danh sách ID + số mutant thực tế + ✅/❌; chưa chạy kiểm chứng.
 2. **Công cụ đo chạy được**: Docker Desktop (WSL2); dựng 3 dịch vụ; chạy thử 1 ca; xem công cụ repo tính mutation score. → ⬜ kết quả thật
 3. **LLM**: RQ không dùng LLM → N/A (can thiệp là kỹ thuật không AI).
 4. **Chỉ số tính được**: oracle requirements-based trả pass/fail cho mutant trên 1 yêu cầu mẫu? → ⬜ kết quả thật
@@ -9,12 +23,17 @@
 6. **Nhóm làm nổi?**: Docker + thống kê + thời gian — tự đánh giá. → ⬜ kết quả thật
 → **Kết luận: GIỮ RQ / ĐỔI RQ** (❌ ở câu 1–3 → huỷ đăng ký, đổi RQ ngay). Ngày: ⬜___
 
-## ⬜ Dành cho W7 — Ngưỡng & kiểm định (đừng xoá)
+## Lịch sử — ghi chú W7 về ngưỡng & kiểm định của thiết kế cũ (giữ để truy vết)
 - Tiêu chí chấp nhận thực tiễn (KHÔNG nằm trong H0): ngưỡng θ xác định bằng mini-pilot 5–10 mẫu — chốt TRƯỚC lần chạy chính, báo cáo kèm khoảng tin cậy 95%.
 - ⚠️ Chốt lại cho khớp: form ghi "θ sẽ xác định bằng mini-pilot" nhưng ô "nguồn ngưỡng" chọn "Case 1: paper trích dẫn" → chọn 1 hướng (mini-pilot → Case 3; theo paper → Case 1 + con số cụ thể).
-- Kiểm định gợi ý (dán vào proposal §4): "Coi mỗi lỗi/mutant ground-truth là một mục (phát hiện/không) rồi dùng McNemar hai phía trên cùng danh sách; nếu có yếu tố ngẫu nhiên và chạy lặp ≥ 10 lần → so sánh mỗi lần chạy bằng Mann–Whitney U, báo cáo kèm Vargha–Delaney Â12; nếu ≥ 3 điều kiện → Cochran's Q (đúng/sai) hoặc Friedman (liên tục) trước, rồi so từng cặp có hiệu chỉnh Holm; nhóm độc lập → Fisher exact / Mann–Whitney U."
+- Đề xuất ở thiết kế cũ: tổng hợp 10 lượt thành một giá trị/kỹ thuật/requirement rồi ghép cặp theo requirement; Wilcoxon–Holm còn phụ thuộc giả định. Gợi ý cũ dùng Mann–Whitney U mặc định cho các lượt đã bỏ vì không xét cấu trúc ghép cặp; chưa có kết quả kiểm định/CI/power. Kế hoạch hiện hành ba run còn phải khóa theo [rq-validation §4](team-synthesis/rq-validation.md#4-khả-thi-của-gap-đang-cân-nhắc).
 
 ## Nhật ký quyết định
 - 02/10/2026 — Nhóm chốt RQ FA26-EXT-12 ("Giá trị biên vs ngẫu nhiên trên mutant REST API"); tạo repo RT-SWT302-001-SaoCungDuoc; chốt vai + chia nguồn (A0).
 - 02/10/2026 — Đăng ký RQ thành công trên hệ thống (nhóm 1).
-- [ngày] …
+- 20/10/2026 — Thống nhất mẫu P 45 yêu cầu gần cân bằng: 16 FastAPI + 15 RealWorld + 14 TodoApp, thay 15/dịch vụ. Sửa rq-validation theo đối chiếu nguồn; chưa khóa artifact/ID/B/miền random hoặc chạy pilot; chưa xác minh cập nhật thẻ/GV. Nhật ký chi tiết tại lam/SLR/search-log.md.
+- 21/10/2026 — Commit `6658a63de7250dd7a41bbd6d140b3cdb3f9f5f51` trên nhánh Lam đổi RQ/gap sang prompt-guided EP+BVA vs single-step, P = 106 vague. Đợt đồng bộ tài liệu tiếp theo sửa bảng căn hàng, số lượt, định nghĩa outcome và giới hạn bằng chứng; người dùng chọn giữ điểm nền, chỉ ghi rõ chỗ chưa đồng nhất. Chưa chạy thí nghiệm hoặc xác minh GV phê duyệt.
+
+- 22/10/2026 — Theo người dùng cho phép, cập nhật mục 1 bằng skill experimental-design, bổ sung GV-18 và protocol RQ mới, bảo toàn điểm/screening cũ; tiếp đó soạn mục 2 với DeepSeek-V4.1-Flash-1017/API chính thức/3 USD. Chỉ tạo hồ sơ để review; chưa làm bước 3/golden/pilot/main, chưa chi phí DeepSeek. Chi tiết nguồn/thay đổi ở search-log §11–12.
+
+- 22/10/2026 — Lượt rà tiếp theo dùng duy nhất scientific-critical-thinking, chỉ agent chính. Trước đó đã thêm “RQ phân tích” theo gợi ý phân tích cải thiện/suy giảm trong mail cô; nay giữ nội dung làm mục tiêu phân tích bổ trợ, chỉ còn một RQ chính. Viết rõ PICO và tách điều kiện kiểm soát; viết đầy đủ H0: Δ = 0 / H1: Δ ≠ 0, giữ ý nghĩa hai phía, phân biệt Δ với Δ_hat. Gộp nội dung mục 8 của protocol vào §3 và §5, giữ truy vết tìm kiếm cũ và query dự kiến. Đổi tên báo cáo thành [TEMP_RESEARCH_SYNC_REVIEW_2026-10-22.md](TEMP_RESEARCH_SYNC_REVIEW_2026-10-22.md); chi tiết tại search-log §13. Không đổi artifact hoặc triển khai bước 3.
