@@ -1,6 +1,6 @@
 # Thiết kế thực nghiệm để review — mục 2 · FA26-EXT-12
 
-**Ngày:** 22/10/2026, Asia/Saigon. **Trạng thái:** bản review, chưa freeze đánh giá chính. Người dùng đã chọn DeepSeek-V4.1-Flash-1017 qua DeepSeek API chính thức, trần tổng 3 USD. Chỉ triển khai mục 1–2; **chưa dựng service, chạy golden tests, pilot hoặc gọi model**. `execution_permitted=false` trong cấu hình là chốt trạng thái, chưa phải bộ thực thi có sẵn.
+**Thiết kế ngày 22/10/2026; amendment trạng thái 23/10/2026, Asia/Saigon.** RQ/phương pháp/ngân sách giữ nguyên, chưa freeze main. Đã có golden và pilot thực; [đối soát offline có công bố](../.local/pilot-preparation/pilot-reconciliation-20261023-01/provenance.json) đóng 24/24 evaluation, C 19/25 (76%), I 18/25 (72%), không điều chỉnh prompt theo điểm. [Hồ sơ review](../.local/pilot-preparation/pilot-reconciliation-20261023-01/HO-SO-GUI-GIANG-VIEN.md). `study-config.json` giữ nguyên baseline review, không sửa thành giấy phép main; trạng thái thực thi mới nhất đọc ở report/provenance. Chưa được cô chốt, main chưa chạy/chưa được phép trong lượt đóng pilot.
 
 ## 1. Câu hỏi, đơn vị và điều kiện
 
@@ -19,11 +19,11 @@ Một RQ chính và mục tiêu phân tích bổ trợ theo [rq-validation §1](
 | [C.txt](../experiments/prompts/C.txt) | `DEFAULT_PROMPT_TEMPLATE` nguyên văn từ `tools/single_step_tool/single_step_tool.py` tại commit khóa |
 | [I.txt](../experiments/prompts/I.txt) | Toàn bộ C làm tiền tố, chỉ nối sáu chỉ dẫn EP+BVA có căn cứ; không thêm ví dụ hoặc đổi output format |
 | [study-config.json](../experiments/study-config.json) | Model/API, điều kiện chung, ngân sách, số run dự kiến, các gate và SHA256 artifact |
-| [run-schedule.csv](../experiments/run-schedule.csv) | 24 slot pilot + 636 slot main **dự kiến**, chưa có lượt chạy thực tế |
+| [run-schedule.csv](../experiments/run-schedule.csv) | Lịch baseline giữ nguyên: 24 slot pilot đã thực hiện; 636 slot main còn dự kiến, R chưa chốt |
 
 Commit benchmark: `4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae`. Đã kiểm tĩnh: FastAPI 63/141, RealWorld 29/65, TodoApp 14/22; vague không rỗng ở cả 106 file. Native mutant locator là vị trí **0-based trong `mutants`** của từng JSON; `service/requirement_id/mutant_index` là khóa ghép của nghiên cứu, không phải trường ID do tác giả đặt.
 
-OAS tương ứng `services/<service>/spec.json`: 38.478 / 36.766 / 8.962 ký tự theo nội dung đã đọc. Đây là số ký tự, **không phải token count**. File Python requirements của benchmark đã được định danh hash; chưa có environment lock thực tế. Bước 3 phải lưu OS, Python, Docker, image digest, dependency versions và tokenizer version sau khi thiết lập.
+OAS tương ứng `services/<service>/spec.json`: 38.478 / 36.766 / 8.962 ký tự theo nội dung đã đọc, **không phải token count**. Bằng chứng môi trường/dependency/image/tokenizer đã có trong `.local/environment-verification/`, `.local/pilot-preparation/LIVE-VERIFICATION.md` và `CHECKPOINT.md`; đó là lịch sử nguồn trước amendment. Main cần khóa phiên bản và revalidation mã mới, không nhận smoke/preflight cũ là xác minh mới.
 
 ## 3. Prompt và ngăn rò rỉ
 
@@ -49,7 +49,7 @@ Cả hai arm dùng đúng bước `_clean_code_fences` của tool gốc; giữ r
 
 Nguồn: [DeepSeek changelog](https://api-docs.deepseek.com/updates/), [API parameters](https://api-docs.deepseek.com/api/create-chat-completion/). Tài liệu API nói temperature không tác động trong thinking mode; lựa chọn disabled làm cấu hình temperature có nghĩa.
 
-**Giới hạn phiên bản:** `deepseek-flash` là alias do provider cập nhật, không phải endpoint snapshot bất biến. Ghi request model ID, response model, fingerprint nếu có, timestamp UTC, mapping/release và bảng giá kiểm trước/sau mỗi batch. Nếu mapping thay đổi hoặc không xác nhận được, dừng; không trộn checkpoint. Không tuyên bố đã khóa weights chỉ nhờ tên model người dùng chọn. Chưa có request để xác minh hành vi trả metadata/API thực tế.
+**Giới hạn phiên bản:** `deepseek-flash` là alias do provider cập nhật, không phải endpoint snapshot bất biến. Ghi request model ID, response model, fingerprint nếu có, timestamp UTC, mapping/release và bảng giá kiểm trước/sau mỗi batch. Nếu mapping thay đổi hoặc không xác nhận được, dừng; không trộn checkpoint. Không tuyên bố đã khóa weights chỉ nhờ tên model người dùng chọn. Pilot có 24 response lưu metadata/usage, response ghi alias `deepseek-flash`; model mapping và giá phải xác minh lại trước live run tương lai, không tra lại trong lượt đối soát offline.
 
 ## 5. Ngân sách kiểm thử và lỗi
 
@@ -86,7 +86,7 @@ Phân bổ dự kiến: 0.15 USD pilot + 2.45 USD main + 0.40 USD retry/dự ph�
 
 Ưu tiên chạy sau 17:15 đến trước 07:30 giờ Việt Nam, tránh peak công bố theo UTC; kiểm lại bảng giá ở ngày chạy. Chỉ bắt đầu một cặp khi còn đủ cửa sổ cho cả hai arm/attempt tối đa và margin. Không dựa hoàn toàn vào lịch để bảo đảm tiền: một call vẫn được reserve theo giá peak.
 
-**Bộ chặn chi phí cần triển khai/xác minh ở bước sau:** trước khi bắt đầu một cặp phải reserve đủ cho cả hai arm và số transport attempt tối đa; trước từng dispatch phải có cận trên token/cost đã được kiểm chứng, reserve theo peak cache-miss input + peak output, bảo đảm `spent + unknown_reservations + next_reservation <= 3`. Nếu không xác minh được cận trên/giá thì không dispatch. Sau response đối soát usage và phí thật; không giải phóng khoản phí chưa rõ. Concurrency=1. Giá tăng, alias đổi, charge không rõ hoặc không đủ tiền cho cặp tiếp theo đều khiến study dừng với trạng thái incomplete. Thiết kế JSON hiện tại chưa tự thực thi các chốt này.
+**Bộ chặn chi phí (đã triển khai trong runner, cần revalidation trước live run mới):** trước khi bắt đầu một cặp phải reserve đủ cho cả hai arm và số transport attempt tối đa; trước từng dispatch phải có cận trên token/cost đã được kiểm chứng, reserve theo peak cache-miss input + peak output, bảo đảm `spent + unknown_reservations + next_reservation <= 3`. Nếu không xác minh được cận trên/giá thì không dispatch. Sau response đối soát usage và phí thật; không giải phóng khoản phí chưa rõ. Concurrency=1. Giá tăng, alias đổi, charge không rõ hoặc không đủ tiền cho cặp tiếp theo đều khiến study dừng với trạng thái incomplete. JSON baseline không tự thực thi các chốt; runner/ledger lưu bằng chứng riêng. Pilot: ledger bound USD0.0655344, ước tính off-peak từ usage USD0.022192608, chưa phải hóa đơn. Các dự toán phía trên giữ nguyên giả định ngày 22/10.
 
 ## 7. Lịch, pilot và số lần sinh
 
@@ -132,14 +132,15 @@ Báo số lượng/mẫu số theo service và nhãn; nếu ước lượng tỷ
 
 ## 10. Điều kiện freeze và phần chưa làm
 
-- [ ] Người dùng review mục 1–2 trước khi cho làm bước 3.
-- [ ] Xác nhận môi trường, image/dependency/tokenizer versions và cận trên token/chi phí thật.
-- [ ] Golden tests, reset/patch và evaluator được kiểm qua ba service; đối soát missing output/mẫu số và instrumentation cap.
-- [ ] Pilot không dùng tune prompt; có usage, runtime, charge, độ biến động và quyết định số run trước main.
+- [x] Người dùng đã cho phép môi trường, runner/pilot và đối soát; không cấp quyền main ở nhiệm vụ hiện tại.
+- [x] Có bằng chứng môi trường, image/dependency/tokenizer và cost guard lịch sử; cần kiểm lại theo mã mới trước live run.
+- [x] Golden/reset/patch/restore qua ba service; 106 original pass, 227 assertion kill, 1 compile lỗi NestJS 5/0 giữ mẫu số 228. Release chấp nhận bước 1 với lỗi, không nhận mọi mutant runtime-valid.
+- [x] Pilot 24/24 resolved qua amendment có bằng chứng, không tune prompt; usage/request/assertion/runtime có trong report dẫn xuất. Hóa đơn chưa xác nhận.
+- [ ] Chốt căn cứ R và phân tích bất định trước main; một pilot run không đo biến động giữa các lần sinh.
 - [ ] Nhóm chốt hai người chấm độc lập, deadline, giờ công và cách xử lý bất đồng.
 - [ ] Model mapping/giá không thay đổi; khóa SHA256 C/I/config/manifest/schedule và mọi amendment trước main.
 
-**Phạm vi hoàn thành hiện tại:** tài liệu, dữ liệu kiểm kê tĩnh, prompt và cấu hình/lịch **để review**. Chưa có runner, instrumentation, hard-budget enforcement, environment lock, kết quả golden/pilot hoặc quyết định giảng viên. Không tự chuyển sang bước 3; không gọi API bằng cấu hình này trong lượt hiện tại.
+**Phạm vi hoàn thành hiện tại:** có runner/guard và bằng chứng golden/pilot; [hồ sơ gửi cô](../.local/pilot-preparation/pilot-reconciliation-20261023-01/HO-SO-GUI-GIANG-VIEN.md) sẵn sàng để người dùng review/gửi, chưa gửi hoặc được cô duyệt. Hai người chấm/annotation/giờ công/deadline/hòa giải, căn cứ R/uncertainty, freeze/model/price/preflight/smoke mã mới còn pending. Không đổi RQ, giả thuyết, quy tắc chấm, N/R dự kiến, ngân sách hoặc prompt theo điểm; chưa main/freeze. Lượt đóng pilot không chạy SUT/model.
 
 ## Nguồn phương pháp và hỗ trợ
 

@@ -1,6 +1,6 @@
 # Kiểm chứng RQ — FA26-EXT-12 · SaoCungDuoc
 
-**Cập nhật 22/10/2026 (Asia/Saigon):** bản thiết kế để nhóm review theo mail cô Chi. Đã được người dùng cho phép triển khai mục 1–2; chưa phải giảng viên chốt RQ, chưa cho phép bước 3. Không có kết quả golden tests, pilot hoặc đánh giá chính thức.
+**Amendment trạng thái 23/10/2026 (Asia/Saigon):** RQ/phương pháp dưới đây giữ nguyên bản review ngày 22/10; chưa được giảng viên chốt. Đã có golden và pilot thực; [pilot đối soát offline](../.local/pilot-preparation/pilot-reconciliation-20261023-01/report.json) có 24/24 evaluation resolved, C 19/25 (76%), I 18/25 (72%). [Hồ sơ review/provenance](../.local/pilot-preparation/pilot-reconciliation-20261023-01/HO-SO-GUI-GIANG-VIEN.md) công bố một amendment original-quality-failure, không đổi prompt/benchmark/generated test. Main chưa chạy/chưa freeze; không suy tác động từ một pilot run.
 
 ## 1. RQ + PICO
 
@@ -43,7 +43,7 @@ Với requirement i có m_i mutant, k[a,r,i] là số mutant được test tươ
 - Với R lần sinh được chốt: `mean_MS_φ(a) = Σ_r Σ_i k[a,r,i] / (R × 228)`; chênh lệch quan sát `Δ_r = MS_φ(I,r) − MS_φ(C,r)` và `Δ_hat = mean_MS_φ(I) − mean_MS_φ(C) = Σ_r Δ_r / R`. `Δ_hat` ước lượng chênh lệch kỳ vọng Δ; nhân 100 để báo điểm phần trăm.
 - Trung bình không phải union kill, không phải trung bình không trọng số của 106 tỷ lệ. Mutant cùng requirement dùng chung test; các lần sinh là đo lặp trên cùng benchmark.
 
-Theo đối chiếu mã nguồn tĩnh trước đó, validity gate được xác định tại [Evaluator.evaluate_test](https://github.com/casablancahotelsoftware/RESTestBench/blob/4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae/src/evaluator.py). Hàm aggregate chỉ thấy requirement có score, nên bước 3/pilot phải kiểm tra đối soát manifest khi mất output/kết quả. Chưa xác minh runtime hoặc chất lượng evaluator bằng thực thi.
+Validity gate được xác định tại [Evaluator.evaluate_test](https://github.com/casablancahotelsoftware/RESTestBench/blob/4decc1e36ea3dd41b64ce3e3ac6a85bc72df36ae/src/evaluator.py). Aggregate được đối soát theo manifest/slot ID vì hàm benchmark chỉ thấy requirement có score. Đã có bằng chứng golden/pilot và regression offline; một mutant compile lỗi chưa được runtime-validated. Smoke/preflight trước amendment không xác minh mã mới; cần revalidation trước live run tương lai.
 
 <a id="22-đối-chiếu-pico-cho-rq-hiện-hành"></a>
 
@@ -82,13 +82,13 @@ Không tuyên bố phát minh EP/BVA hoặc thêm EP/BVA vào prompt. Không bá
 | Hạng mục | Bằng chứng thực tế | Trạng thái |
 |---|---|---|
 | Dữ liệu tĩnh | Đã đọc 106 JSON, 228 mutant; vague không rỗng; đúng 63/29/14 và 141/65/22 tại commit trên. README cùng commit ghi 26 RealWorld, khác dữ liệu 29. | Đã kiểm tĩnh; không đồng nghĩa chạy được |
-| Model/provider/budget | Người dùng chọn DeepSeek-V4.1-Flash-1017 / API chính thức / tối đa 3 USD | Đã có quyết định; chưa gọi API |
+| Model/provider/budget | DeepSeek-V4.1-Flash-1017 / API chính thức / tối đa 3 USD; pilot 24 attempt | Có usage thật; alias/giá phải kiểm lại trước main |
 | Prompt, ngân sách, manifest | Hồ sơ review ở [experiment-design](experiment-design.md) và [experiments](../experiments/) | Cần nhóm review; không phải freeze đánh giá chính |
-| Môi trường | Chưa có log Docker/golden tests, phiên bản máy chạy hoặc reset/mutant validation | Thuộc bước 3, chưa triển khai |
-| Pilot và chi phí thật | Chưa có output/usage thực tế; dự toán không phải hóa đơn hoặc kết quả pilot | Chưa triển khai |
+| Môi trường | Golden 106 original pass, 227 assertion kill, 1 compile lỗi, 106 restored pass | Bước 1 hoàn thành với lỗi NestJS 5/0; giữ mẫu số 228, không chặn bước 2; không nhận mọi mutant runtime-valid |
+| Pilot và chi phí | 24/24 resolved qua đối soát; ledger bound USD0.0655344, ước tính usage USD0.022192608 | Pilot đã đóng, hóa đơn chưa xác nhận; chưa suy biến động từ một run |
 | Nhân lực/deadline | Có vai trò trong [authorship](authorship.md); chưa có cam kết giờ công, deadline cụ thể và tên hai người chấm oracle | Cần nhóm chốt trước khi chạy |
 
-**Đủ thông tin để hoàn thiện tài liệu và soạn thiết kế review cho mục 1–2. Chưa đủ để xác nhận thực nghiệm khả thi trên máy nhóm hoặc chốt đánh giá chính.** Không tự điền API key, kết quả pilot, runtime hay sự đồng ý của cô.
+**Có hồ sơ và bằng chứng để gửi review có công bố giới hạn. Chưa đủ để chốt đánh giá chính:** thiếu người chấm/annotation, căn cứ R và độ bất định, xác nhận cô, freeze và revalidation mã mới. Không tự điền quyết định hoặc kết quả chưa có bằng chứng.
 
 <a id="5-gap-mà-rq-lấp-kết-quả-bước-2"></a>
 
@@ -118,9 +118,9 @@ Giữ hướng hai prompt và chuẩn bị bộ hồ sơ cho cô; chỉ kết lu
 |---|---|---|
 | 1 · Nền tảng tài liệu | RQ, đóng góp, đối chiếu bài 60, protocol bổ sung, đồng bộ tài liệu cá nhân | Bản cập nhật ngày 22/10 để review |
 | 2 · Thiết kế thực nghiệm | Manifest, C/I đầy đủ, cấu hình, ngân sách, lịch và kế hoạch phân tích | Xem experiment-design; cần review, chưa freeze đánh giá chính |
-| 3 · Môi trường/golden tests | Log xác minh ba service, reset, mutant và evaluator | Chưa làm; chỉ tiếp tục sau khi người dùng review |
-| 4 · Pilot | Xác minh pipeline, đo usage/chi phí/runtime; kiểm mất output và mẫu số | Chưa làm |
-| 5 · Gửi cô | Bảng nghiên cứu gần nhất + commit/thống kê + hai prompt + ngân sách + pilot evaluator | Chưa đủ hồ sơ, chưa gửi |
+| 3 · Môi trường/golden tests | Log ba service, reset/restore và golden | Hoàn thành với một mutant compile lỗi; release không chặn bước 2 |
+| 4 · Pilot | 24 output/evaluation resolved; usage và metric từ artifact, một amendment công bố | Đã đóng offline; cần smoke/preflight mã mới trước live run tiếp theo |
+| 5 · Gửi cô | Bảng nghiên cứu + commit/thống kê + prompt + ngân sách + pilot | Hồ sơ sẵn sàng để người dùng review/gửi; chưa gửi, chưa có xác nhận cô |
 | 6 · Đánh giá chính | Prompt/config đã freeze, đánh giá, phân tích và gói tái lập | Chưa được triển khai |
 
 **Ghi chú lịch sử:** con số 15 mutant từ trao đổi GV trước đây chưa có danh sách ID và phân loại độc lập; không dùng làm trần tăng điểm hoặc căn cứ power. Kế hoạch 45 requirement/random/10 run đã được thay thế, không phải thiết kế hiện hành.

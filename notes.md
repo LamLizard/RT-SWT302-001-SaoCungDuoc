@@ -1,13 +1,14 @@
 # notes.md — quyết định kỹ thuật & error log · nhóm 1 (SaoCungDuoc)
 
-## Thiết kế hiện hành — bản review 22/10/2026
+## Thiết kế hiện hành — amendment trạng thái 23/10/2026, chưa freeze main
 
 - **RQ:** chỉ giữ một RQ chính theo nguyên văn cô đề xuất, có điều kiện cùng model/cấu hình/ngân sách. Phân tích input, tiền điều kiện và oracle là mục tiêu bổ trợ để diễn giải kết quả; không là RQ thứ hai hoặc bằng chứng cơ chế nhân quả từ liên hệ quan sát. Canonical: [rq-validation](team-synthesis/rq-validation.md).
 - **Quyết định người dùng:** DeepSeek-V4.1-Flash-1017 qua DeepSeek API chính thức; tổng chi phí API tối đa 3 USD, gồm pilot/main/retry. API ID là alias `deepseek-flash`, không phải snapshot bất biến.
 - **Mục 1:** 60 nguồn = 42 INCLUDE lịch sử + 18 nguồn nền, thêm GV-18/PDF60; giữ PRISMA 42 và 59 dòng điểm nền. Năm rq-check có phần hiện hành và lịch sử; chưa systematic search/screening mới hoặc tái chấm cả tập cũ.
-- **Mục 2:** [experiment-design](team-synthesis/experiment-design.md), hai prompt C/I, config, manifest tĩnh 106/228 và lịch dự kiến 660 slot. R=3 là phương án nguồn lực cần review, không bảo đảm power. Envelope 16k input/2048 output off-peak cho 660 call là 2.395008 USD trước retry; chưa đo token thật.
-- **Trạng thái:** chỉ tài liệu/design artifacts. Chưa runner, budget guard, environment lock, golden tests, pilot hoặc gọi DeepSeek. Không commit/push. Dừng trước bước 3 để người dùng review.
-- **Cần xác minh trước main:** tokenizer/cost upper bound và giá hiện hành, model mapping, môi trường/reset/patch/evaluator/mất output, request-cap instrumentation, pilot và độ biến động, hai người chấm độc lập/deadline. Không điền dữ liệu giả vào phần thiếu.
+- **Mục 2:** [experiment-design](team-synthesis/experiment-design.md), hai prompt C/I, config, manifest 106/228 và lịch baseline 660 slot giữ nguyên. Pilot thực đã có 24 slot; 636 main slot/R=3 chưa chốt, không bảo đảm power. Dự toán 2.395008 USD ngày 22/10 là lịch sử, không phải phí thực.
+- **Trạng thái:** golden lịch sử 106 original pass/227 assertion kill/1 compile error/106 restored pass. Bước 1 `completed_with_known_failure`, không chặn bước 2. Pilot đóng qua [đối soát offline có công bố](.local/pilot-preparation/pilot-reconciliation-20261023-01/provenance.json): 24/24 resolved, C 19/25 (76%), I 18/25 (72%), không suy kết luận từ một run. 23 slot giữ nguyên; NestJS 8/C được chấm original-quality-failure bằng 0 từ log/JUnit/reset/instrumentation, không sửa/sinh lại test hoặc gọi model. Run gốc và ledger giữ nguyên.
+- **Chi phí:** 24 model attempt; ledger bound USD0.0655344, ước tính off-peak từ usage USD0.022192608, không unknown charge, chưa xác nhận hóa đơn. Không commit/push, chưa gửi cô, chưa main/freeze.
+- **Cần chốt trước main:** hai người chấm/giờ công/deadline, annotation và hòa giải, căn cứ R/độ bất định, xác nhận cô; khóa hash và xác minh lại model/giá/token/preflight/smoke của mã mới. Smoke cũ không xác minh mã sau amendment. NestJS 5/0 compile lỗi vẫn giữ mẫu số 228, không kill. [Hồ sơ review và tồn đọng](.local/pilot-preparation/pilot-reconciliation-20261023-01/HO-SO-GUI-GIANG-VIEN.md); không tự điền quyết định còn thiếu.
 - **Giữ nguyên:** precise/golden/mutant không là đầu vào LLM; một test/requirement/arm/run, single-step; cùng hướng dẫn assertion gốc; metric pass-valid/fail-mutant và mẫu số manifest.
 
 ## Lịch sử — thử khả thi RQ FA26-EXT-12 trước đổi hướng (không còn là thiết kế hiện hành)
